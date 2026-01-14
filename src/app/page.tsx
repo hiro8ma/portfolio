@@ -99,10 +99,21 @@ export default function Home() {
           <h2 className="text-3xl font-bold text-slate-900 dark:text-white mb-8 text-center">
             About
           </h2>
-          <div className="bg-white dark:bg-slate-800 rounded-2xl p-8 shadow-lg">
+          <div className="bg-white dark:bg-slate-800 rounded-2xl p-8 shadow-lg space-y-6">
             <p className="text-lg text-slate-600 dark:text-slate-300 leading-relaxed">
-              ソフトウェア開発に情熱を持つエンジニアです。
-              新しい技術を学び、より良いプロダクトを作ることに日々取り組んでいます。
+              現在は主にマネジメント、プロダクトの技術的な戦略、設計、開発、SRE、インフラ管理などを行っています。
+            </p>
+            <p className="text-slate-600 dark:text-slate-300 leading-relaxed">
+              開発言語としては要件に応じて Go, Rust, C++, TypeScript, Python を、サービス間コミュニケーションには gRPC, ConnectRPC, GraphQL, Pub/Sub 等を用いることが多いです。
+            </p>
+            <p className="text-slate-600 dark:text-slate-300 leading-relaxed">
+              リアーキテクトにも積極的に取り組んでおり、複雑化したコアサービスのドメインモデリング見直し、サービス分割、オーケストレーションベースのサーガパターン上にイベントソーシング・CQRSを実装。イベントストアの情報は集約の再現や監査ログ、教師データとして活用しています。
+            </p>
+            <p className="text-slate-600 dark:text-slate-300 leading-relaxed">
+              クラウドネイティブなインフラ管理も担当しており、マイクロサービスのコンテナ運用、CI/CD（Argo Rollouts, PipeCD, Cloud Build, GitHub Actions）、Kubernetes, Istio, Prometheus, Grafana, Terraform などを用いた環境構築・運用、生産性向上ツールの構築やトイルの削減に努めています。
+            </p>
+            <p className="text-slate-600 dark:text-slate-300 leading-relaxed">
+              GCPでは GKE, Anthos, Cloud Run, Pub/Sub, AlloyDB, Spanner, BigQuery, Vertex AI など幅広いサービスの実務運用経験があります。
             </p>
           </div>
         </div>
