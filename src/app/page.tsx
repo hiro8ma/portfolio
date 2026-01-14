@@ -99,8 +99,8 @@ export default function Home() {
           <h2 className="text-3xl font-bold text-slate-900 dark:text-white mb-8 text-center">
             About
           </h2>
-          <div className="bg-white dark:bg-slate-800 rounded-2xl p-8 shadow-lg space-y-6">
-            <p className="text-lg text-slate-600 dark:text-slate-300 leading-relaxed">
+          <div className="bg-white dark:bg-slate-800 rounded-2xl p-8 shadow-lg space-y-4">
+            <p className="text-slate-600 dark:text-slate-300 leading-relaxed">
               現在は主にマネジメント、プロダクトの技術的な戦略、設計、開発、SRE、インフラ管理などを行っています。
             </p>
             <p className="text-slate-600 dark:text-slate-300 leading-relaxed">
@@ -125,47 +125,26 @@ export default function Home() {
           <h2 className="text-3xl font-bold text-slate-900 dark:text-white mb-8 text-center">
             Skills
           </h2>
-          <div className="space-y-8">
+          <div className="flex flex-wrap justify-center gap-3">
             {[
-              {
-                category: "Languages",
-                items: ["Go", "Rust", "TypeScript", "JavaScript", "Python", "C++", "Solidity"],
-              },
-              {
-                category: "Frontend",
-                items: ["React", "Next.js", "Electron", "HTML/CSS"],
-              },
-              {
-                category: "Backend",
-                items: ["NestJS", "GraphQL", "RabbitMQ", "Firebase"],
-              },
-              {
-                category: "Infrastructure",
-                items: ["AWS", "GCP", "Docker", "Kubernetes", "Grafana"],
-              },
-            ].map((skillGroup) => (
-              <div key={skillGroup.category}>
-                <h3 className="text-lg font-semibold text-slate-700 dark:text-slate-300 mb-4">
-                  {skillGroup.category}
-                </h3>
-                <div className="flex flex-wrap gap-3">
-                  {skillGroup.items.map((skill) => {
-                    const Icon = skillIcons[skill];
-                    return (
-                      <div
-                        key={skill}
-                        className="flex items-center gap-2 bg-white dark:bg-slate-800 rounded-xl px-4 py-2 shadow-md hover:shadow-lg transition-shadow"
-                      >
-                        {Icon && <Icon className="text-xl text-slate-600 dark:text-slate-400" />}
-                        <span className="text-slate-700 dark:text-slate-200 font-medium">
-                          {skill}
-                        </span>
-                      </div>
-                    );
-                  })}
+              "Go", "Rust", "TypeScript", "JavaScript", "Python", "C++", "Solidity",
+              "React", "Next.js", "Electron", "HTML/CSS",
+              "NestJS", "GraphQL", "RabbitMQ", "Firebase",
+              "AWS", "GCP", "Docker", "Kubernetes", "Grafana",
+            ].map((skill) => {
+              const Icon = skillIcons[skill];
+              return (
+                <div
+                  key={skill}
+                  className="flex items-center gap-2 bg-white dark:bg-slate-800 rounded-xl px-4 py-2 shadow-md hover:shadow-lg transition-shadow"
+                >
+                  {Icon && <Icon className="text-xl text-slate-600 dark:text-slate-400" />}
+                  <span className="text-slate-700 dark:text-slate-200 font-medium">
+                    {skill}
+                  </span>
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         </div>
       </section>
