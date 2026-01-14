@@ -68,7 +68,7 @@ export default function Home() {
                 <a href="/">hiro8ma</a>
               </h1>
               <h2 className="mt-3 text-lg font-medium tracking-tight text-slate-200 sm:text-xl">
-                Software Engineer
+                Developer & Architect
               </h2>
               <p className="mt-4 max-w-xs leading-normal text-slate-400">
                 Building reliable, scalable systems with modern cloud-native technologies
@@ -269,7 +269,7 @@ export default function Home() {
                       <div className="z-10 sm:col-span-6">
                         <h3 className="font-medium leading-snug text-slate-200">
                           <div className="inline-flex items-baseline font-medium leading-tight text-slate-200 group-hover:text-teal-300 focus-visible:text-teal-300">
-                            Software Engineer / Tech Lead
+                            Developer & Architect
                           </div>
                         </h3>
                         <p className="mt-2 text-sm leading-normal">
