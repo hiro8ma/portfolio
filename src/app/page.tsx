@@ -1,4 +1,4 @@
-import { Github, Mail, ExternalLink } from "lucide-react";
+import { Github, Mail, ExternalLink, Briefcase } from "lucide-react";
 
 export default function Home() {
   return (
@@ -17,7 +17,7 @@ export default function Home() {
           <p className="text-xl text-slate-600 dark:text-slate-300 mb-8">
             Software Developer
           </p>
-          <div className="flex justify-center gap-4">
+          <div className="flex flex-wrap justify-center gap-4">
             <a
               href="https://github.com/hiro8ma"
               target="_blank"
@@ -26,6 +26,15 @@ export default function Home() {
             >
               <Github size={20} />
               GitHub
+            </a>
+            <a
+              href="https://www.wantedly.com/id/hiro8ma"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-2 px-6 py-3 bg-teal-600 text-white rounded-full font-medium hover:bg-teal-500 transition-colors"
+            >
+              <Briefcase size={20} />
+              Wantedly
             </a>
             <a
               href="mailto:hiro8masu@gmail.com"
@@ -59,24 +68,41 @@ export default function Home() {
           <h2 className="text-3xl font-bold text-slate-900 dark:text-white mb-8 text-center">
             Skills
           </h2>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          <div className="space-y-8">
             {[
-              "TypeScript",
-              "React",
-              "Next.js",
-              "Node.js",
-              "Python",
-              "Git",
-              "Docker",
-              "AWS",
-            ].map((skill) => (
-              <div
-                key={skill}
-                className="bg-white dark:bg-slate-800 rounded-xl p-4 text-center shadow-md hover:shadow-lg transition-shadow"
-              >
-                <span className="text-slate-700 dark:text-slate-200 font-medium">
-                  {skill}
-                </span>
+              {
+                category: "Languages",
+                items: ["Go", "Rust", "TypeScript", "JavaScript", "Python", "C++", "Solidity"],
+              },
+              {
+                category: "Frontend",
+                items: ["React", "Next.js", "Electron", "HTML/CSS"],
+              },
+              {
+                category: "Backend",
+                items: ["NestJS", "GraphQL", "RabbitMQ", "Firebase"],
+              },
+              {
+                category: "Infrastructure",
+                items: ["AWS", "GCP", "Docker", "Kubernetes", "Grafana"],
+              },
+            ].map((skillGroup) => (
+              <div key={skillGroup.category}>
+                <h3 className="text-lg font-semibold text-slate-700 dark:text-slate-300 mb-4">
+                  {skillGroup.category}
+                </h3>
+                <div className="flex flex-wrap gap-3">
+                  {skillGroup.items.map((skill) => (
+                    <div
+                      key={skill}
+                      className="bg-white dark:bg-slate-800 rounded-xl px-4 py-2 shadow-md hover:shadow-lg transition-shadow"
+                    >
+                      <span className="text-slate-700 dark:text-slate-200 font-medium">
+                        {skill}
+                      </span>
+                    </div>
+                  ))}
+                </div>
               </div>
             ))}
           </div>
