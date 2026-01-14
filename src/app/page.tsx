@@ -1,6 +1,7 @@
 "use client";
 
-import { Github, Linkedin, Mail, ExternalLink, Briefcase } from "lucide-react";
+import { Github, Linkedin, Mail, ExternalLink, Briefcase, Instagram, BookOpen } from "lucide-react";
+import { SiX } from "react-icons/si";
 import {
   SiGo,
   SiRust,
@@ -98,7 +99,7 @@ export default function Home() {
             </div>
 
             {/* Social Links */}
-            <ul className="ml-1 mt-8 flex items-center gap-5" aria-label="Social media">
+            <ul className="ml-1 mt-8 flex flex-wrap items-center gap-5" aria-label="Social media">
               <li>
                 <a
                   className="block text-slate-400 hover:text-teal-300 transition-colors"
@@ -107,7 +108,7 @@ export default function Home() {
                   rel="noopener noreferrer"
                   aria-label="GitHub"
                 >
-                  <Github size={24} />
+                  <Github size={22} />
                 </a>
               </li>
               <li>
@@ -118,7 +119,29 @@ export default function Home() {
                   rel="noopener noreferrer"
                   aria-label="LinkedIn"
                 >
-                  <Linkedin size={24} />
+                  <Linkedin size={22} />
+                </a>
+              </li>
+              <li>
+                <a
+                  className="block text-slate-400 hover:text-teal-300 transition-colors"
+                  href="https://x.com/hir08ma"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label="X (Twitter)"
+                >
+                  <SiX size={20} />
+                </a>
+              </li>
+              <li>
+                <a
+                  className="block text-slate-400 hover:text-teal-300 transition-colors"
+                  href="https://www.instagram.com/h8.16"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label="Instagram"
+                >
+                  <Instagram size={22} />
                 </a>
               </li>
               <li>
@@ -129,7 +152,18 @@ export default function Home() {
                   rel="noopener noreferrer"
                   aria-label="Wantedly"
                 >
-                  <Briefcase size={24} />
+                  <Briefcase size={22} />
+                </a>
+              </li>
+              <li>
+                <a
+                  className="block text-slate-400 hover:text-teal-300 transition-colors"
+                  href="https://booklog.jp/users/2620093309d9255a"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label="Booklog"
+                >
+                  <BookOpen size={22} />
                 </a>
               </li>
               <li>
@@ -138,7 +172,7 @@ export default function Home() {
                   href="mailto:hiro8masu@gmail.com"
                   aria-label="Email"
                 >
-                  <Mail size={24} />
+                  <Mail size={22} />
                 </a>
               </li>
             </ul>
