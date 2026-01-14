@@ -1,4 +1,7 @@
-import { Github, Mail, ExternalLink, Briefcase } from "lucide-react";
+"use client";
+
+import { Github, Mail, ExternalLink, Briefcase, Menu, X } from "lucide-react";
+import { useState } from "react";
 import {
   SiGo,
   SiRust,
@@ -46,11 +49,68 @@ const skillIcons: Record<string, IconType> = {
   Grafana: SiGrafana,
 };
 
+const navLinks = [
+  { href: "#about", label: "About" },
+  { href: "#skills", label: "Skills" },
+  { href: "#projects", label: "Projects" },
+  { href: "#contact", label: "Contact" },
+];
+
 export default function Home() {
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800">
+      {/* Navigation */}
+      <nav className="fixed top-0 left-0 right-0 z-50 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border-b border-slate-200 dark:border-slate-700">
+        <div className="container mx-auto px-6">
+          <div className="flex items-center justify-between h-16">
+            <a href="#" className="text-xl font-bold text-slate-900 dark:text-white">
+              hiro8ma
+            </a>
+
+            {/* Desktop Navigation */}
+            <div className="hidden md:flex items-center gap-8">
+              {navLinks.map((link) => (
+                <a
+                  key={link.href}
+                  href={link.href}
+                  className="text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white transition-colors"
+                >
+                  {link.label}
+                </a>
+              ))}
+            </div>
+
+            {/* Mobile Menu Button */}
+            <button
+              className="md:hidden p-2 text-slate-600 dark:text-slate-300"
+              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+            >
+              {mobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
+            </button>
+          </div>
+
+          {/* Mobile Navigation */}
+          {mobileMenuOpen && (
+            <div className="md:hidden py-4 border-t border-slate-200 dark:border-slate-700">
+              {navLinks.map((link) => (
+                <a
+                  key={link.href}
+                  href={link.href}
+                  className="block py-2 text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white transition-colors"
+                  onClick={() => setMobileMenuOpen(false)}
+                >
+                  {link.label}
+                </a>
+              ))}
+            </div>
+          )}
+        </div>
+      </nav>
+
       {/* Hero Section */}
-      <header className="container mx-auto px-6 py-20 lg:py-32">
+      <header className="container mx-auto px-6 pt-32 pb-20 lg:pt-40 lg:pb-32">
         <div className="max-w-4xl mx-auto text-center">
           <div className="mb-8">
             <div className="w-32 h-32 mx-auto rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white text-5xl font-bold shadow-xl">
@@ -94,7 +154,7 @@ export default function Home() {
       </header>
 
       {/* About Section */}
-      <section className="container mx-auto px-6 py-16">
+      <section id="about" className="container mx-auto px-6 py-16 scroll-mt-20">
         <div className="max-w-4xl mx-auto">
           <h2 className="text-3xl font-bold text-slate-900 dark:text-white mb-8 text-center">
             About
@@ -120,7 +180,7 @@ export default function Home() {
       </section>
 
       {/* Skills Section */}
-      <section className="container mx-auto px-6 py-16">
+      <section id="skills" className="container mx-auto px-6 py-16 scroll-mt-20">
         <div className="max-w-4xl mx-auto">
           <h2 className="text-3xl font-bold text-slate-900 dark:text-white mb-8 text-center">
             Skills
@@ -136,7 +196,7 @@ export default function Home() {
               return (
                 <div
                   key={skill}
-                  className="flex items-center gap-2 bg-white dark:bg-slate-800 rounded-xl px-4 py-2 shadow-md hover:shadow-lg transition-shadow"
+                  className="flex items-center gap-2 bg-white dark:bg-slate-800 rounded-xl px-4 py-2 shadow-md hover:shadow-lg hover:-translate-y-1 transition-all duration-300"
                 >
                   {Icon && <Icon className="text-xl text-slate-600 dark:text-slate-400" />}
                   <span className="text-slate-700 dark:text-slate-200 font-medium">
@@ -150,7 +210,7 @@ export default function Home() {
       </section>
 
       {/* Projects Section */}
-      <section className="container mx-auto px-6 py-16">
+      <section id="projects" className="container mx-auto px-6 py-16 scroll-mt-20">
         <div className="max-w-4xl mx-auto">
           <h2 className="text-3xl font-bold text-slate-900 dark:text-white mb-8 text-center">
             Projects
@@ -172,7 +232,7 @@ export default function Home() {
             ].map((project, index) => (
               <div
                 key={index}
-                className="bg-white dark:bg-slate-800 rounded-2xl p-6 shadow-lg hover:shadow-xl transition-shadow"
+                className="bg-white dark:bg-slate-800 rounded-2xl p-6 shadow-lg hover:shadow-xl hover:-translate-y-1 transition-all duration-300"
               >
                 <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-2">
                   {project.title}
@@ -203,7 +263,7 @@ export default function Home() {
       </section>
 
       {/* Contact Section */}
-      <section className="container mx-auto px-6 py-16">
+      <section id="contact" className="container mx-auto px-6 py-16 scroll-mt-20">
         <div className="max-w-4xl mx-auto text-center">
           <h2 className="text-3xl font-bold text-slate-900 dark:text-white mb-8">
             Contact
