@@ -28,7 +28,7 @@ export default function Home() {
               GitHub
             </a>
             <a
-              href="mailto:hiro8ma@gmail.com"
+              href="mailto:hiro8masu@gmail.com"
               className="flex items-center gap-2 px-6 py-3 border-2 border-slate-900 dark:border-white text-slate-900 dark:text-white rounded-full font-medium hover:bg-slate-900 hover:text-white dark:hover:bg-white dark:hover:text-slate-900 transition-colors"
             >
               <Mail size={20} />
@@ -147,11 +147,11 @@ export default function Home() {
               お気軽にお問い合わせください
             </p>
             <a
-              href="mailto:hiro8ma@gmail.com"
+              href="mailto:hiro8masu@gmail.com"
               className="inline-flex items-center gap-2 px-8 py-4 bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-full font-medium hover:opacity-90 transition-opacity"
             >
               <Mail size={20} />
-              hiro8ma@gmail.com
+              hiro8masu@gmail.com
             </a>
           </div>
         </div>
