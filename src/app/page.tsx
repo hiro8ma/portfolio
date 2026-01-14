@@ -1,6 +1,7 @@
 "use client";
 
-import { Github, Linkedin, Mail, ExternalLink, Briefcase } from "lucide-react";
+import { Github, Linkedin, Mail, ExternalLink, Briefcase, Instagram, BookOpen, Youtube, FileText, Mic } from "lucide-react";
+import { SiX, SiZenn } from "react-icons/si";
 import {
   SiGo,
   SiRust,
@@ -67,10 +68,10 @@ export default function Home() {
                 <a href="/">hiro8ma</a>
               </h1>
               <h2 className="mt-3 text-lg font-medium tracking-tight text-slate-200 sm:text-xl">
-                Software Engineer
+                Developer & Architect
               </h2>
               <p className="mt-4 max-w-xs leading-normal text-slate-400">
-                マネジメント、技術戦略、設計、開発、SRE、インフラ管理を担当
+                Building reliable, scalable systems with modern cloud-native technologies
               </p>
 
               {/* Navigation */}
@@ -79,6 +80,7 @@ export default function Home() {
                   {[
                     { id: "about", label: "About" },
                     { id: "skills", label: "Skills" },
+                    { id: "writing", label: "Writing" },
                     { id: "experience", label: "Experience" },
                   ].map((item) => (
                     <li key={item.id}>
@@ -98,7 +100,7 @@ export default function Home() {
             </div>
 
             {/* Social Links */}
-            <ul className="ml-1 mt-8 flex items-center gap-5" aria-label="Social media">
+            <ul className="ml-1 mt-8 flex flex-wrap items-center gap-5" aria-label="Social media">
               <li>
                 <a
                   className="block text-slate-400 hover:text-teal-300 transition-colors"
@@ -107,7 +109,7 @@ export default function Home() {
                   rel="noopener noreferrer"
                   aria-label="GitHub"
                 >
-                  <Github size={24} />
+                  <Github size={22} />
                 </a>
               </li>
               <li>
@@ -118,7 +120,29 @@ export default function Home() {
                   rel="noopener noreferrer"
                   aria-label="LinkedIn"
                 >
-                  <Linkedin size={24} />
+                  <Linkedin size={22} />
+                </a>
+              </li>
+              <li>
+                <a
+                  className="block text-slate-400 hover:text-teal-300 transition-colors"
+                  href="https://x.com/hir08ma"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label="X (Twitter)"
+                >
+                  <SiX size={20} />
+                </a>
+              </li>
+              <li>
+                <a
+                  className="block text-slate-400 hover:text-teal-300 transition-colors"
+                  href="https://www.instagram.com/h8.16"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label="Instagram"
+                >
+                  <Instagram size={22} />
                 </a>
               </li>
               <li>
@@ -129,7 +153,18 @@ export default function Home() {
                   rel="noopener noreferrer"
                   aria-label="Wantedly"
                 >
-                  <Briefcase size={24} />
+                  <Briefcase size={22} />
+                </a>
+              </li>
+              <li>
+                <a
+                  className="block text-slate-400 hover:text-teal-300 transition-colors"
+                  href="https://booklog.jp/users/2620093309d9255a"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label="Booklog"
+                >
+                  <BookOpen size={22} />
                 </a>
               </li>
               <li>
@@ -138,7 +173,7 @@ export default function Home() {
                   href="mailto:hiro8masu@gmail.com"
                   aria-label="Email"
                 >
-                  <Mail size={24} />
+                  <Mail size={22} />
                 </a>
               </li>
             </ul>
@@ -158,32 +193,32 @@ export default function Home() {
               </div>
               <div className="space-y-4">
                 <p>
-                  開発言語としては要件に応じて{" "}
+                  Depending on the requirements, I work with{" "}
                   <span className="text-slate-200">Go, Rust, C++, TypeScript, Python</span>{" "}
-                  を、サービス間コミュニケーションには{" "}
+                  for development, and commonly use{" "}
                   <span className="text-slate-200">gRPC, ConnectRPC, GraphQL, Pub/Sub</span>{" "}
-                  等を用いることが多いです。
+                  for service communication.
                 </p>
                 <p>
-                  リアーキテクトにも積極的に取り組んでおり、複雑化したコアサービスの
-                  <span className="text-slate-200">ドメインモデリング</span>見直し、
-                  サービス分割、オーケストレーションベースの
-                  <span className="text-slate-200">サーガパターン</span>上に
-                  <span className="text-slate-200">イベントソーシング・CQRS</span>を実装。
-                  イベントストアの情報は集約の再現や監査ログ、教師データとして活用しています。
+                  I actively engage in re-architecting systems, including reviewing{" "}
+                  <span className="text-slate-200">domain modeling</span> for complex core services,
+                  service decomposition, and implementing{" "}
+                  <span className="text-slate-200">Event Sourcing & CQRS</span> on top of
+                  orchestration-based <span className="text-slate-200">Saga patterns</span>.
+                  Event store data is utilized for aggregate reconstruction, audit logs, and training data.
                 </p>
                 <p>
-                  クラウドネイティブなインフラ管理も担当しており、マイクロサービスのコンテナ運用、
-                  CI/CD（<span className="text-slate-200">Argo Rollouts, PipeCD, Cloud Build, GitHub Actions</span>）、
-                  <span className="text-slate-200">Kubernetes, Istio, Prometheus, Grafana, Terraform</span>{" "}
-                  などを用いた環境構築・運用、生産性向上ツールの構築やトイルの削減に努めています。
+                  I also manage cloud-native infrastructure, including microservice container operations,
+                  CI/CD (<span className="text-slate-200">Argo Rollouts, PipeCD, Cloud Build, GitHub Actions</span>),
+                  and environment setup using{" "}
+                  <span className="text-slate-200">Kubernetes, Istio, Prometheus, Grafana, Terraform</span>.
+                  I focus on building productivity tools and reducing toil.
                 </p>
                 <p>
-                  GCPでは{" "}
+                  On GCP, I have hands-on experience with a wide range of services including{" "}
                   <span className="text-slate-200">
                     GKE, Anthos, Cloud Run, Pub/Sub, AlloyDB, Spanner, BigQuery, Vertex AI
-                  </span>{" "}
-                  など幅広いサービスの実務運用経験があります。
+                  </span>.
                 </p>
               </div>
             </section>
@@ -214,6 +249,103 @@ export default function Home() {
               </div>
             </section>
 
+            {/* Writing Section */}
+            <section
+              id="writing"
+              className="mb-16 scroll-mt-16 md:mb-24 lg:mb-36 lg:scroll-mt-24"
+            >
+              <div className="sticky top-0 z-20 -mx-6 mb-4 w-screen bg-slate-900/75 px-6 py-5 backdrop-blur md:-mx-12 md:px-12 lg:sr-only lg:relative lg:top-auto lg:mx-auto lg:w-full lg:px-0 lg:py-0 lg:opacity-0">
+                <h2 className="text-sm font-bold uppercase tracking-widest text-slate-200 lg:sr-only">
+                  Writing
+                </h2>
+              </div>
+              <div>
+                <ul className="group/list">
+                  <li className="mb-8">
+                    <a
+                      href="https://note.com/canary_inc/n/n658b8313277f"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="group relative grid gap-4 pb-1 transition-all sm:grid-cols-8 sm:gap-8 md:gap-4 lg:hover:!opacity-100 lg:group-hover/list:opacity-50"
+                    >
+                      <div className="absolute -inset-x-4 -inset-y-4 z-0 hidden rounded-md transition motion-reduce:transition-none lg:-inset-x-6 lg:block lg:group-hover:bg-slate-800/50 lg:group-hover:shadow-[inset_0_1px_0_0_rgba(148,163,184,0.1)] lg:group-hover:drop-shadow-lg"></div>
+                      <div className="z-10 sm:col-span-2 flex items-center justify-center text-slate-500">
+                        <FileText size={32} />
+                      </div>
+                      <div className="z-10 sm:col-span-6">
+                        <h3 className="font-medium leading-snug text-slate-200">
+                          <span className="inline-flex items-baseline font-medium leading-tight text-slate-200 group-hover:text-teal-300 focus-visible:text-teal-300">
+                            Interview: Product Lead Engineer&apos;s Mission
+                            <ExternalLink size={14} className="ml-1 inline-block" />
+                          </span>
+                        </h3>
+                        <p className="mt-2 text-sm leading-normal text-slate-400">
+                          &quot;Providing growth opportunities for team members is also my important mission&quot;
+                        </p>
+                        <span className="mt-2 inline-block rounded-full bg-teal-400/10 px-3 py-1 text-xs font-medium text-teal-300">
+                          note
+                        </span>
+                      </div>
+                    </a>
+                  </li>
+                  <li className="mb-8">
+                    <a
+                      href="https://zenn.dev/canary_techblog/articles/2358dd21cee434"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="group relative grid gap-4 pb-1 transition-all sm:grid-cols-8 sm:gap-8 md:gap-4 lg:hover:!opacity-100 lg:group-hover/list:opacity-50"
+                    >
+                      <div className="absolute -inset-x-4 -inset-y-4 z-0 hidden rounded-md transition motion-reduce:transition-none lg:-inset-x-6 lg:block lg:group-hover:bg-slate-800/50 lg:group-hover:shadow-[inset_0_1px_0_0_rgba(148,163,184,0.1)] lg:group-hover:drop-shadow-lg"></div>
+                      <div className="z-10 sm:col-span-2 flex items-center justify-center text-slate-500">
+                        <SiZenn size={32} />
+                      </div>
+                      <div className="z-10 sm:col-span-6">
+                        <h3 className="font-medium leading-snug text-slate-200">
+                          <span className="inline-flex items-baseline font-medium leading-tight text-slate-200 group-hover:text-teal-300 focus-visible:text-teal-300">
+                            Building Teams That Move Without Hesitation in the AI Era
+                            <ExternalLink size={14} className="ml-1 inline-block" />
+                          </span>
+                        </h3>
+                        <p className="mt-2 text-sm leading-normal text-slate-400">
+                          Organizational design secrets for accelerating development in the AI era
+                        </p>
+                        <span className="mt-2 inline-block rounded-full bg-teal-400/10 px-3 py-1 text-xs font-medium text-teal-300">
+                          zenn
+                        </span>
+                      </div>
+                    </a>
+                  </li>
+                  <li className="mb-8">
+                    <a
+                      href="https://youtu.be/HpF_87aHPFg"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="group relative grid gap-4 pb-1 transition-all sm:grid-cols-8 sm:gap-8 md:gap-4 lg:hover:!opacity-100 lg:group-hover/list:opacity-50"
+                    >
+                      <div className="absolute -inset-x-4 -inset-y-4 z-0 hidden rounded-md transition motion-reduce:transition-none lg:-inset-x-6 lg:block lg:group-hover:bg-slate-800/50 lg:group-hover:shadow-[inset_0_1px_0_0_rgba(148,163,184,0.1)] lg:group-hover:drop-shadow-lg"></div>
+                      <div className="z-10 sm:col-span-2 flex items-center justify-center text-slate-500">
+                        <Mic size={32} />
+                      </div>
+                      <div className="z-10 sm:col-span-6">
+                        <h3 className="font-medium leading-snug text-slate-200">
+                          <span className="inline-flex items-baseline font-medium leading-tight text-slate-200 group-hover:text-teal-300 focus-visible:text-teal-300">
+                            Talk: Rethinking Dev Organizations in the AI Era
+                            <ExternalLink size={14} className="ml-1 inline-block" />
+                          </span>
+                        </h3>
+                        <p className="mt-2 text-sm leading-normal text-slate-400">
+                          Are we focusing on the right things? Reconsidering development organizations in the AI era
+                        </p>
+                        <span className="mt-2 inline-block rounded-full bg-teal-400/10 px-3 py-1 text-xs font-medium text-teal-300">
+                          talk
+                        </span>
+                      </div>
+                    </a>
+                  </li>
+                </ul>
+              </div>
+            </section>
+
             {/* Experience Section */}
             <section
               id="experience"
@@ -230,17 +362,17 @@ export default function Home() {
                     <div className="group relative grid pb-1 transition-all sm:grid-cols-8 sm:gap-8 md:gap-4 lg:hover:!opacity-100 lg:group-hover/list:opacity-50">
                       <div className="absolute -inset-x-4 -inset-y-4 z-0 hidden rounded-md transition motion-reduce:transition-none lg:-inset-x-6 lg:block lg:group-hover:bg-slate-800/50 lg:group-hover:shadow-[inset_0_1px_0_0_rgba(148,163,184,0.1)] lg:group-hover:drop-shadow-lg"></div>
                       <header className="z-10 mb-2 mt-1 text-xs font-semibold uppercase tracking-wide text-slate-500 sm:col-span-2">
-                        現在
+                        Present
                       </header>
                       <div className="z-10 sm:col-span-6">
                         <h3 className="font-medium leading-snug text-slate-200">
                           <div className="inline-flex items-baseline font-medium leading-tight text-slate-200 group-hover:text-teal-300 focus-visible:text-teal-300">
-                            Software Engineer / Tech Lead
+                            Developer & Architect
                           </div>
                         </h3>
                         <p className="mt-2 text-sm leading-normal">
-                          マネジメント、プロダクトの技術的な戦略、設計、開発、SRE、インフラ管理などを担当。
-                          マイクロサービスアーキテクチャの設計・運用、クラウドネイティブなインフラ構築を推進。
+                          Responsible for management, technical strategy, architecture design, development, SRE, and infrastructure management.
+                          Leading microservices architecture design and operations, driving cloud-native infrastructure initiatives.
                         </p>
                         <ul className="mt-2 flex flex-wrap gap-2" aria-label="Technologies used">
                           {["Go", "Kubernetes", "GCP", "Terraform"].map((tech) => (
