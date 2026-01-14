@@ -71,7 +71,7 @@ export default function Home() {
                 Software Engineer
               </h2>
               <p className="mt-4 max-w-xs leading-normal text-slate-400">
-                マネジメント、技術戦略、設計、開発、SRE、インフラ管理を担当
+                Building reliable, scalable systems with modern cloud-native technologies
               </p>
 
               {/* Navigation */}
@@ -192,32 +192,32 @@ export default function Home() {
               </div>
               <div className="space-y-4">
                 <p>
-                  開発言語としては要件に応じて{" "}
+                  Depending on the requirements, I work with{" "}
                   <span className="text-slate-200">Go, Rust, C++, TypeScript, Python</span>{" "}
-                  を、サービス間コミュニケーションには{" "}
+                  for development, and commonly use{" "}
                   <span className="text-slate-200">gRPC, ConnectRPC, GraphQL, Pub/Sub</span>{" "}
-                  等を用いることが多いです。
+                  for service communication.
                 </p>
                 <p>
-                  リアーキテクトにも積極的に取り組んでおり、複雑化したコアサービスの
-                  <span className="text-slate-200">ドメインモデリング</span>見直し、
-                  サービス分割、オーケストレーションベースの
-                  <span className="text-slate-200">サーガパターン</span>上に
-                  <span className="text-slate-200">イベントソーシング・CQRS</span>を実装。
-                  イベントストアの情報は集約の再現や監査ログ、教師データとして活用しています。
+                  I actively engage in re-architecting systems, including reviewing{" "}
+                  <span className="text-slate-200">domain modeling</span> for complex core services,
+                  service decomposition, and implementing{" "}
+                  <span className="text-slate-200">Event Sourcing & CQRS</span> on top of
+                  orchestration-based <span className="text-slate-200">Saga patterns</span>.
+                  Event store data is utilized for aggregate reconstruction, audit logs, and training data.
                 </p>
                 <p>
-                  クラウドネイティブなインフラ管理も担当しており、マイクロサービスのコンテナ運用、
-                  CI/CD（<span className="text-slate-200">Argo Rollouts, PipeCD, Cloud Build, GitHub Actions</span>）、
-                  <span className="text-slate-200">Kubernetes, Istio, Prometheus, Grafana, Terraform</span>{" "}
-                  などを用いた環境構築・運用、生産性向上ツールの構築やトイルの削減に努めています。
+                  I also manage cloud-native infrastructure, including microservice container operations,
+                  CI/CD (<span className="text-slate-200">Argo Rollouts, PipeCD, Cloud Build, GitHub Actions</span>),
+                  and environment setup using{" "}
+                  <span className="text-slate-200">Kubernetes, Istio, Prometheus, Grafana, Terraform</span>.
+                  I focus on building productivity tools and reducing toil.
                 </p>
                 <p>
-                  GCPでは{" "}
+                  On GCP, I have hands-on experience with a wide range of services including{" "}
                   <span className="text-slate-200">
                     GKE, Anthos, Cloud Run, Pub/Sub, AlloyDB, Spanner, BigQuery, Vertex AI
-                  </span>{" "}
-                  など幅広いサービスの実務運用経験があります。
+                  </span>.
                 </p>
               </div>
             </section>
@@ -264,7 +264,7 @@ export default function Home() {
                     <div className="group relative grid pb-1 transition-all sm:grid-cols-8 sm:gap-8 md:gap-4 lg:hover:!opacity-100 lg:group-hover/list:opacity-50">
                       <div className="absolute -inset-x-4 -inset-y-4 z-0 hidden rounded-md transition motion-reduce:transition-none lg:-inset-x-6 lg:block lg:group-hover:bg-slate-800/50 lg:group-hover:shadow-[inset_0_1px_0_0_rgba(148,163,184,0.1)] lg:group-hover:drop-shadow-lg"></div>
                       <header className="z-10 mb-2 mt-1 text-xs font-semibold uppercase tracking-wide text-slate-500 sm:col-span-2">
-                        現在
+                        Present
                       </header>
                       <div className="z-10 sm:col-span-6">
                         <h3 className="font-medium leading-snug text-slate-200">
@@ -273,8 +273,8 @@ export default function Home() {
                           </div>
                         </h3>
                         <p className="mt-2 text-sm leading-normal">
-                          マネジメント、プロダクトの技術的な戦略、設計、開発、SRE、インフラ管理などを担当。
-                          マイクロサービスアーキテクチャの設計・運用、クラウドネイティブなインフラ構築を推進。
+                          Responsible for management, technical strategy, architecture design, development, SRE, and infrastructure management.
+                          Leading microservices architecture design and operations, driving cloud-native infrastructure initiatives.
                         </p>
                         <ul className="mt-2 flex flex-wrap gap-2" aria-label="Technologies used">
                           {["Go", "Kubernetes", "GCP", "Terraform"].map((tech) => (
