@@ -1,4 +1,50 @@
 import { Github, Mail, ExternalLink, Briefcase } from "lucide-react";
+import {
+  SiGo,
+  SiRust,
+  SiTypescript,
+  SiJavascript,
+  SiPython,
+  SiCplusplus,
+  SiSolidity,
+  SiReact,
+  SiNextdotjs,
+  SiElectron,
+  SiHtml5,
+  SiNestjs,
+  SiGraphql,
+  SiRabbitmq,
+  SiFirebase,
+  SiAmazonwebservices,
+  SiGooglecloud,
+  SiDocker,
+  SiKubernetes,
+  SiGrafana,
+} from "react-icons/si";
+import { IconType } from "react-icons";
+
+const skillIcons: Record<string, IconType> = {
+  Go: SiGo,
+  Rust: SiRust,
+  TypeScript: SiTypescript,
+  JavaScript: SiJavascript,
+  Python: SiPython,
+  "C++": SiCplusplus,
+  Solidity: SiSolidity,
+  React: SiReact,
+  "Next.js": SiNextdotjs,
+  Electron: SiElectron,
+  "HTML/CSS": SiHtml5,
+  NestJS: SiNestjs,
+  GraphQL: SiGraphql,
+  RabbitMQ: SiRabbitmq,
+  Firebase: SiFirebase,
+  AWS: SiAmazonwebservices,
+  GCP: SiGooglecloud,
+  Docker: SiDocker,
+  Kubernetes: SiKubernetes,
+  Grafana: SiGrafana,
+};
 
 export default function Home() {
   return (
@@ -92,16 +138,20 @@ export default function Home() {
                   {skillGroup.category}
                 </h3>
                 <div className="flex flex-wrap gap-3">
-                  {skillGroup.items.map((skill) => (
-                    <div
-                      key={skill}
-                      className="bg-white dark:bg-slate-800 rounded-xl px-4 py-2 shadow-md hover:shadow-lg transition-shadow"
-                    >
-                      <span className="text-slate-700 dark:text-slate-200 font-medium">
-                        {skill}
-                      </span>
-                    </div>
-                  ))}
+                  {skillGroup.items.map((skill) => {
+                    const Icon = skillIcons[skill];
+                    return (
+                      <div
+                        key={skill}
+                        className="flex items-center gap-2 bg-white dark:bg-slate-800 rounded-xl px-4 py-2 shadow-md hover:shadow-lg transition-shadow"
+                      >
+                        {Icon && <Icon className="text-xl text-slate-600 dark:text-slate-400" />}
+                        <span className="text-slate-700 dark:text-slate-200 font-medium">
+                          {skill}
+                        </span>
+                      </div>
+                    );
+                  })}
                 </div>
               </div>
             ))}
