@@ -389,40 +389,6 @@ export default function Home() {
                 </ul>
               </div>
             </section>
-
-            {/* Footer */}
-            <footer className="max-w-md pb-16 text-sm text-slate-500 sm:pb-0">
-              <p>
-                Built with{" "}
-                <a
-                  href="https://nextjs.org/"
-                  className="font-medium text-slate-400 hover:text-teal-300 focus-visible:text-teal-300"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  Next.js
-                </a>{" "}
-                and{" "}
-                <a
-                  href="https://tailwindcss.com/"
-                  className="font-medium text-slate-400 hover:text-teal-300 focus-visible:text-teal-300"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  Tailwind CSS
-                </a>
-                . Inspired by{" "}
-                <a
-                  href="https://brittanychiang.com/"
-                  className="font-medium text-slate-400 hover:text-teal-300 focus-visible:text-teal-300"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  Brittany Chiang
-                </a>
-                .
-              </p>
-            </footer>
           </main>
         </div>
       </div>
