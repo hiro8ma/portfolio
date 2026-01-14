@@ -1,7 +1,7 @@
 "use client";
 
-import { Github, Linkedin, Mail, ExternalLink, Briefcase, Instagram, BookOpen } from "lucide-react";
-import { SiX } from "react-icons/si";
+import { Github, Linkedin, Mail, ExternalLink, Briefcase, Instagram, BookOpen, Youtube, FileText, Mic } from "lucide-react";
+import { SiX, SiZenn } from "react-icons/si";
 import {
   SiGo,
   SiRust,
@@ -80,6 +80,7 @@ export default function Home() {
                   {[
                     { id: "about", label: "About" },
                     { id: "skills", label: "Skills" },
+                    { id: "writing", label: "Writing" },
                     { id: "experience", label: "Experience" },
                   ].map((item) => (
                     <li key={item.id}>
@@ -245,6 +246,103 @@ export default function Home() {
                     </span>
                   );
                 })}
+              </div>
+            </section>
+
+            {/* Writing Section */}
+            <section
+              id="writing"
+              className="mb-16 scroll-mt-16 md:mb-24 lg:mb-36 lg:scroll-mt-24"
+            >
+              <div className="sticky top-0 z-20 -mx-6 mb-4 w-screen bg-slate-900/75 px-6 py-5 backdrop-blur md:-mx-12 md:px-12 lg:sr-only lg:relative lg:top-auto lg:mx-auto lg:w-full lg:px-0 lg:py-0 lg:opacity-0">
+                <h2 className="text-sm font-bold uppercase tracking-widest text-slate-200 lg:sr-only">
+                  Writing
+                </h2>
+              </div>
+              <div>
+                <ul className="group/list">
+                  <li className="mb-8">
+                    <a
+                      href="https://note.com/canary_inc/n/n658b8313277f"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="group relative grid gap-4 pb-1 transition-all sm:grid-cols-8 sm:gap-8 md:gap-4 lg:hover:!opacity-100 lg:group-hover/list:opacity-50"
+                    >
+                      <div className="absolute -inset-x-4 -inset-y-4 z-0 hidden rounded-md transition motion-reduce:transition-none lg:-inset-x-6 lg:block lg:group-hover:bg-slate-800/50 lg:group-hover:shadow-[inset_0_1px_0_0_rgba(148,163,184,0.1)] lg:group-hover:drop-shadow-lg"></div>
+                      <div className="z-10 sm:col-span-2 flex items-center justify-center text-slate-500">
+                        <FileText size={32} />
+                      </div>
+                      <div className="z-10 sm:col-span-6">
+                        <h3 className="font-medium leading-snug text-slate-200">
+                          <span className="inline-flex items-baseline font-medium leading-tight text-slate-200 group-hover:text-teal-300 focus-visible:text-teal-300">
+                            Interview: Product Lead Engineer&apos;s Mission
+                            <ExternalLink size={14} className="ml-1 inline-block" />
+                          </span>
+                        </h3>
+                        <p className="mt-2 text-sm leading-normal text-slate-400">
+                          &quot;Providing growth opportunities for team members is also my important mission&quot;
+                        </p>
+                        <span className="mt-2 inline-block rounded-full bg-teal-400/10 px-3 py-1 text-xs font-medium text-teal-300">
+                          note
+                        </span>
+                      </div>
+                    </a>
+                  </li>
+                  <li className="mb-8">
+                    <a
+                      href="https://zenn.dev/canary_techblog/articles/2358dd21cee434"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="group relative grid gap-4 pb-1 transition-all sm:grid-cols-8 sm:gap-8 md:gap-4 lg:hover:!opacity-100 lg:group-hover/list:opacity-50"
+                    >
+                      <div className="absolute -inset-x-4 -inset-y-4 z-0 hidden rounded-md transition motion-reduce:transition-none lg:-inset-x-6 lg:block lg:group-hover:bg-slate-800/50 lg:group-hover:shadow-[inset_0_1px_0_0_rgba(148,163,184,0.1)] lg:group-hover:drop-shadow-lg"></div>
+                      <div className="z-10 sm:col-span-2 flex items-center justify-center text-slate-500">
+                        <SiZenn size={32} />
+                      </div>
+                      <div className="z-10 sm:col-span-6">
+                        <h3 className="font-medium leading-snug text-slate-200">
+                          <span className="inline-flex items-baseline font-medium leading-tight text-slate-200 group-hover:text-teal-300 focus-visible:text-teal-300">
+                            Building Teams That Move Without Hesitation in the AI Era
+                            <ExternalLink size={14} className="ml-1 inline-block" />
+                          </span>
+                        </h3>
+                        <p className="mt-2 text-sm leading-normal text-slate-400">
+                          Organizational design secrets for accelerating development in the AI era
+                        </p>
+                        <span className="mt-2 inline-block rounded-full bg-teal-400/10 px-3 py-1 text-xs font-medium text-teal-300">
+                          zenn
+                        </span>
+                      </div>
+                    </a>
+                  </li>
+                  <li className="mb-8">
+                    <a
+                      href="https://youtu.be/HpF_87aHPFg"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="group relative grid gap-4 pb-1 transition-all sm:grid-cols-8 sm:gap-8 md:gap-4 lg:hover:!opacity-100 lg:group-hover/list:opacity-50"
+                    >
+                      <div className="absolute -inset-x-4 -inset-y-4 z-0 hidden rounded-md transition motion-reduce:transition-none lg:-inset-x-6 lg:block lg:group-hover:bg-slate-800/50 lg:group-hover:shadow-[inset_0_1px_0_0_rgba(148,163,184,0.1)] lg:group-hover:drop-shadow-lg"></div>
+                      <div className="z-10 sm:col-span-2 flex items-center justify-center text-slate-500">
+                        <Mic size={32} />
+                      </div>
+                      <div className="z-10 sm:col-span-6">
+                        <h3 className="font-medium leading-snug text-slate-200">
+                          <span className="inline-flex items-baseline font-medium leading-tight text-slate-200 group-hover:text-teal-300 focus-visible:text-teal-300">
+                            Talk: Rethinking Dev Organizations in the AI Era
+                            <ExternalLink size={14} className="ml-1 inline-block" />
+                          </span>
+                        </h3>
+                        <p className="mt-2 text-sm leading-normal text-slate-400">
+                          Are we focusing on the right things? Reconsidering development organizations in the AI era
+                        </p>
+                        <span className="mt-2 inline-block rounded-full bg-teal-400/10 px-3 py-1 text-xs font-medium text-teal-300">
+                          talk
+                        </span>
+                      </div>
+                    </a>
+                  </li>
+                </ul>
               </div>
             </section>
 
