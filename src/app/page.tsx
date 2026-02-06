@@ -23,6 +23,8 @@ import {
   SiDocker,
   SiKubernetes,
   SiGrafana,
+  SiOpenai,
+  SiLangchain,
 } from "react-icons/si";
 import { IconType } from "react-icons";
 
@@ -47,6 +49,8 @@ const skillIcons: Record<string, IconType> = {
   Docker: SiDocker,
   Kubernetes: SiKubernetes,
   Grafana: SiGrafana,
+  OpenAI: SiOpenai,
+  LangChain: SiLangchain,
 };
 
 const skills = [
@@ -54,6 +58,7 @@ const skills = [
   "React", "Next.js", "Electron", "HTML/CSS",
   "NestJS", "GraphQL", "RabbitMQ", "Firebase",
   "AWS", "GCP", "Docker", "Kubernetes", "Grafana",
+  "OpenAI", "LangChain", "Vertex AI", "RAG",
 ];
 
 export default function Home() {
