@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { Github, Linkedin, Mail, ExternalLink, Briefcase, Instagram, BookOpen, Youtube, FileText, Mic, Award } from "lucide-react";
 import { SiX, SiZenn } from "react-icons/si";
 import {
@@ -102,7 +103,7 @@ export default function Home() {
                     </li>
                   ))}
                 </ul>
-                <a
+                <Link
                   href="/blog"
                   className="group mt-4 flex items-center py-3"
                 >
@@ -110,7 +111,7 @@ export default function Home() {
                   <span className="nav-text text-xs font-bold uppercase tracking-widest text-slate-500 group-hover:text-teal-300 group-focus-visible:text-teal-300">
                     Blog
                   </span>
-                </a>
+                </Link>
               </nav>
             </div>
 
