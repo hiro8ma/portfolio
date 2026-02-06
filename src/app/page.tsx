@@ -412,25 +412,25 @@ export default function Home() {
                           </div>
                         </h3>
                         <p className="mt-2 text-sm leading-normal">
-                          Leading development teams, technical strategy, and architecture for Japan&apos;s real estate marketplace app.
-                          Driving AI integration and microservices transformation.
+                          Leading engineering organization for Japan&apos;s real estate marketplace app.
+                          Driving technical strategy, team growth, and AI-powered development.
                         </p>
                         <ul className="mt-3 space-y-1 text-sm text-slate-400">
                           <li className="flex items-start gap-2">
                             <span className="text-teal-400">▹</span>
-                            Architected Event Sourcing & CQRS system handling millions of domain events
+                            Technical strategy, quality assurance, and development productivity
                           </li>
                           <li className="flex items-start gap-2">
                             <span className="text-teal-400">▹</span>
-                            Led team of engineers, establishing growth-focused engineering culture
+                            Team building, goal setting, evaluation, and hiring
                           </li>
                           <li className="flex items-start gap-2">
                             <span className="text-teal-400">▹</span>
-                            Implemented AI-powered features using Vertex AI and Gemini
+                            Enabling engineers and driving AI adoption across teams
                           </li>
                         </ul>
                         <ul className="mt-3 flex flex-wrap gap-2" aria-label="Technologies used">
-                          {["Go", "Kubernetes", "GCP", "Vertex AI", "Event Sourcing"].map((tech) => (
+                          {["Go", "Kubernetes", "GCP", "Vertex AI", "Team Building"].map((tech) => (
                             <li key={tech}>
                               <span className="flex items-center rounded-full bg-teal-400/10 px-3 py-1 text-xs font-medium leading-5 text-teal-300">
                                 {tech}
@@ -460,19 +460,19 @@ export default function Home() {
                         <ul className="mt-3 space-y-1 text-sm text-slate-400">
                           <li className="flex items-start gap-2">
                             <span className="text-teal-400">▹</span>
+                            Architected Event Sourcing & CQRS systems for complex domains
+                          </li>
+                          <li className="flex items-start gap-2">
+                            <span className="text-teal-400">▹</span>
                             Designed and built microservices architectures from ground up
                           </li>
                           <li className="flex items-start gap-2">
                             <span className="text-teal-400">▹</span>
                             Established CI/CD pipelines and DevOps practices
                           </li>
-                          <li className="flex items-start gap-2">
-                            <span className="text-teal-400">▹</span>
-                            Mentored junior engineers and built engineering teams
-                          </li>
                         </ul>
                         <ul className="mt-3 flex flex-wrap gap-2" aria-label="Technologies used">
-                          {["TypeScript", "React", "AWS", "Docker", "GraphQL"].map((tech) => (
+                          {["Go", "TypeScript", "AWS", "Event Sourcing", "CQRS"].map((tech) => (
                             <li key={tech}>
                               <span className="flex items-center rounded-full bg-teal-400/10 px-3 py-1 text-xs font-medium leading-5 text-teal-300">
                                 {tech}
