@@ -282,7 +282,7 @@ export default function Home() {
                         <ExternalLink size={14} />
                       </h3>
                       <p className="mt-1 text-sm text-slate-400">
-                        Google Cloud Professional Cloud Architect, 45+ Skill Badges, and more
+                        Google Cloud certifications and skill badges
                       </p>
                     </div>
                   </div>
