@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { Github, Linkedin, Mail, ExternalLink, Briefcase, Instagram, BookOpen, Youtube, FileText, Mic, Award } from "lucide-react";
+import { Github, Linkedin, Mail, ExternalLink, Briefcase, Instagram, BookOpen, Youtube, FileText, Mic, Award, ArrowRight } from "lucide-react";
 import { SiX, SiZenn } from "react-icons/si";
 import {
   SiGo,
@@ -495,6 +495,31 @@ export default function Home() {
                   </li>
                 </ul>
               </div>
+            </section>
+
+            {/* Blog Section - Mobile/Tablet */}
+            <section className="mb-16 scroll-mt-16 md:mb-24 lg:hidden">
+              <div className="sticky top-0 z-20 -mx-6 mb-4 w-screen bg-slate-900/75 px-6 py-5 backdrop-blur md:-mx-12 md:px-12">
+                <h2 className="text-sm font-bold uppercase tracking-widest text-slate-200">
+                  Blog
+                </h2>
+              </div>
+              <Link
+                href="/blog"
+                className="group relative block rounded-lg border border-slate-700/50 bg-slate-800/30 p-6 transition-all hover:border-teal-500/50 hover:bg-slate-800/50"
+              >
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h3 className="font-medium text-slate-200 group-hover:text-teal-300">
+                      View All Posts
+                    </h3>
+                    <p className="mt-1 text-sm text-slate-400">
+                      AI, Engineering, and Tech insights
+                    </p>
+                  </div>
+                  <ArrowRight className="h-5 w-5 text-slate-400 group-hover:text-teal-300 transition-colors" />
+                </div>
+              </Link>
             </section>
           </main>
         </div>
