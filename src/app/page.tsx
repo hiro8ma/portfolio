@@ -23,6 +23,7 @@ import {
   SiDocker,
   SiKubernetes,
   SiGrafana,
+  SiTensorflow,
 } from "react-icons/si";
 import { IconType } from "react-icons";
 
@@ -47,6 +48,7 @@ const skillIcons: Record<string, IconType> = {
   Docker: SiDocker,
   Kubernetes: SiKubernetes,
   Grafana: SiGrafana,
+  TensorFlow: SiTensorflow,
 };
 
 const skills = [
@@ -54,6 +56,7 @@ const skills = [
   "React", "Next.js", "Electron", "HTML/CSS",
   "NestJS", "GraphQL", "RabbitMQ", "Firebase",
   "AWS", "GCP", "Docker", "Kubernetes", "Grafana",
+  "Vertex AI", "Gemini", "BigQuery ML", "TensorFlow", "RAG",
 ];
 
 export default function Home() {
