@@ -1,6 +1,6 @@
 "use client";
 
-import { Github, Linkedin, Mail, ExternalLink, Briefcase, Instagram, BookOpen, Youtube, FileText, Mic, Award, MapPin, Calendar } from "lucide-react";
+import { Github, Linkedin, Mail, ExternalLink, Briefcase, Instagram, BookOpen, Youtube, FileText, Mic, Award, Calendar } from "lucide-react";
 import { SiX, SiZenn } from "react-icons/si";
 import {
   SiGo,
@@ -78,18 +78,6 @@ export default function Home() {
               <p className="mt-4 max-w-xs leading-normal text-slate-400">
                 10+ years building scalable systems. Leading teams, architecting microservices, and driving AI transformation at scale.
               </p>
-
-              {/* Open to Work Badge */}
-              <div className="mt-4 flex items-center gap-2">
-                <span className="inline-flex items-center gap-1.5 rounded-full bg-green-500/10 px-3 py-1 text-xs font-medium text-green-400 ring-1 ring-inset ring-green-500/20">
-                  <span className="h-1.5 w-1.5 rounded-full bg-green-400 animate-pulse"></span>
-                  Open to Opportunities
-                </span>
-                <span className="inline-flex items-center gap-1 text-xs text-slate-500">
-                  <MapPin size={12} />
-                  Tokyo / Remote
-                </span>
-              </div>
 
               {/* Navigation */}
               <nav className="nav hidden lg:block" aria-label="In-page jump links">
