@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ArrowLeft } from "lucide-react";
+import { Pencil } from "lucide-react";
 import { notFound } from "next/navigation";
 import { getAllPostSlugs, getPostBySlug } from "@/lib/posts";
 import { MDXRemote } from "next-mdx-remote/rsc";
@@ -69,6 +69,18 @@ export default async function PostPage({ params }: PageProps) {
 
         <div className="prose prose-invert prose-teal max-w-none">
           <MDXRemote source={post.content} />
+        </div>
+
+        <div className="mt-12 pt-8 border-t border-slate-700">
+          <a
+            href={`https://github.com/hiro8ma/portfolio/edit/main/content/posts/${slug}.mdx`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-2 text-sm text-slate-500 hover:text-teal-400"
+          >
+            <Pencil size={14} />
+            Edit on GitHub
+          </a>
         </div>
       </article>
     </div>
