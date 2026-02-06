@@ -1,6 +1,6 @@
 "use client";
 
-import { Github, Linkedin, Mail, ExternalLink, Briefcase, Instagram, BookOpen, Youtube, FileText, Mic } from "lucide-react";
+import { Github, Linkedin, Mail, ExternalLink, Briefcase, Instagram, BookOpen, Youtube, FileText, Mic, Award, MapPin, Calendar } from "lucide-react";
 import { SiX, SiZenn } from "react-icons/si";
 import {
   SiGo,
@@ -73,11 +73,23 @@ export default function Home() {
               </h1>
               <p className="mt-1 text-sm text-slate-400">hiro8ma / 増田 浩之</p>
               <h2 className="mt-3 text-lg font-medium tracking-tight text-slate-200 sm:text-xl">
-                Developer & Architect
+                Product Lead Engineer & Architect
               </h2>
               <p className="mt-4 max-w-xs leading-normal text-slate-400">
-                Building reliable, scalable systems with modern cloud-native technologies
+                10+ years building scalable systems. Leading teams, architecting microservices, and driving AI transformation at scale.
               </p>
+
+              {/* Open to Work Badge */}
+              <div className="mt-4 flex items-center gap-2">
+                <span className="inline-flex items-center gap-1.5 rounded-full bg-green-500/10 px-3 py-1 text-xs font-medium text-green-400 ring-1 ring-inset ring-green-500/20">
+                  <span className="h-1.5 w-1.5 rounded-full bg-green-400 animate-pulse"></span>
+                  Open to Opportunities
+                </span>
+                <span className="inline-flex items-center gap-1 text-xs text-slate-500">
+                  <MapPin size={12} />
+                  Tokyo / Remote
+                </span>
+              </div>
 
               {/* Navigation */}
               <nav className="nav hidden lg:block" aria-label="In-page jump links">
@@ -85,6 +97,7 @@ export default function Home() {
                   {[
                     { id: "about", label: "About" },
                     { id: "skills", label: "Skills" },
+                    { id: "certifications", label: "Certifications" },
                     { id: "writing", label: "Writing" },
                     { id: "experience", label: "Experience" },
                   ].map((item) => (
@@ -254,6 +267,60 @@ export default function Home() {
               </div>
             </section>
 
+            {/* Certifications Section */}
+            <section
+              id="certifications"
+              className="mb-16 scroll-mt-16 md:mb-24 lg:mb-36 lg:scroll-mt-24"
+            >
+              <div className="sticky top-0 z-20 -mx-6 mb-4 w-screen bg-slate-900/75 px-6 py-5 backdrop-blur md:-mx-12 md:px-12 lg:sr-only lg:relative lg:top-auto lg:mx-auto lg:w-full lg:px-0 lg:py-0 lg:opacity-0">
+                <h2 className="text-sm font-bold uppercase tracking-widest text-slate-200 lg:sr-only">
+                  Certifications
+                </h2>
+              </div>
+              <div>
+                <ul className="group/list space-y-4">
+                  <li>
+                    <div className="group relative rounded-lg border border-slate-700/50 bg-slate-800/30 p-4 transition-all hover:border-teal-500/50 hover:bg-slate-800/50">
+                      <div className="flex items-start gap-4">
+                        <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-lg bg-teal-500/10">
+                          <Award className="h-6 w-6 text-teal-400" />
+                        </div>
+                        <div>
+                          <h3 className="font-medium text-slate-200">Google Cloud Professional Cloud Architect</h3>
+                          <p className="mt-1 text-sm text-slate-400">Google Cloud</p>
+                          <p className="mt-1 flex items-center gap-1 text-xs text-slate-500">
+                            <Calendar size={12} />
+                            Valid until Dec 2027
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  </li>
+                  <li>
+                    <div className="group relative rounded-lg border border-slate-700/50 bg-slate-800/30 p-4 transition-all hover:border-teal-500/50 hover:bg-slate-800/50">
+                      <div className="flex items-start gap-4">
+                        <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-lg bg-teal-500/10">
+                          <Award className="h-6 w-6 text-teal-400" />
+                        </div>
+                        <div>
+                          <h3 className="font-medium text-slate-200">45+ Google Cloud Skill Badges</h3>
+                          <p className="mt-1 text-sm text-slate-400">Including: Vertex AI, Gemini API, BigQuery ML, Kubernetes, Terraform, Security</p>
+                          <a
+                            href="https://www.cloudskillsboost.google/public_profiles/your-profile"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="mt-2 inline-flex items-center gap-1 text-xs text-teal-400 hover:text-teal-300"
+                          >
+                            View all badges <ExternalLink size={12} />
+                          </a>
+                        </div>
+                      </div>
+                    </div>
+                  </li>
+                </ul>
+              </div>
+            </section>
+
             {/* Writing Section */}
             <section
               id="writing"
@@ -367,20 +434,76 @@ export default function Home() {
                     <div className="group relative grid pb-1 transition-all sm:grid-cols-8 sm:gap-8 md:gap-4 lg:hover:!opacity-100 lg:group-hover/list:opacity-50">
                       <div className="absolute -inset-x-4 -inset-y-4 z-0 hidden rounded-md transition motion-reduce:transition-none lg:-inset-x-6 lg:block lg:group-hover:bg-slate-800/50 lg:group-hover:shadow-[inset_0_1px_0_0_rgba(148,163,184,0.1)] lg:group-hover:drop-shadow-lg"></div>
                       <header className="z-10 mb-2 mt-1 text-xs font-semibold uppercase tracking-wide text-slate-500 sm:col-span-2">
-                        Present
+                        2023 — Present
                       </header>
                       <div className="z-10 sm:col-span-6">
                         <h3 className="font-medium leading-snug text-slate-200">
                           <div className="inline-flex items-baseline font-medium leading-tight text-slate-200 group-hover:text-teal-300 focus-visible:text-teal-300">
-                            Developer & Architect
+                            Product Lead Engineer · CANARY
                           </div>
                         </h3>
                         <p className="mt-2 text-sm leading-normal">
-                          Responsible for management, technical strategy, architecture design, development, SRE, and infrastructure management.
-                          Leading microservices architecture design and operations, driving cloud-native infrastructure initiatives.
+                          Leading development teams, technical strategy, and architecture for Japan&apos;s real estate marketplace app.
+                          Driving AI integration and microservices transformation.
                         </p>
-                        <ul className="mt-2 flex flex-wrap gap-2" aria-label="Technologies used">
-                          {["Go", "Kubernetes", "GCP", "Terraform"].map((tech) => (
+                        <ul className="mt-3 space-y-1 text-sm text-slate-400">
+                          <li className="flex items-start gap-2">
+                            <span className="text-teal-400">▹</span>
+                            Architected Event Sourcing & CQRS system handling millions of domain events
+                          </li>
+                          <li className="flex items-start gap-2">
+                            <span className="text-teal-400">▹</span>
+                            Led team of engineers, establishing growth-focused engineering culture
+                          </li>
+                          <li className="flex items-start gap-2">
+                            <span className="text-teal-400">▹</span>
+                            Implemented AI-powered features using Vertex AI and Gemini
+                          </li>
+                        </ul>
+                        <ul className="mt-3 flex flex-wrap gap-2" aria-label="Technologies used">
+                          {["Go", "Kubernetes", "GCP", "Vertex AI", "Event Sourcing"].map((tech) => (
+                            <li key={tech}>
+                              <span className="flex items-center rounded-full bg-teal-400/10 px-3 py-1 text-xs font-medium leading-5 text-teal-300">
+                                {tech}
+                              </span>
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    </div>
+                  </li>
+                  <li className="mb-12">
+                    <div className="group relative grid pb-1 transition-all sm:grid-cols-8 sm:gap-8 md:gap-4 lg:hover:!opacity-100 lg:group-hover/list:opacity-50">
+                      <div className="absolute -inset-x-4 -inset-y-4 z-0 hidden rounded-md transition motion-reduce:transition-none lg:-inset-x-6 lg:block lg:group-hover:bg-slate-800/50 lg:group-hover:shadow-[inset_0_1px_0_0_rgba(148,163,184,0.1)] lg:group-hover:drop-shadow-lg"></div>
+                      <header className="z-10 mb-2 mt-1 text-xs font-semibold uppercase tracking-wide text-slate-500 sm:col-span-2">
+                        Previous
+                      </header>
+                      <div className="z-10 sm:col-span-6">
+                        <h3 className="font-medium leading-snug text-slate-200">
+                          <div className="inline-flex items-baseline font-medium leading-tight text-slate-200 group-hover:text-teal-300 focus-visible:text-teal-300">
+                            Tech Lead · Multiple Startups
+                          </div>
+                        </h3>
+                        <p className="mt-2 text-sm leading-normal">
+                          Tech lead experience across fintech, retail, and sales support domains.
+                          Built scalable systems from scratch and led technical transformations.
+                        </p>
+                        <ul className="mt-3 space-y-1 text-sm text-slate-400">
+                          <li className="flex items-start gap-2">
+                            <span className="text-teal-400">▹</span>
+                            Designed and built microservices architectures from ground up
+                          </li>
+                          <li className="flex items-start gap-2">
+                            <span className="text-teal-400">▹</span>
+                            Established CI/CD pipelines and DevOps practices
+                          </li>
+                          <li className="flex items-start gap-2">
+                            <span className="text-teal-400">▹</span>
+                            Mentored junior engineers and built engineering teams
+                          </li>
+                        </ul>
+                        <ul className="mt-3 flex flex-wrap gap-2" aria-label="Technologies used">
+                          {["TypeScript", "React", "AWS", "Docker", "GraphQL"].map((tech) => (
                             <li key={tech}>
                               <span className="flex items-center rounded-full bg-teal-400/10 px-3 py-1 text-xs font-medium leading-5 text-teal-300">
                                 {tech}
