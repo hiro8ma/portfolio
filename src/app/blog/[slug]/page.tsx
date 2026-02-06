@@ -1,7 +1,7 @@
 import Link from "next/link";
-import { Pencil } from "lucide-react";
+import { Pencil, ChevronLeft, ChevronRight } from "lucide-react";
 import { notFound } from "next/navigation";
-import { getAllPostSlugs, getPostBySlug } from "@/lib/posts";
+import { getAllPostSlugs, getPostBySlug, getAdjacentPosts } from "@/lib/posts";
 import { MDXRemote } from "next-mdx-remote/rsc";
 
 interface PageProps {
@@ -26,6 +26,7 @@ export async function generateMetadata({ params }: PageProps) {
 export default async function PostPage({ params }: PageProps) {
   const { slug } = await params;
   const post = getPostBySlug(slug);
+  const { prev, next } = getAdjacentPosts(slug);
 
   if (!post) {
     notFound();
@@ -71,7 +72,7 @@ export default async function PostPage({ params }: PageProps) {
           <MDXRemote source={post.content} />
         </div>
 
-        <div className="mt-12 pt-8 border-t border-slate-700">
+        <div className="mt-12 pt-8 border-t border-slate-700 flex items-center justify-between">
           <a
             href={`https://github.com/hiro8ma/portfolio/edit/main/content/posts/${slug}.mdx`}
             target="_blank"
@@ -82,6 +83,41 @@ export default async function PostPage({ params }: PageProps) {
             Edit on GitHub
           </a>
         </div>
+
+        <nav className="mt-8 grid grid-cols-2 gap-4">
+          {prev ? (
+            <Link
+              href={`/blog/${prev.slug}`}
+              className="group rounded-lg border border-slate-700/50 p-4 hover:border-teal-500/50"
+            >
+              <span className="flex items-center gap-1 text-xs text-slate-500">
+                <ChevronLeft size={14} />
+                前の記事
+              </span>
+              <span className="mt-1 block text-sm text-slate-300 group-hover:text-teal-300">
+                {prev.title}
+              </span>
+            </Link>
+          ) : (
+            <div />
+          )}
+          {next ? (
+            <Link
+              href={`/blog/${next.slug}`}
+              className="group rounded-lg border border-slate-700/50 p-4 hover:border-teal-500/50 text-right"
+            >
+              <span className="flex items-center justify-end gap-1 text-xs text-slate-500">
+                次の記事
+                <ChevronRight size={14} />
+              </span>
+              <span className="mt-1 block text-sm text-slate-300 group-hover:text-teal-300">
+                {next.title}
+              </span>
+            </Link>
+          ) : (
+            <div />
+          )}
+        </nav>
       </article>
     </div>
   );
