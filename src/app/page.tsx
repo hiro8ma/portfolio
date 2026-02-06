@@ -464,15 +464,15 @@ export default function Home() {
                           </li>
                           <li className="flex items-start gap-2">
                             <span className="text-teal-400">▹</span>
-                            Designed and built microservices architectures from ground up
+                            Designed microservices on Kubernetes with Terraform IaC
                           </li>
                           <li className="flex items-start gap-2">
                             <span className="text-teal-400">▹</span>
-                            Established CI/CD pipelines and DevOps practices
+                            Built AI and data analytics platforms on AWS/GCP
                           </li>
                         </ul>
                         <ul className="mt-3 flex flex-wrap gap-2" aria-label="Technologies used">
-                          {["Go", "TypeScript", "AWS", "Event Sourcing", "CQRS"].map((tech) => (
+                          {["Go", "TypeScript", "AWS", "GCP", "Kubernetes", "Terraform"].map((tech) => (
                             <li key={tech}>
                               <span className="flex items-center rounded-full bg-teal-400/10 px-3 py-1 text-xs font-medium leading-5 text-teal-300">
                                 {tech}
