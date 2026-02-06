@@ -1,6 +1,6 @@
 "use client";
 
-import { Github, Linkedin, Mail, ExternalLink, Briefcase, Instagram, BookOpen, Youtube, FileText, Mic, Award, Calendar } from "lucide-react";
+import { Github, Linkedin, Mail, ExternalLink, Briefcase, Instagram, BookOpen, Youtube, FileText, Mic, Award } from "lucide-react";
 import { SiX, SiZenn } from "react-icons/si";
 import {
   SiGo,
@@ -266,46 +266,27 @@ export default function Home() {
                 </h2>
               </div>
               <div>
-                <ul className="group/list space-y-4">
-                  <li>
-                    <div className="group relative rounded-lg border border-slate-700/50 bg-slate-800/30 p-4 transition-all hover:border-teal-500/50 hover:bg-slate-800/50">
-                      <div className="flex items-start gap-4">
-                        <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-lg bg-teal-500/10">
-                          <Award className="h-6 w-6 text-teal-400" />
-                        </div>
-                        <div>
-                          <h3 className="font-medium text-slate-200">Google Cloud Professional Cloud Architect</h3>
-                          <p className="mt-1 text-sm text-slate-400">Google Cloud</p>
-                          <p className="mt-1 flex items-center gap-1 text-xs text-slate-500">
-                            <Calendar size={12} />
-                            Valid until Dec 2027
-                          </p>
-                        </div>
-                      </div>
+                <a
+                  href="https://www.credly.com/users/hiroyuki-masuda.99ab0592/badges"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="group relative block rounded-lg border border-slate-700/50 bg-slate-800/30 p-4 transition-all hover:border-teal-500/50 hover:bg-slate-800/50"
+                >
+                  <div className="flex items-start gap-4">
+                    <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-lg bg-teal-500/10">
+                      <Award className="h-6 w-6 text-teal-400" />
                     </div>
-                  </li>
-                  <li>
-                    <div className="group relative rounded-lg border border-slate-700/50 bg-slate-800/30 p-4 transition-all hover:border-teal-500/50 hover:bg-slate-800/50">
-                      <div className="flex items-start gap-4">
-                        <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-lg bg-teal-500/10">
-                          <Award className="h-6 w-6 text-teal-400" />
-                        </div>
-                        <div>
-                          <h3 className="font-medium text-slate-200">45+ Google Cloud Skill Badges</h3>
-                          <p className="mt-1 text-sm text-slate-400">Including: Vertex AI, Gemini API, BigQuery ML, Kubernetes, Terraform, Security</p>
-                          <a
-                            href="https://www.cloudskillsboost.google/public_profiles/your-profile"
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="mt-2 inline-flex items-center gap-1 text-xs text-teal-400 hover:text-teal-300"
-                          >
-                            View all badges <ExternalLink size={12} />
-                          </a>
-                        </div>
-                      </div>
+                    <div>
+                      <h3 className="font-medium text-slate-200 group-hover:text-teal-300 inline-flex items-center gap-1">
+                        View All Certifications
+                        <ExternalLink size={14} />
+                      </h3>
+                      <p className="mt-1 text-sm text-slate-400">
+                        Google Cloud Professional Cloud Architect, 45+ Skill Badges, and more
+                      </p>
                     </div>
-                  </li>
-                </ul>
+                  </div>
+                </a>
               </div>
             </section>
 
