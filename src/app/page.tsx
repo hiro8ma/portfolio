@@ -67,6 +67,7 @@ export default function Home() {
               <h1 className="text-4xl font-bold tracking-tight text-slate-200 sm:text-5xl">
                 <a href="/">Hiroyuki Masuda</a>
               </h1>
+              <p className="mt-1 text-sm text-slate-400">hiro8ma / 増田 浩之</p>
               <h2 className="mt-3 text-lg font-medium tracking-tight text-slate-200 sm:text-xl">
                 Developer & Architect
               </h2>
