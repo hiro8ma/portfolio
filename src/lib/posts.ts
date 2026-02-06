@@ -73,3 +73,13 @@ export function getAllPostSlugs(): string[] {
     .filter((fileName) => fileName.endsWith(".mdx") || fileName.endsWith(".md"))
     .map((fileName) => fileName.replace(/\.mdx?$/, ""));
 }
+
+export function getAdjacentPosts(slug: string): { prev: Post | null; next: Post | null } {
+  const posts = getAllPosts();
+  const currentIndex = posts.findIndex((post) => post.slug === slug);
+
+  return {
+    prev: currentIndex < posts.length - 1 ? posts[currentIndex + 1] : null,
+    next: currentIndex > 0 ? posts[currentIndex - 1] : null,
+  };
+}
