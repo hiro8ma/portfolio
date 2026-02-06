@@ -102,6 +102,15 @@ export default function Home() {
                     </li>
                   ))}
                 </ul>
+                <a
+                  href="/blog"
+                  className="group mt-4 flex items-center py-3"
+                >
+                  <span className="nav-indicator mr-4 h-px w-8 bg-slate-600 transition-all group-hover:w-16 group-hover:bg-teal-300 group-focus-visible:w-16 group-focus-visible:bg-teal-300"></span>
+                  <span className="nav-text text-xs font-bold uppercase tracking-widest text-slate-500 group-hover:text-teal-300 group-focus-visible:text-teal-300">
+                    Blog
+                  </span>
+                </a>
               </nav>
             </div>
 
