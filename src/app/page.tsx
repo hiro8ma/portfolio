@@ -57,6 +57,7 @@ const skills = [
   "NestJS", "GraphQL", "RabbitMQ", "Firebase",
   "AWS", "GCP", "Docker", "Kubernetes", "Grafana",
   "Vertex AI", "Gemini", "BigQuery ML", "TensorFlow", "RAG",
+  "Engineering Management", "Product Management", "Agile/Scrum",
 ];
 
 export default function Home() {
