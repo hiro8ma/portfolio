@@ -34,13 +34,21 @@ export default async function PostPage({ params }: PageProps) {
   return (
     <div className="min-h-screen bg-slate-900 text-slate-400">
       <article className="mx-auto max-w-3xl px-6 py-12 md:px-12 md:py-20">
-        <Link
-          href="/blog"
-          className="inline-flex items-center gap-2 text-teal-400 hover:text-teal-300 mb-8"
-        >
-          <ArrowLeft size={16} />
-          Back to Blog
-        </Link>
+        <div className="flex items-center gap-4 mb-8">
+          <Link
+            href="/"
+            className="text-teal-400 hover:text-teal-300"
+          >
+            Home
+          </Link>
+          <span className="text-slate-600">/</span>
+          <Link
+            href="/blog"
+            className="text-teal-400 hover:text-teal-300"
+          >
+            Blog
+          </Link>
+        </div>
 
         <header className="mb-8">
           <time className="text-sm text-slate-500">{post.date}</time>
