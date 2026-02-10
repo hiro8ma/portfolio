@@ -1,0 +1,95 @@
+---
+title: "OpenAI Apps SDK — MCP に UI を載せる"
+date: "2026-02-10"
+description: "MCP サーバーと UI コンポーネントを組み合わせて ChatGPT アプリを構築"
+tags: ["openai", "mcp", "apps-sdk", "ui"]
+---
+
+## Apps SDK とは
+
+MCP サーバーに UI を追加できるフレームワーク。ChatGPT、Claude、VS Code などで動作する。
+
+構成要素:
+- **MCP サーバー**: ツールとリソースを定義
+- **Web コンポーネント**: iframe で描画される UI
+
+## セットアップ
+
+```bash
+npm install @modelcontextprotocol/sdk @modelcontextprotocol/ext-apps zod
+```
+
+## コード例
+
+### UI リソースの登録
+
+```typescript
+import { registerAppResource, RESOURCE_MIME_TYPE } from "@modelcontextprotocol/ext-apps/server";
+import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
+
+const server = new McpServer({
+  name: "my-app",
+  version: "1.0.0"
+});
+
+registerAppResource(
+  server,
+  "dashboard",
+  "ui://widget/dashboard.html",
+  {},
+  async () => ({
+    contents: [{
+      uri: "ui://widget/dashboard.html",
+      mimeType: RESOURCE_MIME_TYPE,
+      text: `<html>...</html>`
+    }]
+  })
+);
+```
+
+### UI 付きツールの登録
+
+```typescript
+import { registerAppTool } from "@modelcontextprotocol/ext-apps/server";
+import { z } from "zod";
+
+registerAppTool(
+  server,
+  "show_metrics",
+  {
+    title: "show_metrics",
+    inputSchema: {
+      period: z.enum(["day", "week", "month"])
+    },
+    _meta: {
+      ui: { resourceUri: "ui://widget/dashboard.html" }
+    },
+  },
+  async ({ period }) => {
+    const data = await fetchMetrics(period);
+    return {
+      structuredContent: { data },
+      content: [{ type: "text", text: `Metrics for ${period}` }],
+    };
+  }
+);
+```
+
+## プロジェクト構成
+
+```
+app/
+  server/           # MCP サーバー
+    index.ts
+  web/
+    src/
+      component.tsx # React コンポーネント
+    dist/
+      component.js  # ビルド済み
+```
+
+## 所感
+
+MCP でツールを定義して、UI で結果を可視化する流れ。Claude Code でも使える。
+
+データ分析やダッシュボード系のツールと相性が良さそう。
