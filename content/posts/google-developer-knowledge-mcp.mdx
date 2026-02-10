@@ -1,0 +1,76 @@
+---
+title: "Google Developer Knowledge MCP — 公式ドキュメントに AI がアクセス"
+date: "2026-02-10"
+description: "Google の公式ドキュメントを MCP 経由で検索・取得"
+tags: ["google", "mcp", "developer-knowledge", "documentation"]
+---
+
+## Developer Knowledge API とは
+
+Google の公式ドキュメント（Firebase、Cloud、Android、Maps など）に MCP 経由でアクセスできる API。2/4 に public preview 開始。
+
+## 主な機能
+
+- `search_documents`: クエリでドキュメント検索
+- `get_document`: 単一ドキュメント取得
+- `batch_get_documents`: 複数ドキュメント一括取得
+
+## セットアップ
+
+### 1. API キー取得
+
+Google Cloud Console の Credentials ページで API キーを作成。
+
+### 2. MCP サーバー有効化
+
+```bash
+gcloud beta services mcp enable developerknowledge.googleapis.com \
+  --project=YOUR_PROJECT_ID
+```
+
+### 3. 設定ファイル
+
+```json
+{
+  "mcpServers": {
+    "google-developer-knowledge": {
+      "serverUrl": "https://developerknowledge.googleapis.com/mcp",
+      "headers": {
+        "X-Goog-Api-Key": "YOUR_API_KEY"
+      }
+    }
+  }
+}
+```
+
+### Gemini CLI の場合
+
+```bash
+gemini mcp add -t http \
+  -H "X-Goog-Api-Key: YOUR_API_KEY" \
+  google-developer-knowledge \
+  https://developerknowledge.googleapis.com/mcp \
+  --scope user
+```
+
+## 動作確認
+
+```bash
+/mcp list
+```
+
+出力:
+- `batch_get_documents`
+- `get_document`
+- `search_documents`
+
+## 特徴
+
+- ドキュメント更新から 24 時間以内に再インデックス
+- 将来的にコードサンプルや API リファレンスの構造化データも対応予定
+
+## 所感
+
+Claude Code や Gemini CLI から Google のドキュメントを直接参照できる。
+
+「Firebase の認証設定方法」とか聞くと、公式ドキュメントベースで回答してくれる。hallucination 対策として有効。
