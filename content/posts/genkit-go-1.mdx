@@ -1,0 +1,165 @@
+---
+title: "Genkit Go 1.0 — Google の AI フレームワークが本番対応"
+date: "2026-02-12"
+description: "Go で AI アプリを構築。マルチモデル対応、RAG、Tool Calling、型安全な Flow"
+tags: ["google", "genkit", "go", "ai-framework", "rag"]
+---
+
+## Genkit とは
+
+Google が開発したオープンソースの AI フレームワーク。2/4 に Go 版 1.0 がリリースされ、本番対応になった。
+
+特徴:
+- **マルチモデル対応**: Google AI、Vertex AI、OpenAI、Anthropic、Ollama
+- **型安全**: Go の struct で入出力を定義
+- **統一 API**: RAG、Tool Calling、構造化出力を一貫したインターフェースで
+
+## セットアップ
+
+```bash
+# プロジェクト初期化
+go mod init my-ai-app
+
+# Genkit インストール
+go get github.com/firebase/genkit/go
+
+# CLI インストール（開発 UI 用）
+npm install -g genkit-cli
+```
+
+## 基本: テキスト生成
+
+```go
+package main
+
+import (
+    "context"
+    "fmt"
+    "github.com/firebase/genkit/go/ai"
+    "github.com/firebase/genkit/go/genkit"
+    "github.com/firebase/genkit/go/plugins/googlegenai"
+)
+
+func main() {
+    ctx := context.Background()
+
+    // Genkit 初期化
+    g := genkit.Init(ctx,
+        genkit.WithPlugins(&googlegenai.GoogleAI{}),
+        genkit.WithDefaultModel("googleai/gemini-2.5-flash"),
+    )
+
+    // 生成
+    resp, _ := genkit.Generate(ctx, g,
+        ai.WithPrompt("Go の並行処理を3行で説明して"),
+    )
+    fmt.Println(resp.Text())
+}
+```
+
+## 構造化出力: 型安全なレスポンス
+
+LLM のレスポンスを Go の struct にマッピング。
+
+```go
+// 出力スキーマを定義
+type Recipe struct {
+    Name        string   `json:"name"`
+    Ingredients []string `json:"ingredients"`
+    Steps       []string `json:"steps"`
+}
+
+func main() {
+    // 型パラメータで出力型を指定
+    recipe, _ := genkit.GenerateData[Recipe](ctx, g,
+        ai.WithPrompt("カレーのレシピを教えて"),
+    )
+
+    // recipe.Name, recipe.Ingredients などに型安全にアクセス
+    fmt.Printf("料理名: %s\n", recipe.Name)
+}
+```
+
+## Tool Calling: LLM に関数を使わせる
+
+```go
+// ツール定義
+weatherTool := genkit.DefineTool(g, "getWeather",
+    "指定した都市の天気を取得",
+    func(ctx context.Context, input struct {
+        City string `json:"city"`
+    }) (string, error) {
+        // 実際の天気 API 呼び出し
+        return fetchWeather(input.City), nil
+    },
+)
+
+// ツール付きで生成
+resp, _ := genkit.Generate(ctx, g,
+    ai.WithPrompt("東京の天気を教えて"),
+    ai.WithTools(weatherTool),
+)
+```
+
+## Flow: 再利用可能なワークフロー
+
+```go
+// Flow 定義
+summarizeFlow := genkit.DefineFlow(g, "summarize",
+    func(ctx context.Context, url string) (string, error) {
+        // URL からコンテンツ取得
+        content := fetchContent(url)
+
+        // LLM で要約
+        resp, _ := genkit.Generate(ctx, g,
+            ai.WithPrompt(fmt.Sprintf("要約して: %s", content)),
+        )
+        return resp.Text(), nil
+    },
+)
+
+// Flow 実行
+summary, _ := summarizeFlow.Run(ctx, "https://example.com/article")
+```
+
+## RAG: 外部知識を組み込む
+
+```go
+// Embedder と Retriever を設定
+embedder := googlegenai.Embedder(g, "text-embedding-004")
+retriever := localvec.DefineRetriever(g, "docs", embedder)
+
+// ドキュメントをインデックス
+indexer := localvec.DefineIndexer(g, "docs", embedder)
+indexer.Index(ctx, documents)
+
+// RAG で生成
+resp, _ := genkit.Generate(ctx, g,
+    ai.WithPrompt(query),
+    ai.WithRetriever(retriever, query),
+)
+```
+
+## REST API として公開
+
+```go
+mux := http.NewServeMux()
+mux.Handle("/summarize", genkit.Handler(summarizeFlow))
+http.ListenAndServe(":8080", mux)
+```
+
+## 開発ツール
+
+```bash
+# 開発 UI 起動
+genkit start
+
+# Flow テスト
+genkit flow:run summarize '"https://example.com"'
+```
+
+## 所感
+
+Go で AI アプリを書くなら第一選択肢。型安全なのが Go らしい。
+
+OpenAI や Anthropic も同じ API で使えるので、モデル切り替えが楽。本番で使う場合の Flow → REST API 変換も便利。
