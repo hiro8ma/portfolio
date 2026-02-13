@@ -1,0 +1,148 @@
+<!DOCTYPE html><!--dhE_h6aE_wqqrVZdiNod_--><html lang="ja"><head><meta charSet="utf-8"/><meta name="viewport" content="width=device-width, initial-scale=1"/><link rel="stylesheet" href="/portfolio/_next/static/chunks/5620f1e361788a5a.css" data-precedence="next"/><link rel="preload" as="script" fetchPriority="low" href="/portfolio/_next/static/chunks/cbd55ab9639e1e66.js"/><script src="/portfolio/_next/static/chunks/aa0a7c5c022cbeb9.js" async=""></script><script src="/portfolio/_next/static/chunks/cc759f7c2413b7ff.js" async=""></script><script src="/portfolio/_next/static/chunks/e74724e45262e47d.js" async=""></script><script src="/portfolio/_next/static/chunks/turbopack-b1cee9d941ac097d.js" async=""></script><script src="/portfolio/_next/static/chunks/ff1a16fafef87110.js" async=""></script><script src="/portfolio/_next/static/chunks/7340adf74ff47ec0.js" async=""></script><script src="/portfolio/_next/static/chunks/796e69ae18b2784c.js" async=""></script><title>Go 1.26 — new(expr) と Green Tea GC でコードが変わる</title><meta name="description" content="2/10 リリース。ポインタ生成が 1 行に、GC が高速化、go fix が賢くなった"/><meta property="og:title" content="Go 1.26 — new(expr) と Green Tea GC でコードが変わる"/><meta property="og:description" content="2/10 リリース。ポインタ生成が 1 行に、GC が高速化、go fix が賢くなった"/><meta property="og:locale" content="ja_JP"/><meta property="og:type" content="website"/><meta name="twitter:card" content="summary"/><meta name="twitter:title" content="Go 1.26 — new(expr) と Green Tea GC でコードが変わる"/><meta name="twitter:description" content="2/10 リリース。ポインタ生成が 1 行に、GC が高速化、go fix が賢くなった"/><link rel="icon" href="/portfolio/favicon.ico?favicon.0b3bf435.ico" sizes="256x256" type="image/x-icon"/><script src="/portfolio/_next/static/chunks/a6dad97d9634a72d.js" noModule=""></script></head><body class="antialiased"><div hidden=""><!--$--><!--/$--></div><div class="min-h-screen bg-slate-900 text-slate-400"><article class="mx-auto max-w-3xl px-6 py-12 md:px-12 md:py-20"><div class="flex items-center gap-4 mb-8"><a class="text-teal-400 hover:text-teal-300" href="/portfolio">Home</a><span class="text-slate-600">/</span><a class="text-teal-400 hover:text-teal-300" href="/portfolio/blog">Blog</a></div><header class="mb-8"><time class="text-sm text-slate-500">2026-02-13</time><h1 class="mt-2 text-4xl font-bold text-slate-200">Go 1.26 — new(expr) と Green Tea GC でコードが変わる</h1><div class="mt-4 flex flex-wrap gap-2"><span class="rounded-full bg-teal-400/10 px-3 py-1 text-xs text-teal-300">go</span><span class="rounded-full bg-teal-400/10 px-3 py-1 text-xs text-teal-300">go1.26</span><span class="rounded-full bg-teal-400/10 px-3 py-1 text-xs text-teal-300">green-tea-gc</span><span class="rounded-full bg-teal-400/10 px-3 py-1 text-xs text-teal-300">generics</span></div></header><div class="prose prose-invert prose-teal max-w-none"><h2>概要</h2>
+<p>Go 1.26 が 2/10 にリリース。主な変更:</p>
+<ul>
+<li><strong>言語</strong>: <code>new(expr)</code> 構文、自己参照ジェネリクス</li>
+<li><strong>ランタイム</strong>: Green Tea GC がデフォルト化</li>
+<li><strong>ツール</strong>: <code>go fix</code> のリライト</li>
+<li><strong>新パッケージ</strong>: <code>crypto/hpke</code>、<code>goroutineleak</code> プロファイル</li>
+</ul>
+<h2>new(expr) — ポインタ生成が 1 行に</h2>
+<h3>Before (Go 1.25)</h3>
+<pre><code class="language-go">// 2 行必要だった
+age := 42
+p := &amp;age
+
+// またはヘルパー関数
+func Ptr[T any](v T) *T { return &amp;v }
+p := Ptr(42)
+</code></pre>
+<h3>After (Go 1.26)</h3>
+<pre><code class="language-go">// 1 行で OK
+p := new(42)  // *int, 値は 42
+
+// 文字列も
+name := new(&quot;gopher&quot;)  // *string
+
+// 式も渡せる
+born := time.Date(1990, 1, 1, 0, 0, 0, 0, time.UTC)
+age := new(yearsSince(born))  // *int
+</code></pre>
+<h3>実用例: JSON のオプショナルフィールド</h3>
+<pre><code class="language-go">type User struct {
+    Name string `json:&quot;name&quot;`
+    Age  *int   `json:&quot;age,omitempty&quot;`  // nil なら省略
+}
+
+// Before
+age := 30
+user := User{Name: &quot;Alice&quot;, Age: &amp;age}
+
+// After
+user := User{Name: &quot;Alice&quot;, Age: new(30)}
+</code></pre>
+<h3>注意点</h3>
+<pre><code class="language-go">// nil は型がないのでエラー
+p := new(nil)  // コンパイルエラー
+</code></pre>
+<h2>自己参照ジェネリクス</h2>
+<p>型パラメータで自分自身を参照できるようになった。</p>
+<h3>Before (Go 1.25)</h3>
+<pre><code class="language-go">// 自己参照できず、interface{} に逃げがち
+type Builder interface {
+    WithField(key, value string) Builder
+    Build() string
+}
+</code></pre>
+<h3>After (Go 1.26)</h3>
+<pre><code class="language-go">// 型パラメータで自分自身を参照
+type Builder[T any] interface {
+    WithField(key, value string) T
+    Build() string
+}
+
+// 使う側
+func Process[T Builder[T]](b T) string {
+    return b.WithField(&quot;key&quot;, &quot;value&quot;).Build()
+}
+</code></pre>
+<h3>実用例: Fluent API</h3>
+<pre><code class="language-go">type QueryBuilder[T any] interface {
+    Where(condition string) T
+    OrderBy(field string) T
+    Execute() ([]Row, error)
+}
+
+type MySQLQuery struct { /* ... */ }
+
+func (q *MySQLQuery) Where(c string) *MySQLQuery { return q }
+func (q *MySQLQuery) OrderBy(f string) *MySQLQuery { return q }
+func (q *MySQLQuery) Execute() ([]Row, error) { /* ... */ }
+
+// 型安全に使える
+func RunQuery[T QueryBuilder[T]](q T) ([]Row, error) {
+    return q.Where(&quot;active = true&quot;).OrderBy(&quot;created_at&quot;).Execute()
+}
+</code></pre>
+<h2>Green Tea GC がデフォルト化</h2>
+<p>Go 1.25 で実験的だった Green Tea GC が標準に。</p>
+<pre><code class="language-bash"># Go 1.25 では opt-in だった
+GOEXPERIMENT=greenteagc go build
+
+# Go 1.26 ではデフォルト有効
+go build
+
+# 旧 GC に戻す（1.27 で削除予定）
+GOGC=off go build
+</code></pre>
+<h3>パフォーマンス改善</h3>
+<ul>
+<li>GC 停止時間の短縮</li>
+<li>メモリ使用量の最適化</li>
+<li>cgo オーバーヘッド 30% 削減</li>
+</ul>
+<h2>go fix のリライト</h2>
+<p>モダナイザー搭載で古いコードを自動更新。</p>
+<pre><code class="language-bash"># 古い書き方を新しい書き方に
+go fix ./...
+
+# インライン化候補を表示
+go fix -inline ./...
+</code></pre>
+<h3>例: ポインタ生成の自動変換</h3>
+<pre><code class="language-go">// Before
+age := 42
+p := &amp;age
+
+// go fix 実行後
+p := new(42)
+</code></pre>
+<h2>新パッケージ</h2>
+<h3>crypto/hpke</h3>
+<p>TLS Encrypted Client Hello で使われる HPKE（RFC 9180）。</p>
+<pre><code class="language-go">import &quot;crypto/hpke&quot;
+
+// 鍵ペア生成
+pub, priv, _ := hpke.GenerateKeyPair(hpke.DHKEM_X25519)
+
+// 暗号化
+enc, ct, _ := hpke.Seal(pub, nil, nil, plaintext)
+
+// 復号
+pt, _ := hpke.Open(priv, enc, nil, nil, ct)
+</code></pre>
+<h3>goroutineleak プロファイル（実験的）</h3>
+<p>到達不能な goroutine を検出。</p>
+<pre><code class="language-go">import &quot;runtime/pprof&quot;
+
+// プロファイル取得
+pprof.Lookup(&quot;goroutineleak&quot;).WriteTo(w, 0)
+</code></pre>
+<h2>移行時の注意</h2>
+<ul>
+<li><strong>macOS 12</strong> は最後のサポート（1.27 で 13 以上必須）</li>
+<li><strong>Bootstrap</strong> に Go 1.24.6 以上が必要</li>
+<li><strong>linux/riscv64</strong> で race detector 対応</li>
+</ul>
+<h2>所感</h2>
+<p><code>new(expr)</code> は地味だけど日常的に使う。JSON 構造体のオプショナルフィールドが楽になった。</p>
+<p>Green Tea GC のデフォルト化で、何もしなくてもパフォーマンス向上。<code>go fix</code> のモダナイザーも便利。</p></div><div class="mt-12 pt-8 border-t border-slate-700 flex items-center justify-between"><a href="https://github.com/hiro8ma/portfolio/edit/main/content/posts/go-1-26.mdx" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-2 text-sm text-slate-500 hover:text-teal-400"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-pencil" aria-hidden="true"><path d="M21.174 6.812a1 1 0 0 0-3.986-3.987L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0 .623.622l4.353-1.32a2 2 0 0 0 .83-.497z"></path><path d="m15 5 4 4"></path></svg>Edit on GitHub</a></div><nav class="mt-8 grid grid-cols-2 gap-4"><a class="group rounded-lg border border-slate-700/50 p-4 hover:border-teal-500/50" href="/portfolio/blog/genkit-go-1"><span class="flex items-center gap-1 text-xs text-slate-500"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chevron-left" aria-hidden="true"><path d="m15 18-6-6 6-6"></path></svg>前の記事</span><span class="mt-1 block text-sm text-slate-300 group-hover:text-teal-300">Genkit Go 1.0 — Google の AI フレームワークが本番対応</span></a><div></div></nav></article></div><!--$--><!--/$--><script src="/portfolio/_next/static/chunks/cbd55ab9639e1e66.js" id="_R_" async=""></script><script>(self.__next_f=self.__next_f||[]).push([0])</script><script>self.__next_f.push([1,"1:\"$Sreact.fragment\"\n2:I[39756,[\"/portfolio/_next/static/chunks/ff1a16fafef87110.js\",\"/portfolio/_next/static/chunks/7340adf74ff47ec0.js\"],\"default\"]\n3:I[37457,[\"/portfolio/_next/static/chunks/ff1a16fafef87110.js\",\"/portfolio/_next/static/chunks/7340adf74ff47ec0.js\"],\"default\"]\n5:I[97367,[\"/portfolio/_next/static/chunks/ff1a16fafef87110.js\",\"/portfolio/_next/static/chunks/7340adf74ff47ec0.js\"],\"OutletBoundary\"]\n6:\"$Sreact.suspense\"\n8:I[97367,[\"/portfolio/_next/static/chunks/ff1a16fafef87110.js\",\"/portfolio/_next/static/chunks/7340adf74ff47ec0.js\"],\"ViewportBoundary\"]\na:I[97367,[\"/portfolio/_next/static/chunks/ff1a16fafef87110.js\",\"/portfolio/_next/static/chunks/7340adf74ff47ec0.js\"],\"MetadataBoundary\"]\nc:I[68027,[],\"default\"]\n:HL[\"/portfolio/_next/static/chunks/5620f1e361788a5a.css\",\"style\"]\n"])</script><script>self.__next_f.push([1,"0:{\"P\":null,\"b\":\"dhE-h6aE-wqqrVZdiNod-\",\"c\":[\"\",\"blog\",\"go-1-26\"],\"q\":\"\",\"i\":false,\"f\":[[[\"\",{\"children\":[\"blog\",{\"children\":[[\"slug\",\"go-1-26\",\"d\"],{\"children\":[\"__PAGE__\",{}]}]}]},\"$undefined\",\"$undefined\",true],[[\"$\",\"$1\",\"c\",{\"children\":[[[\"$\",\"link\",\"0\",{\"rel\":\"stylesheet\",\"href\":\"/portfolio/_next/static/chunks/5620f1e361788a5a.css\",\"precedence\":\"next\",\"crossOrigin\":\"$undefined\",\"nonce\":\"$undefined\"}]],[\"$\",\"html\",null,{\"lang\":\"ja\",\"children\":[\"$\",\"body\",null,{\"className\":\"antialiased\",\"children\":[\"$\",\"$L2\",null,{\"parallelRouterKey\":\"children\",\"error\":\"$undefined\",\"errorStyles\":\"$undefined\",\"errorScripts\":\"$undefined\",\"template\":[\"$\",\"$L3\",null,{}],\"templateStyles\":\"$undefined\",\"templateScripts\":\"$undefined\",\"notFound\":[[[\"$\",\"title\",null,{\"children\":\"404: This page could not be found.\"}],[\"$\",\"div\",null,{\"style\":{\"fontFamily\":\"system-ui,\\\"Segoe UI\\\",Roboto,Helvetica,Arial,sans-serif,\\\"Apple Color Emoji\\\",\\\"Segoe UI Emoji\\\"\",\"height\":\"100vh\",\"textAlign\":\"center\",\"display\":\"flex\",\"flexDirection\":\"column\",\"alignItems\":\"center\",\"justifyContent\":\"center\"},\"children\":[\"$\",\"div\",null,{\"children\":[[\"$\",\"style\",null,{\"dangerouslySetInnerHTML\":{\"__html\":\"body{color:#000;background:#fff;margin:0}.next-error-h1{border-right:1px solid rgba(0,0,0,.3)}@media (prefers-color-scheme:dark){body{color:#fff;background:#000}.next-error-h1{border-right:1px solid rgba(255,255,255,.3)}}\"}}],[\"$\",\"h1\",null,{\"className\":\"next-error-h1\",\"style\":{\"display\":\"inline-block\",\"margin\":\"0 20px 0 0\",\"padding\":\"0 23px 0 0\",\"fontSize\":24,\"fontWeight\":500,\"verticalAlign\":\"top\",\"lineHeight\":\"49px\"},\"children\":404}],[\"$\",\"div\",null,{\"style\":{\"display\":\"inline-block\"},\"children\":[\"$\",\"h2\",null,{\"style\":{\"fontSize\":14,\"fontWeight\":400,\"lineHeight\":\"49px\",\"margin\":0},\"children\":\"This page could not be found.\"}]}]]}]}]],[]],\"forbidden\":\"$undefined\",\"unauthorized\":\"$undefined\"}]}]}]]}],{\"children\":[[\"$\",\"$1\",\"c\",{\"children\":[null,[\"$\",\"$L2\",null,{\"parallelRouterKey\":\"children\",\"error\":\"$undefined\",\"errorStyles\":\"$undefined\",\"errorScripts\":\"$undefined\",\"template\":[\"$\",\"$L3\",null,{}],\"templateStyles\":\"$undefined\",\"templateScripts\":\"$undefined\",\"notFound\":\"$undefined\",\"forbidden\":\"$undefined\",\"unauthorized\":\"$undefined\"}]]}],{\"children\":[[\"$\",\"$1\",\"c\",{\"children\":[null,[\"$\",\"$L2\",null,{\"parallelRouterKey\":\"children\",\"error\":\"$undefined\",\"errorStyles\":\"$undefined\",\"errorScripts\":\"$undefined\",\"template\":[\"$\",\"$L3\",null,{}],\"templateStyles\":\"$undefined\",\"templateScripts\":\"$undefined\",\"notFound\":\"$undefined\",\"forbidden\":\"$undefined\",\"unauthorized\":\"$undefined\"}]]}],{\"children\":[[\"$\",\"$1\",\"c\",{\"children\":[\"$L4\",[[\"$\",\"script\",\"script-0\",{\"src\":\"/portfolio/_next/static/chunks/796e69ae18b2784c.js\",\"async\":true,\"nonce\":\"$undefined\"}]],[\"$\",\"$L5\",null,{\"children\":[\"$\",\"$6\",null,{\"name\":\"Next.MetadataOutlet\",\"children\":\"$@7\"}]}]]}],{},null,false,false]},null,false,false]},null,false,false]},null,false,false],[\"$\",\"$1\",\"h\",{\"children\":[null,[\"$\",\"$L8\",null,{\"children\":\"$L9\"}],[\"$\",\"div\",null,{\"hidden\":true,\"children\":[\"$\",\"$La\",null,{\"children\":[\"$\",\"$6\",null,{\"name\":\"Next.Metadata\",\"children\":\"$Lb\"}]}]}],null]}],false]],\"m\":\"$undefined\",\"G\":[\"$c\",[]],\"S\":true}\n"])</script><script>self.__next_f.push([1,"d:I[22016,[\"/portfolio/_next/static/chunks/796e69ae18b2784c.js\"],\"\"]\n"])</script><script>self.__next_f.push([1,"4:[\"$\",\"div\",null,{\"className\":\"min-h-screen bg-slate-900 text-slate-400\",\"children\":[\"$\",\"article\",null,{\"className\":\"mx-auto max-w-3xl px-6 py-12 md:px-12 md:py-20\",\"children\":[[\"$\",\"div\",null,{\"className\":\"flex items-center gap-4 mb-8\",\"children\":[[\"$\",\"$Ld\",null,{\"href\":\"/\",\"className\":\"text-teal-400 hover:text-teal-300\",\"children\":\"Home\"}],[\"$\",\"span\",null,{\"className\":\"text-slate-600\",\"children\":\"/\"}],[\"$\",\"$Ld\",null,{\"href\":\"/blog\",\"className\":\"text-teal-400 hover:text-teal-300\",\"children\":\"Blog\"}]]}],[\"$\",\"header\",null,{\"className\":\"mb-8\",\"children\":[[\"$\",\"time\",null,{\"className\":\"text-sm text-slate-500\",\"children\":\"2026-02-13\"}],[\"$\",\"h1\",null,{\"className\":\"mt-2 text-4xl font-bold text-slate-200\",\"children\":\"Go 1.26 — new(expr) と Green Tea GC でコードが変わる\"}],[\"$\",\"div\",null,{\"className\":\"mt-4 flex flex-wrap gap-2\",\"children\":[[\"$\",\"span\",\"go\",{\"className\":\"rounded-full bg-teal-400/10 px-3 py-1 text-xs text-teal-300\",\"children\":\"go\"}],[\"$\",\"span\",\"go1.26\",{\"className\":\"rounded-full bg-teal-400/10 px-3 py-1 text-xs text-teal-300\",\"children\":\"go1.26\"}],[\"$\",\"span\",\"green-tea-gc\",{\"className\":\"rounded-full bg-teal-400/10 px-3 py-1 text-xs text-teal-300\",\"children\":\"green-tea-gc\"}],[\"$\",\"span\",\"generics\",{\"className\":\"rounded-full bg-teal-400/10 px-3 py-1 text-xs text-teal-300\",\"children\":\"generics\"}]]}]]}],[\"$\",\"div\",null,{\"className\":\"prose prose-invert prose-teal max-w-none\",\"children\":\"$Le\"}],[\"$\",\"div\",null,{\"className\":\"mt-12 pt-8 border-t border-slate-700 flex items-center justify-between\",\"children\":[\"$\",\"a\",null,{\"href\":\"https://github.com/hiro8ma/portfolio/edit/main/content/posts/go-1-26.mdx\",\"target\":\"_blank\",\"rel\":\"noopener noreferrer\",\"className\":\"inline-flex items-center gap-2 text-sm text-slate-500 hover:text-teal-400\",\"children\":[[\"$\",\"svg\",null,{\"ref\":\"$undefined\",\"xmlns\":\"http://www.w3.org/2000/svg\",\"width\":14,\"height\":14,\"viewBox\":\"0 0 24 24\",\"fill\":\"none\",\"stroke\":\"currentColor\",\"strokeWidth\":2,\"strokeLinecap\":\"round\",\"strokeLinejoin\":\"round\",\"className\":\"lucide lucide-pencil\",\"aria-hidden\":\"true\",\"children\":[[\"$\",\"path\",\"1a8usu\",{\"d\":\"M21.174 6.812a1 1 0 0 0-3.986-3.987L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0 .623.622l4.353-1.32a2 2 0 0 0 .83-.497z\"}],[\"$\",\"path\",\"1mk7zo\",{\"d\":\"m15 5 4 4\"}],\"$undefined\"]}],\"Edit on GitHub\"]}]}],[\"$\",\"nav\",null,{\"className\":\"mt-8 grid grid-cols-2 gap-4\",\"children\":[[\"$\",\"$Ld\",null,{\"href\":\"/blog/genkit-go-1\",\"className\":\"group rounded-lg border border-slate-700/50 p-4 hover:border-teal-500/50\",\"children\":[[\"$\",\"span\",null,{\"className\":\"flex items-center gap-1 text-xs text-slate-500\",\"children\":[[\"$\",\"svg\",null,{\"ref\":\"$undefined\",\"xmlns\":\"http://www.w3.org/2000/svg\",\"width\":14,\"height\":14,\"viewBox\":\"0 0 24 24\",\"fill\":\"none\",\"stroke\":\"currentColor\",\"strokeWidth\":2,\"strokeLinecap\":\"round\",\"strokeLinejoin\":\"round\",\"className\":\"lucide lucide-chevron-left\",\"aria-hidden\":\"true\",\"children\":[[\"$\",\"path\",\"1wnfg3\",{\"d\":\"m15 18-6-6 6-6\"}],\"$undefined\"]}],\"前の記事\"]}],[\"$\",\"span\",null,{\"className\":\"mt-1 block text-sm text-slate-300 group-hover:text-teal-300\",\"children\":\"Genkit Go 1.0 — Google の AI フレームワークが本番対応\"}]]}],[\"$\",\"div\",null,{}]]}]]}]}]\n"])</script><script>self.__next_f.push([1,"e:[[\"$\",\"h2\",null,{\"children\":\"概要\"}],\"\\n\",[\"$\",\"p\",null,{\"children\":\"Go 1.26 が 2/10 にリリース。主な変更:\"}],\"\\n\",[\"$\",\"ul\",null,{\"children\":[\"\\n\",[\"$\",\"li\",null,{\"children\":[[\"$\",\"strong\",null,{\"children\":\"言語\"}],\": \",[\"$\",\"code\",null,{\"children\":\"new(expr)\"}],\" 構文、自己参照ジェネリクス\"]}],\"\\n\",[\"$\",\"li\",null,{\"children\":[[\"$\",\"strong\",null,{\"children\":\"ランタイム\"}],\": Green Tea GC がデフォルト化\"]}],\"\\n\",[\"$\",\"li\",null,{\"children\":[[\"$\",\"strong\",null,{\"children\":\"ツール\"}],\": \",[\"$\",\"code\",null,{\"children\":\"go fix\"}],\" のリライト\"]}],\"\\n\",[\"$\",\"li\",null,{\"children\":[[\"$\",\"strong\",null,{\"children\":\"新パッケージ\"}],\": \",[\"$\",\"code\",null,{\"children\":\"crypto/hpke\"}],\"、\",[\"$\",\"code\",null,{\"children\":\"goroutineleak\"}],\" プロファイル\"]}],\"\\n\"]}],\"\\n\",[\"$\",\"h2\",null,{\"children\":\"new(expr) — ポインタ生成が 1 行に\"}],\"\\n\",[\"$\",\"h3\",null,{\"children\":\"Before (Go 1.25)\"}],\"\\n\",[\"$\",\"pre\",null,{\"children\":[\"$\",\"code\",null,{\"className\":\"language-go\",\"children\":\"// 2 行必要だった\\nage := 42\\np := \u0026age\\n\\n// またはヘルパー関数\\nfunc Ptr[T any](v T) *T { return \u0026v }\\np := Ptr(42)\\n\"}]}],\"\\n\",[\"$\",\"h3\",null,{\"children\":\"After (Go 1.26)\"}],\"\\n\",[\"$\",\"pre\",null,{\"children\":[\"$\",\"code\",null,{\"className\":\"language-go\",\"children\":\"// 1 行で OK\\np := new(42)  // *int, 値は 42\\n\\n// 文字列も\\nname := new(\\\"gopher\\\")  // *string\\n\\n// 式も渡せる\\nborn := time.Date(1990, 1, 1, 0, 0, 0, 0, time.UTC)\\nage := new(yearsSince(born))  // *int\\n\"}]}],\"\\n\",[\"$\",\"h3\",null,{\"children\":\"実用例: JSON のオプショナルフィールド\"}],\"\\n\",[\"$\",\"pre\",null,{\"children\":[\"$\",\"code\",null,{\"className\":\"language-go\",\"children\":\"type User struct {\\n    Name string `json:\\\"name\\\"`\\n    Age  *int   `json:\\\"age,omitempty\\\"`  // nil なら省略\\n}\\n\\n// Before\\nage := 30\\nuser := User{Name: \\\"Alice\\\", Age: \u0026age}\\n\\n// After\\nuser := User{Name: \\\"Alice\\\", Age: new(30)}\\n\"}]}],\"\\n\",[\"$\",\"h3\",null,{\"children\":\"注意点\"}],\"\\n\",[\"$\",\"pre\",null,{\"children\":[\"$\",\"code\",null,{\"className\":\"language-go\",\"children\":\"// nil は型がないのでエラー\\np := new(nil)  // コンパイルエラー\\n\"}]}],\"\\n\",[\"$\",\"h2\",null,{\"children\":\"自己参照ジェネリクス\"}],\"\\n\",[\"$\",\"p\",null,{\"children\":\"型パラメータで自分自身を参照できるようになった。\"}],\"\\n\",[\"$\",\"h3\",null,{\"children\":\"Before (Go 1.25)\"}],\"\\n\",[\"$\",\"pre\",null,{\"children\":[\"$\",\"code\",null,{\"className\":\"language-go\",\"children\":\"// 自己参照できず、interface{} に逃げがち\\ntype Builder interface {\\n    WithField(key, value string) Builder\\n    Build() string\\n}\\n\"}]}],\"\\n\",[\"$\",\"h3\",null,{\"children\":\"After (Go 1.26)\"}],\"\\n\",[\"$\",\"pre\",null,{\"children\":[\"$\",\"code\",null,{\"className\":\"language-go\",\"children\":\"// 型パラメータで自分自身を参照\\ntype Builder[T any] interface {\\n    WithField(key, value string) T\\n    Build() string\\n}\\n\\n// 使う側\\nfunc Process[T Builder[T]](b T) string {\\n    return b.WithField(\\\"key\\\", \\\"value\\\").Build()\\n}\\n\"}]}],\"\\n\",[\"$\",\"h3\",null,{\"children\":\"実用例: Fluent API\"}],\"\\n\",[\"$\",\"pre\",null,{\"children\":[\"$\",\"code\",null,{\"className\":\"language-go\",\"children\":\"type QueryBuilder[T any] interface {\\n    Where(condition string) T\\n    OrderBy(field string) T\\n    Execute() ([]Row, error)\\n}\\n\\ntype MySQLQuery struct { /* ... */ }\\n\\nfunc (q *MySQLQuery) Where(c string) *MySQLQuery { return q }\\nfunc (q *MySQLQuery) OrderBy(f string) *MySQLQuery { return q }\\nfunc (q *MySQLQuery) Execute() ([]Row, error) { /* ... */ }\\n\\n// 型安全に使える\\nfunc RunQuery[T QueryBuilder[T]](q T) ([]Row, error) {\\n    return q.Where(\\\"active = true\\\").OrderBy(\\\"created_at\\\").Execute()\\n}\\n\"}]}],\"\\n\",[\"$\",\"h2\",null,{\"children\":\"Green Tea GC がデフォルト化\"}],\"\\n\",[\"$\",\"p\",null,{\"children\":\"Go 1.25 で実験的だった Green Tea GC が標準に。\"}],\"\\n\",[\"$\",\"pre\",null,{\"children\":[\"$\",\"code\",null,{\"className\":\"language-bash\",\"children\":\"# Go 1.25 では opt-in だった\\nGOEXPERIMENT=greenteagc go build\\n\\n# Go 1.26 ではデフォルト有効\\ngo build\\n\\n# 旧 GC に戻す（1.27 で削除予定）\\nGOGC=off go build\\n\"}]}],\"\\n\",[\"$\",\"h3\",null,{\"children\":\"パフォーマンス改善\"}],\"\\n\",[\"$\",\"ul\",null,{\"children\":[\"\\n\",[\"$\",\"li\",null,{\"children\":\"GC 停止時間の短縮\"}],\"\\n\",[\"$\",\"li\",null,{\"children\":\"メモリ使用量の最適化\"}],\"\\n\",[\"$\",\"li\",null,{\"children\":\"cgo オーバーヘッド 30% 削減\"}],\"\\n\"]}],\"\\n\",[\"$\",\"h2\",null,{\"children\":\"go fix のリライト\"}],\"\\n\",[\"$\",\"p\",null,{\"children\":\"モダナイザー搭載で古いコードを自動更新。\"}],\"\\n\",[\"$\",\"pre\",null,{\"children\":[\"$\",\"code\",null,{\"className\":\"language-bash\",\"children\":\"# 古い書き方を新しい書き方に\\ngo fix ./...\\n\\n# インライン化候補を表示\\ngo fix -inline ./...\\n\"}]}],\"\\n\",[\"$\",\"h3\",null,{\"children\":\"例: ポインタ生成の自動変換\"}],\"\\n\",[\"$\",\"pre\",null,{\"children\":[\"$\",\"code\",null,{\"className\":\"language-go\",\"children\":\"// Before\\nage := 42\\np := \u0026age\\n\\n// go fix 実行後\\np := new(42)\\n\"}]}],\"\\n\",\"$Lf\",\"\\n\",\"$L10\",\"\\n\",\"$L11\",\"\\n\",\"$L12\",\"\\n\",\"$L13\",\"\\n\",\"$L14\",\"\\n\",\"$L15\",\"\\n\",\"$L16\",\"\\n\",\"$L17\",\"\\n\",\"$L18\",\"\\n\",\"$L19\",\"\\n\",\"$L1a\"]\n"])</script><script>self.__next_f.push([1,"f:[\"$\",\"h2\",null,{\"children\":\"新パッケージ\"}]\n10:[\"$\",\"h3\",null,{\"children\":\"crypto/hpke\"}]\n11:[\"$\",\"p\",null,{\"children\":\"TLS Encrypted Client Hello で使われる HPKE（RFC 9180）。\"}]\n12:[\"$\",\"pre\",null,{\"children\":[\"$\",\"code\",null,{\"className\":\"language-go\",\"children\":\"import \\\"crypto/hpke\\\"\\n\\n// 鍵ペア生成\\npub, priv, _ := hpke.GenerateKeyPair(hpke.DHKEM_X25519)\\n\\n// 暗号化\\nenc, ct, _ := hpke.Seal(pub, nil, nil, plaintext)\\n\\n// 復号\\npt, _ := hpke.Open(priv, enc, nil, nil, ct)\\n\"}]}]\n13:[\"$\",\"h3\",null,{\"children\":\"goroutineleak プロファイル（実験的）\"}]\n14:[\"$\",\"p\",null,{\"children\":\"到達不能な goroutine を検出。\"}]\n15:[\"$\",\"pre\",null,{\"children\":[\"$\",\"code\",null,{\"className\":\"language-go\",\"children\":\"import \\\"runtime/pprof\\\"\\n\\n// プロファイル取得\\npprof.Lookup(\\\"goroutineleak\\\").WriteTo(w, 0)\\n\"}]}]\n16:[\"$\",\"h2\",null,{\"children\":\"移行時の注意\"}]\n17:[\"$\",\"ul\",null,{\"children\":[\"\\n\",[\"$\",\"li\",null,{\"children\":[[\"$\",\"strong\",null,{\"children\":\"macOS 12\"}],\" は最後のサポート（1.27 で 13 以上必須）\"]}],\"\\n\",[\"$\",\"li\",null,{\"children\":[[\"$\",\"strong\",null,{\"children\":\"Bootstrap\"}],\" に Go 1.24.6 以上が必要\"]}],\"\\n\",[\"$\",\"li\",null,{\"children\":[[\"$\",\"strong\",null,{\"children\":\"linux/riscv64\"}],\" で race detector 対応\"]}],\"\\n\"]}]\n18:[\"$\",\"h2\",null,{\"children\":\"所感\"}]\n19:[\"$\",\"p\",null,{\"children\":[[\"$\",\"code\",null,{\"children\":\"new(expr)\"}],\" は地味だけど日常的に使う。JSON 構造体のオプショナルフィールドが楽になった。\"]}]\n1a:[\"$\",\"p\",null,{\"children\":[\"Green Tea GC のデフォルト化で、何もしなくてもパフォーマンス向上。\",[\"$\",\"code\",null,{\"children\":\"go fix\"}],\" のモダナイザーも便利。\"]}]\n"])</script><script>self.__next_f.push([1,"9:[[\"$\",\"meta\",\"0\",{\"charSet\":\"utf-8\"}],[\"$\",\"meta\",\"1\",{\"name\":\"viewport\",\"content\":\"width=device-width, initial-scale=1\"}]]\n"])</script><script>self.__next_f.push([1,"1b:I[27201,[\"/portfolio/_next/static/chunks/ff1a16fafef87110.js\",\"/portfolio/_next/static/chunks/7340adf74ff47ec0.js\"],\"IconMark\"]\n7:null\nb:[[\"$\",\"title\",\"0\",{\"children\":\"Go 1.26 — new(expr) と Green Tea GC でコードが変わる\"}],[\"$\",\"meta\",\"1\",{\"name\":\"description\",\"content\":\"2/10 リリース。ポインタ生成が 1 行に、GC が高速化、go fix が賢くなった\"}],[\"$\",\"meta\",\"2\",{\"property\":\"og:title\",\"content\":\"Go 1.26 — new(expr) と Green Tea GC でコードが変わる\"}],[\"$\",\"meta\",\"3\",{\"property\":\"og:description\",\"content\":\"2/10 リリース。ポインタ生成が 1 行に、GC が高速化、go fix が賢くなった\"}],[\"$\",\"meta\",\"4\",{\"property\":\"og:locale\",\"content\":\"ja_JP\"}],[\"$\",\"meta\",\"5\",{\"property\":\"og:type\",\"content\":\"website\"}],[\"$\",\"meta\",\"6\",{\"name\":\"twitter:card\",\"content\":\"summary\"}],[\"$\",\"meta\",\"7\",{\"name\":\"twitter:title\",\"content\":\"Go 1.26 — new(expr) と Green Tea GC でコードが変わる\"}],[\"$\",\"meta\",\"8\",{\"name\":\"twitter:description\",\"content\":\"2/10 リリース。ポインタ生成が 1 行に、GC が高速化、go fix が賢くなった\"}],[\"$\",\"link\",\"9\",{\"rel\":\"icon\",\"href\":\"/portfolio/favicon.ico?favicon.0b3bf435.ico\",\"sizes\":\"256x256\",\"type\":\"image/x-icon\"}],[\"$\",\"$L1b\",\"10\",{}]]\n"])</script></body></html>
