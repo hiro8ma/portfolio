@@ -1,0 +1,202 @@
+---
+title: "Go 1.26 — new(expr) と Green Tea GC でコードが変わる"
+date: "2026-02-13"
+description: "2/10 リリース。ポインタ生成が 1 行に、GC が高速化、go fix が賢くなった"
+tags: ["go", "go1.26", "green-tea-gc", "generics"]
+---
+
+## 概要
+
+Go 1.26 が 2/10 にリリース。主な変更:
+
+- **言語**: `new(expr)` 構文、自己参照ジェネリクス
+- **ランタイム**: Green Tea GC がデフォルト化
+- **ツール**: `go fix` のリライト
+- **新パッケージ**: `crypto/hpke`、`goroutineleak` プロファイル
+
+## new(expr) — ポインタ生成が 1 行に
+
+### Before (Go 1.25)
+
+```go
+// 2 行必要だった
+age := 42
+p := &age
+
+// またはヘルパー関数
+func Ptr[T any](v T) *T { return &v }
+p := Ptr(42)
+```
+
+### After (Go 1.26)
+
+```go
+// 1 行で OK
+p := new(42)  // *int, 値は 42
+
+// 文字列も
+name := new("gopher")  // *string
+
+// 式も渡せる
+born := time.Date(1990, 1, 1, 0, 0, 0, 0, time.UTC)
+age := new(yearsSince(born))  // *int
+```
+
+### 実用例: JSON のオプショナルフィールド
+
+```go
+type User struct {
+    Name string `json:"name"`
+    Age  *int   `json:"age,omitempty"`  // nil なら省略
+}
+
+// Before
+age := 30
+user := User{Name: "Alice", Age: &age}
+
+// After
+user := User{Name: "Alice", Age: new(30)}
+```
+
+### 注意点
+
+```go
+// nil は型がないのでエラー
+p := new(nil)  // コンパイルエラー
+```
+
+## 自己参照ジェネリクス
+
+型パラメータで自分自身を参照できるようになった。
+
+### Before (Go 1.25)
+
+```go
+// 自己参照できず、interface{} に逃げがち
+type Builder interface {
+    WithField(key, value string) Builder
+    Build() string
+}
+```
+
+### After (Go 1.26)
+
+```go
+// 型パラメータで自分自身を参照
+type Builder[T any] interface {
+    WithField(key, value string) T
+    Build() string
+}
+
+// 使う側
+func Process[T Builder[T]](b T) string {
+    return b.WithField("key", "value").Build()
+}
+```
+
+### 実用例: Fluent API
+
+```go
+type QueryBuilder[T any] interface {
+    Where(condition string) T
+    OrderBy(field string) T
+    Execute() ([]Row, error)
+}
+
+type MySQLQuery struct { /* ... */ }
+
+func (q *MySQLQuery) Where(c string) *MySQLQuery { return q }
+func (q *MySQLQuery) OrderBy(f string) *MySQLQuery { return q }
+func (q *MySQLQuery) Execute() ([]Row, error) { /* ... */ }
+
+// 型安全に使える
+func RunQuery[T QueryBuilder[T]](q T) ([]Row, error) {
+    return q.Where("active = true").OrderBy("created_at").Execute()
+}
+```
+
+## Green Tea GC がデフォルト化
+
+Go 1.25 で実験的だった Green Tea GC が標準に。
+
+```bash
+# Go 1.25 では opt-in だった
+GOEXPERIMENT=greenteagc go build
+
+# Go 1.26 ではデフォルト有効
+go build
+
+# 旧 GC に戻す（1.27 で削除予定）
+GOGC=off go build
+```
+
+### パフォーマンス改善
+
+- GC 停止時間の短縮
+- メモリ使用量の最適化
+- cgo オーバーヘッド 30% 削減
+
+## go fix のリライト
+
+モダナイザー搭載で古いコードを自動更新。
+
+```bash
+# 古い書き方を新しい書き方に
+go fix ./...
+
+# インライン化候補を表示
+go fix -inline ./...
+```
+
+### 例: ポインタ生成の自動変換
+
+```go
+// Before
+age := 42
+p := &age
+
+// go fix 実行後
+p := new(42)
+```
+
+## 新パッケージ
+
+### crypto/hpke
+
+TLS Encrypted Client Hello で使われる HPKE（RFC 9180）。
+
+```go
+import "crypto/hpke"
+
+// 鍵ペア生成
+pub, priv, _ := hpke.GenerateKeyPair(hpke.DHKEM_X25519)
+
+// 暗号化
+enc, ct, _ := hpke.Seal(pub, nil, nil, plaintext)
+
+// 復号
+pt, _ := hpke.Open(priv, enc, nil, nil, ct)
+```
+
+### goroutineleak プロファイル（実験的）
+
+到達不能な goroutine を検出。
+
+```go
+import "runtime/pprof"
+
+// プロファイル取得
+pprof.Lookup("goroutineleak").WriteTo(w, 0)
+```
+
+## 移行時の注意
+
+- **macOS 12** は最後のサポート（1.27 で 13 以上必須）
+- **Bootstrap** に Go 1.24.6 以上が必要
+- **linux/riscv64** で race detector 対応
+
+## 所感
+
+`new(expr)` は地味だけど日常的に使う。JSON 構造体のオプショナルフィールドが楽になった。
+
+Green Tea GC のデフォルト化で、何もしなくてもパフォーマンス向上。`go fix` のモダナイザーも便利。
