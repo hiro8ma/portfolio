@@ -134,6 +134,50 @@ Kanvas は CNCF プロジェクトの **Meshery** をベースに構築されて
 kustomize build overlays/production | kubectl apply -f -
 ```
 
+## 実践例：マイクロサービス構成
+
+実際の業務で使われるような、複数サービスを持つ構成例を見てみよう：
+
+```yaml
+# compose.yaml
+services:
+  gateway:
+    build: .
+    ports:
+      - 8000:8000
+  api:
+    build: .
+    ports:
+      - 9000:9000
+    depends_on:
+      redis:
+        condition: service_healthy
+  worker:
+    build: .
+    depends_on:
+      - redis
+      - pubsub
+  redis:
+    image: redis:7
+    healthcheck:
+      test: redis-cli ping
+  pubsub:
+    image: gcr.io/google.com/cloudsdktool/cloud-sdk
+    command: gcloud beta emulators pubsub start
+```
+
+この構成では：
+
+- **gateway**: 外部からのリクエストを受けるエントリーポイント
+- **api**: ビジネスロジックを処理する API サーバー
+- **worker**: 非同期タスクを処理するワーカー
+- **redis**: キャッシュとセッション管理
+- **pubsub**: メッセージキュー（ここでは GCP Pub/Sub エミュレータ）
+
+Kanvas はこのような `depends_on` や `healthcheck` を含む構成も解析し、Kubernetes の適切なリソース（Deployment、Service、ConfigMap など）に変換してくれる。
+
+なお、Compose V2 以降は `docker-compose.yml` より `compose.yaml` が推奨ファイル名だ。
+
 ## 制限事項
 
 現時点での注意点：
