@@ -83,3 +83,14 @@ export function getAdjacentPosts(slug: string): { prev: Post | null; next: Post 
     next: currentIndex > 0 ? posts[currentIndex - 1] : null,
   };
 }
+
+export function calculateReadingTime(content: string): number {
+  const wordsPerMinute = 200;
+  const japaneseCharsPerMinute = 500;
+
+  const japaneseChars = (content.match(/[\u3040-\u309F\u30A0-\u30FF\u4E00-\u9FAF]/g) || []).length;
+  const englishWords = content.replace(/[\u3040-\u309F\u30A0-\u30FF\u4E00-\u9FAF]/g, ' ').split(/\s+/).filter(w => w.length > 0).length;
+
+  const minutes = Math.ceil(japaneseChars / japaneseCharsPerMinute + englishWords / wordsPerMinute);
+  return Math.max(1, minutes);
+}

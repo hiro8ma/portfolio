@@ -1,8 +1,11 @@
 import Link from "next/link";
-import { Pencil, ChevronLeft, ChevronRight } from "lucide-react";
+import { Pencil, ChevronLeft, ChevronRight, Clock } from "lucide-react";
 import { notFound } from "next/navigation";
-import { getAllPostSlugs, getPostBySlug, getAdjacentPosts } from "@/lib/posts";
+import { getAllPostSlugs, getPostBySlug, getAdjacentPosts, calculateReadingTime } from "@/lib/posts";
 import { MDXRemote } from "next-mdx-remote/rsc";
+import { Metadata } from "next";
+
+const siteUrl = "https://hiro8ma.github.io/portfolio";
 
 interface PageProps {
   params: Promise<{ slug: string }>;
@@ -13,13 +16,45 @@ export async function generateStaticParams() {
   return slugs.map((slug) => ({ slug }));
 }
 
-export async function generateMetadata({ params }: PageProps) {
+export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { slug } = await params;
   const post = getPostBySlug(slug);
   if (!post) return { title: "Post Not Found" };
+
+  const postUrl = `${siteUrl}/blog/${slug}`;
+
   return {
     title: post.title,
     description: post.description,
+    keywords: post.tags,
+    authors: [{ name: "Hiroyuki Masuda" }],
+    openGraph: {
+      type: "article",
+      title: post.title,
+      description: post.description,
+      url: postUrl,
+      siteName: "Hiroyuki Masuda Portfolio",
+      publishedTime: post.date,
+      authors: ["Hiroyuki Masuda"],
+      tags: post.tags,
+      images: [
+        {
+          url: `${siteUrl}/og-image.png`,
+          width: 1200,
+          height: 630,
+          alt: post.title,
+        },
+      ],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: post.title,
+      description: post.description,
+      creator: "@hir08ma",
+    },
+    alternates: {
+      canonical: postUrl,
+    },
   };
 }
 
@@ -32,8 +67,41 @@ export default async function PostPage({ params }: PageProps) {
     notFound();
   }
 
+  const readingTime = calculateReadingTime(post.content);
+  const postUrl = `${siteUrl}/blog/${slug}`;
+
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "BlogPosting",
+    headline: post.title,
+    description: post.description,
+    datePublished: post.date,
+    dateModified: post.date,
+    author: {
+      "@type": "Person",
+      name: "Hiroyuki Masuda",
+      url: siteUrl,
+    },
+    publisher: {
+      "@type": "Person",
+      name: "Hiroyuki Masuda",
+      url: siteUrl,
+    },
+    mainEntityOfPage: {
+      "@type": "WebPage",
+      "@id": postUrl,
+    },
+    keywords: post.tags?.join(", "),
+    wordCount: post.content.split(/\s+/).length,
+    timeRequired: `PT${readingTime}M`,
+  };
+
   return (
     <div className="min-h-screen bg-slate-900 text-slate-400">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
       <article className="mx-auto max-w-3xl px-6 py-12 md:px-12 md:py-20">
         <div className="flex items-center gap-4 mb-8">
           <Link
@@ -52,7 +120,13 @@ export default async function PostPage({ params }: PageProps) {
         </div>
 
         <header className="mb-8">
-          <time className="text-sm text-slate-500">{post.date}</time>
+          <div className="flex items-center gap-4 text-sm text-slate-500">
+            <time>{post.date}</time>
+            <span className="flex items-center gap-1">
+              <Clock size={14} />
+              {readingTime} min read
+            </span>
+          </div>
           <h1 className="mt-2 text-4xl font-bold text-slate-200">{post.title}</h1>
           {post.tags && post.tags.length > 0 && (
             <div className="mt-4 flex flex-wrap gap-2">
