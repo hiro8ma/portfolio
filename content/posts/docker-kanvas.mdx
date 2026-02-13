@@ -1,0 +1,161 @@
+---
+title: "Docker Kanvas — Compose から K8s へ、ビジュアルで設計する新時代"
+date: "2026-02-13"
+description: "Docker Kanvas が Helm/Kustomize に挑む。Compose ファイルを K8s マニフェストに変換し、ビジュアルで設計・デプロイする新ツールを解説"
+tags: ["docker", "kubernetes", "kanvas", "helm", "kustomize", "devops"]
+---
+
+## Docker Kanvas とは
+
+2026年1月、Docker は **Kanvas** を正式リリースした。Layer5 との共同開発により、Docker Compose ファイルを Kubernetes マニフェストに自動変換し、さらにマルチクラウドへのデプロイまでビジュアルで設計できるツールだ。
+
+これまで Kubernetes へのデプロイには Helm や Kustomize が主流だったが、Kanvas は「Infrastructure as Design」という新しいアプローチで、この領域に挑戦している。
+
+## なぜ Kanvas が必要なのか？
+
+### 開発から本番への壁
+
+多くの開発者が直面する課題がある：
+
+1. **ローカル開発** → `docker-compose.yml` で快適に開発
+2. **本番デプロイ** → Kubernetes マニフェスト、Helm Chart、Kustomize... 学習コストが高い
+
+この「Compose から K8s への変換」は手作業になりがちで、設定ミスやドリフト（環境間の差異）が発生しやすい。
+
+### 既存ツールの課題
+
+| ツール | 採用率 | 強み | 課題 |
+|--------|--------|------|------|
+| **Helm** | 75% | パッケージ管理、再利用可能なChart | テンプレート構文の学習曲線 |
+| **Kustomize** | 中程度 | 環境別パッチ、kubectl統合 | 大規模になると複雑化 |
+| **Kanvas** | 新規 | ビジュアル設計、Compose互換 | 高度な機能は手動設定必要 |
+
+## Kanvas の主要機能
+
+### 1. Designer Mode — ビジュアル設計
+
+ドラッグ&ドロップで設計できる「ブループリントスタジオ」：
+
+- **1000+** の Kubernetes リソース
+- **55+** の AWS サービス
+- **50+** の Azure コンポーネント
+- **60+** の GCP サービス
+
+設計図がそのままデプロイ設定になる。ドキュメントと実装の乖離がなくなる。
+
+### 2. Compose → K8s 変換
+
+```yaml
+# docker-compose.yml（入力）
+services:
+  web:
+    image: nginx:latest
+    ports:
+      - "80:80"
+  api:
+    image: myapp/api:v1
+    environment:
+      - DATABASE_URL=postgres://db:5432
+    depends_on:
+      - db
+  db:
+    image: postgres:15
+    volumes:
+      - db-data:/var/lib/postgresql/data
+```
+
+これを Kanvas に読み込むと、Kubernetes Deployment、Service、PersistentVolumeClaim が自動生成される。
+
+### 3. マルチクラウド対応
+
+Kubernetes マニフェストだけでなく、Terraform や Pulumi の設定も生成可能：
+
+- AWS EKS
+- Azure AKS
+- Google GKE
+- オンプレミス K8s
+
+### 4. リアルタイムコラボレーション
+
+チームメンバーと同時にインフラ設計を編集できる。Figma のインフラ版のようなイメージだ。
+
+## アーキテクチャ
+
+```
+┌─────────────────────────────────────────────────────┐
+│                   Docker Desktop                     │
+│  ┌─────────────────────────────────────────────────┐│
+│  │                    Kanvas                        ││
+│  │  ┌───────────┐  ┌───────────┐  ┌─────────────┐ ││
+│  │  │ Designer  │  │ Operator  │  │ Catalog     │ ││
+│  │  │ Mode      │  │ Mode      │  │ (1000+ CRD) │ ││
+│  │  └───────────┘  └───────────┘  └─────────────┘ ││
+│  │           │              │              │       ││
+│  │           ▼              ▼              ▼       ││
+│  │  ┌─────────────────────────────────────────┐   ││
+│  │  │              Meshery (CNCF)              │   ││
+│  │  └─────────────────────────────────────────┘   ││
+│  └─────────────────────────────────────────────────┘│
+└─────────────────────────────────────────────────────┘
+                          │
+                          ▼
+        ┌─────────────────────────────────────┐
+        │   出力: K8s / Terraform / Pulumi    │
+        └─────────────────────────────────────┘
+```
+
+Kanvas は CNCF プロジェクトの **Meshery** をベースに構築されている。
+
+## 使いどころ
+
+### Kanvas が向いているケース
+
+- ローカル開発で Compose を使っているチーム
+- K8s 初心者が多いチーム
+- インフラ設計をビジュアルで共有したいケース
+- 複数クラウドへの展開を検討しているケース
+
+### 従来ツールを使い続けるべきケース
+
+- StatefulSet、CRD、Operator を多用する場合
+- CI/CD パイプラインでヘッドレス実行が必須（Kanvas は Docker Desktop 依存）
+- 既に Helm Chart が成熟しているプロジェクト
+
+## Helm/Kustomize との併用
+
+実は、対立構造ではなく**併用**が推奨されている：
+
+1. **Kanvas** で設計・プロトタイピング
+2. **Helm** でパッケージング・配布
+3. **Kustomize** で環境別カスタマイズ
+
+```bash
+# Kanvas で生成した base を Kustomize でカスタマイズ
+kustomize build overlays/production | kubectl apply -f -
+```
+
+## 制限事項
+
+現時点での注意点：
+
+- **Docker Desktop 必須**: CI/CD サーバーでのヘッドレス実行は不可
+- **高度な K8s 機能**: StatefulSet、CRD、Operator は手動設定が必要
+- **学習コスト**: Compose → K8s の概念理解は依然として必要
+
+## まとめ
+
+Docker Kanvas は「Infrastructure as Design」という新しいパラダイムを提示している。
+
+- Compose ユーザーの K8s 移行ハードルを下げる
+- ビジュアル設計でチームコラボレーションを促進
+- マルチクラウド対応で柔軟性を確保
+
+Helm の 75% 採用率を崩すのは簡単ではないが、開発者体験（DX）を重視する Docker らしいアプローチだ。
+
+今後、CI/CD 統合や高度な K8s 機能のサポートが進めば、より多くのチームで採用が進むだろう。
+
+## 参考リンク
+
+- [Docker Kanvas 公式](https://www.docker.com/blog/compose-to-kubernetes-to-cloud-kanvas/)
+- [Layer5 Kanvas](https://layer5.io/cloud-native-management/kanvas)
+- [GitHub: kanvas-docker-extension](https://github.com/layer5io/kanvas-docker-extension)
