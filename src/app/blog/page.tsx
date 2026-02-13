@@ -11,7 +11,7 @@ export default function BlogPage() {
         <div className="flex items-center justify-between mb-8">
           <Link
             href="/"
-            className="inline-flex items-center gap-2 text-teal-400 hover:text-teal-300"
+            className="inline-flex items-center gap-2 text-violet-400 hover:text-violet-300"
           >
             <ArrowLeft size={16} />
             Home
@@ -29,10 +29,10 @@ export default function BlogPage() {
               <li key={post.slug}>
                 <Link
                   href={`/blog/${post.slug}`}
-                  className="group block rounded-lg border border-slate-700/50 bg-slate-800/30 p-6 transition-all hover:border-teal-500/50 hover:bg-slate-800/50"
+                  className="group block rounded-lg border border-slate-700/50 bg-slate-800/30 p-6 transition-all hover:border-violet-500/50 hover:bg-slate-800/50"
                 >
                   <time className="text-sm text-slate-500">{post.date}</time>
-                  <h2 className="mt-2 text-xl font-semibold text-slate-200 group-hover:text-teal-300">
+                  <h2 className="mt-2 text-xl font-semibold text-slate-200 group-hover:text-violet-300">
                     {post.title}
                   </h2>
                   <p className="mt-2 text-slate-400">{post.description}</p>
@@ -41,7 +41,7 @@ export default function BlogPage() {
                       {post.tags.map((tag) => (
                         <span
                           key={tag}
-                          className="rounded-full bg-teal-400/10 px-3 py-1 text-xs text-teal-300"
+                          className="rounded-full bg-violet-400/10 px-3 py-1 text-xs text-violet-300"
                         >
                           {tag}
                         </span>

@@ -63,7 +63,7 @@ const skills = [
 
 export default function Home() {
   return (
-    <div className="min-h-screen bg-slate-900 text-slate-400 selection:bg-teal-300 selection:text-teal-900">
+    <div className="min-h-screen bg-slate-900 text-slate-400 selection:bg-violet-300 selection:text-violet-900">
       <div className="mx-auto min-h-screen max-w-screen-xl px-6 py-12 md:px-12 md:py-20 lg:px-24 lg:py-0">
         <div className="lg:flex lg:justify-between lg:gap-4">
           {/* Left Column - Fixed */}
@@ -95,8 +95,8 @@ export default function Home() {
                         className="group flex items-center py-3"
                         href={`#${item.id}`}
                       >
-                        <span className="nav-indicator mr-4 h-px w-8 bg-slate-600 transition-all group-hover:w-16 group-hover:bg-teal-300 group-focus-visible:w-16 group-focus-visible:bg-teal-300"></span>
-                        <span className="nav-text text-xs font-bold uppercase tracking-widest text-slate-500 group-hover:text-teal-300 group-focus-visible:text-teal-300">
+                        <span className="nav-indicator mr-4 h-px w-8 bg-slate-600 transition-all group-hover:w-16 group-hover:bg-violet-300 group-focus-visible:w-16 group-focus-visible:bg-violet-300"></span>
+                        <span className="nav-text text-xs font-bold uppercase tracking-widest text-slate-500 group-hover:text-violet-300 group-focus-visible:text-violet-300">
                           {item.label}
                         </span>
                       </a>
@@ -107,8 +107,8 @@ export default function Home() {
                   href="/blog"
                   className="group mt-4 flex items-center py-3"
                 >
-                  <span className="nav-indicator mr-4 h-px w-8 bg-slate-600 transition-all group-hover:w-16 group-hover:bg-teal-300 group-focus-visible:w-16 group-focus-visible:bg-teal-300"></span>
-                  <span className="nav-text text-xs font-bold uppercase tracking-widest text-slate-500 group-hover:text-teal-300 group-focus-visible:text-teal-300">
+                  <span className="nav-indicator mr-4 h-px w-8 bg-slate-600 transition-all group-hover:w-16 group-hover:bg-violet-300 group-focus-visible:w-16 group-focus-visible:bg-violet-300"></span>
+                  <span className="nav-text text-xs font-bold uppercase tracking-widest text-slate-500 group-hover:text-violet-300 group-focus-visible:text-violet-300">
                     Blog
                   </span>
                 </Link>
@@ -119,7 +119,7 @@ export default function Home() {
             <ul className="ml-1 mt-8 flex flex-wrap items-center gap-5" aria-label="Social media">
               <li>
                 <a
-                  className="block text-slate-400 hover:text-teal-300 transition-colors"
+                  className="block text-slate-400 hover:text-violet-300 transition-colors"
                   href="https://github.com/hiro8ma"
                   target="_blank"
                   rel="noopener noreferrer"
@@ -130,7 +130,7 @@ export default function Home() {
               </li>
               <li>
                 <a
-                  className="block text-slate-400 hover:text-teal-300 transition-colors"
+                  className="block text-slate-400 hover:text-violet-300 transition-colors"
                   href="https://www.linkedin.com/in/hiro8ma/"
                   target="_blank"
                   rel="noopener noreferrer"
@@ -141,7 +141,7 @@ export default function Home() {
               </li>
               <li>
                 <a
-                  className="block text-slate-400 hover:text-teal-300 transition-colors"
+                  className="block text-slate-400 hover:text-violet-300 transition-colors"
                   href="https://x.com/hir08ma"
                   target="_blank"
                   rel="noopener noreferrer"
@@ -152,7 +152,7 @@ export default function Home() {
               </li>
               <li>
                 <a
-                  className="block text-slate-400 hover:text-teal-300 transition-colors"
+                  className="block text-slate-400 hover:text-violet-300 transition-colors"
                   href="https://www.instagram.com/h8.16"
                   target="_blank"
                   rel="noopener noreferrer"
@@ -163,7 +163,7 @@ export default function Home() {
               </li>
               <li>
                 <a
-                  className="block text-slate-400 hover:text-teal-300 transition-colors"
+                  className="block text-slate-400 hover:text-violet-300 transition-colors"
                   href="https://www.wantedly.com/id/hiro8ma"
                   target="_blank"
                   rel="noopener noreferrer"
@@ -174,7 +174,7 @@ export default function Home() {
               </li>
               <li>
                 <a
-                  className="block text-slate-400 hover:text-teal-300 transition-colors"
+                  className="block text-slate-400 hover:text-violet-300 transition-colors"
                   href="https://booklog.jp/users/2620093309d9255a"
                   target="_blank"
                   rel="noopener noreferrer"
@@ -185,7 +185,7 @@ export default function Home() {
               </li>
               <li>
                 <a
-                  className="block text-slate-400 hover:text-teal-300 transition-colors"
+                  className="block text-slate-400 hover:text-violet-300 transition-colors"
                   href="mailto:hiro8masu@gmail.com"
                   aria-label="Email"
                 >
@@ -255,7 +255,7 @@ export default function Home() {
                   return (
                     <span
                       key={skill}
-                      className="flex items-center gap-1.5 rounded-full bg-teal-400/10 px-3 py-1 text-xs font-medium leading-5 text-teal-300"
+                      className="flex items-center gap-1.5 rounded-full bg-violet-400/10 px-3 py-1 text-xs font-medium leading-5 text-violet-300"
                     >
                       {Icon && <Icon className="text-sm" />}
                       {skill}
@@ -280,14 +280,14 @@ export default function Home() {
                   href="https://www.credly.com/users/hiroyuki-masuda.99ab0592/badges"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="group relative block rounded-lg border border-slate-700/50 bg-slate-800/30 p-4 transition-all hover:border-teal-500/50 hover:bg-slate-800/50"
+                  className="group relative block rounded-lg border border-slate-700/50 bg-slate-800/30 p-4 transition-all hover:border-violet-500/50 hover:bg-slate-800/50"
                 >
                   <div className="flex items-start gap-4">
-                    <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-lg bg-teal-500/10">
-                      <Award className="h-6 w-6 text-teal-400" />
+                    <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-lg bg-violet-500/10">
+                      <Award className="h-6 w-6 text-violet-400" />
                     </div>
                     <div>
-                      <h3 className="font-medium text-slate-200 group-hover:text-teal-300 inline-flex items-center gap-1">
+                      <h3 className="font-medium text-slate-200 group-hover:text-violet-300 inline-flex items-center gap-1">
                         View All Certifications
                         <ExternalLink size={14} />
                       </h3>
@@ -325,7 +325,7 @@ export default function Home() {
                       </div>
                       <div className="z-10 sm:col-span-6">
                         <h3 className="font-medium leading-snug text-slate-200">
-                          <span className="inline-flex items-baseline font-medium leading-tight text-slate-200 group-hover:text-teal-300 focus-visible:text-teal-300">
+                          <span className="inline-flex items-baseline font-medium leading-tight text-slate-200 group-hover:text-violet-300 focus-visible:text-violet-300">
                             Interview: Product Lead Engineer&apos;s Mission
                             <ExternalLink size={14} className="ml-1 inline-block" />
                           </span>
@@ -333,7 +333,7 @@ export default function Home() {
                         <p className="mt-2 text-sm leading-normal text-slate-400">
                           &quot;Providing growth opportunities for team members is also my important mission&quot;
                         </p>
-                        <span className="mt-2 inline-block rounded-full bg-teal-400/10 px-3 py-1 text-xs font-medium text-teal-300">
+                        <span className="mt-2 inline-block rounded-full bg-violet-400/10 px-3 py-1 text-xs font-medium text-violet-300">
                           note
                         </span>
                       </div>
@@ -352,7 +352,7 @@ export default function Home() {
                       </div>
                       <div className="z-10 sm:col-span-6">
                         <h3 className="font-medium leading-snug text-slate-200">
-                          <span className="inline-flex items-baseline font-medium leading-tight text-slate-200 group-hover:text-teal-300 focus-visible:text-teal-300">
+                          <span className="inline-flex items-baseline font-medium leading-tight text-slate-200 group-hover:text-violet-300 focus-visible:text-violet-300">
                             Building Teams That Move Without Hesitation in the AI Era
                             <ExternalLink size={14} className="ml-1 inline-block" />
                           </span>
@@ -360,7 +360,7 @@ export default function Home() {
                         <p className="mt-2 text-sm leading-normal text-slate-400">
                           Organizational design secrets for accelerating development in the AI era
                         </p>
-                        <span className="mt-2 inline-block rounded-full bg-teal-400/10 px-3 py-1 text-xs font-medium text-teal-300">
+                        <span className="mt-2 inline-block rounded-full bg-violet-400/10 px-3 py-1 text-xs font-medium text-violet-300">
                           zenn
                         </span>
                       </div>
@@ -379,7 +379,7 @@ export default function Home() {
                       </div>
                       <div className="z-10 sm:col-span-6">
                         <h3 className="font-medium leading-snug text-slate-200">
-                          <span className="inline-flex items-baseline font-medium leading-tight text-slate-200 group-hover:text-teal-300 focus-visible:text-teal-300">
+                          <span className="inline-flex items-baseline font-medium leading-tight text-slate-200 group-hover:text-violet-300 focus-visible:text-violet-300">
                             Talk: Rethinking Dev Organizations in the AI Era
                             <ExternalLink size={14} className="ml-1 inline-block" />
                           </span>
@@ -387,7 +387,7 @@ export default function Home() {
                         <p className="mt-2 text-sm leading-normal text-slate-400">
                           Are we focusing on the right things? Reconsidering development organizations in the AI era
                         </p>
-                        <span className="mt-2 inline-block rounded-full bg-teal-400/10 px-3 py-1 text-xs font-medium text-teal-300">
+                        <span className="mt-2 inline-block rounded-full bg-violet-400/10 px-3 py-1 text-xs font-medium text-violet-300">
                           talk
                         </span>
                       </div>
@@ -417,7 +417,7 @@ export default function Home() {
                       </header>
                       <div className="z-10 sm:col-span-6">
                         <h3 className="font-medium leading-snug text-slate-200">
-                          <div className="inline-flex items-baseline font-medium leading-tight text-slate-200 group-hover:text-teal-300 focus-visible:text-teal-300">
+                          <div className="inline-flex items-baseline font-medium leading-tight text-slate-200 group-hover:text-violet-300 focus-visible:text-violet-300">
                             Product Lead Engineer · CANARY
                           </div>
                         </h3>
@@ -427,22 +427,22 @@ export default function Home() {
                         </p>
                         <ul className="mt-3 space-y-1 text-sm text-slate-400">
                           <li className="flex items-start gap-2">
-                            <span className="text-teal-400">▹</span>
+                            <span className="text-violet-400">▹</span>
                             Technical strategy, quality assurance, and development productivity
                           </li>
                           <li className="flex items-start gap-2">
-                            <span className="text-teal-400">▹</span>
+                            <span className="text-violet-400">▹</span>
                             Team building, goal setting, evaluation, and hiring
                           </li>
                           <li className="flex items-start gap-2">
-                            <span className="text-teal-400">▹</span>
+                            <span className="text-violet-400">▹</span>
                             Enabling engineers and driving AI adoption across teams
                           </li>
                         </ul>
                         <ul className="mt-3 flex flex-wrap gap-2" aria-label="Technologies used">
                           {["Go", "Kubernetes", "GCP", "Vertex AI", "Team Building"].map((tech) => (
                             <li key={tech}>
-                              <span className="flex items-center rounded-full bg-teal-400/10 px-3 py-1 text-xs font-medium leading-5 text-teal-300">
+                              <span className="flex items-center rounded-full bg-violet-400/10 px-3 py-1 text-xs font-medium leading-5 text-violet-300">
                                 {tech}
                               </span>
                             </li>
@@ -459,7 +459,7 @@ export default function Home() {
                       </header>
                       <div className="z-10 sm:col-span-6">
                         <h3 className="font-medium leading-snug text-slate-200">
-                          <div className="inline-flex items-baseline font-medium leading-tight text-slate-200 group-hover:text-teal-300 focus-visible:text-teal-300">
+                          <div className="inline-flex items-baseline font-medium leading-tight text-slate-200 group-hover:text-violet-300 focus-visible:text-violet-300">
                             Tech Lead · Multiple Startups
                           </div>
                         </h3>
@@ -469,22 +469,22 @@ export default function Home() {
                         </p>
                         <ul className="mt-3 space-y-1 text-sm text-slate-400">
                           <li className="flex items-start gap-2">
-                            <span className="text-teal-400">▹</span>
+                            <span className="text-violet-400">▹</span>
                             Architected Event Sourcing & CQRS systems for complex domains
                           </li>
                           <li className="flex items-start gap-2">
-                            <span className="text-teal-400">▹</span>
+                            <span className="text-violet-400">▹</span>
                             Designed microservices on Kubernetes with Terraform IaC
                           </li>
                           <li className="flex items-start gap-2">
-                            <span className="text-teal-400">▹</span>
+                            <span className="text-violet-400">▹</span>
                             Built AI and data analytics platforms on AWS/GCP
                           </li>
                         </ul>
                         <ul className="mt-3 flex flex-wrap gap-2" aria-label="Technologies used">
                           {["Go", "TypeScript", "AWS", "GCP", "Kubernetes", "Terraform"].map((tech) => (
                             <li key={tech}>
-                              <span className="flex items-center rounded-full bg-teal-400/10 px-3 py-1 text-xs font-medium leading-5 text-teal-300">
+                              <span className="flex items-center rounded-full bg-violet-400/10 px-3 py-1 text-xs font-medium leading-5 text-violet-300">
                                 {tech}
                               </span>
                             </li>
@@ -506,18 +506,18 @@ export default function Home() {
               </div>
               <Link
                 href="/blog"
-                className="group relative block rounded-lg border border-slate-700/50 bg-slate-800/30 p-6 transition-all hover:border-teal-500/50 hover:bg-slate-800/50"
+                className="group relative block rounded-lg border border-slate-700/50 bg-slate-800/30 p-6 transition-all hover:border-violet-500/50 hover:bg-slate-800/50"
               >
                 <div className="flex items-center justify-between">
                   <div>
-                    <h3 className="font-medium text-slate-200 group-hover:text-teal-300">
+                    <h3 className="font-medium text-slate-200 group-hover:text-violet-300">
                       View All Posts
                     </h3>
                     <p className="mt-1 text-sm text-slate-400">
                       AI, Engineering, and Tech insights
                     </p>
                   </div>
-                  <ArrowRight className="h-5 w-5 text-slate-400 group-hover:text-teal-300 transition-colors" />
+                  <ArrowRight className="h-5 w-5 text-slate-400 group-hover:text-violet-300 transition-colors" />
                 </div>
               </Link>
             </section>
