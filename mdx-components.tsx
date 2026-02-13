@@ -15,7 +15,7 @@ export function useMDXComponents(components: MDXComponents): MDXComponents {
       <p className="text-slate-400 mb-4 leading-relaxed">{children}</p>
     ),
     a: ({ href, children }) => (
-      <a href={href} className="text-teal-400 hover:text-teal-300 underline">
+      <a href={href} className="text-violet-400 hover:text-violet-300 underline">
         {children}
       </a>
     ),
@@ -27,13 +27,13 @@ export function useMDXComponents(components: MDXComponents): MDXComponents {
     ),
     li: ({ children }) => <li className="text-slate-400">{children}</li>,
     code: ({ children }) => (
-      <code className="bg-slate-800 text-teal-300 px-1.5 py-0.5 rounded text-sm">{children}</code>
+      <code className="bg-slate-800 text-violet-300 px-1.5 py-0.5 rounded text-sm">{children}</code>
     ),
     pre: ({ children }) => (
       <pre className="bg-slate-800 p-4 rounded-lg overflow-x-auto mb-4">{children}</pre>
     ),
     blockquote: ({ children }) => (
-      <blockquote className="border-l-4 border-teal-500 pl-4 italic text-slate-500 mb-4">
+      <blockquote className="border-l-4 border-violet-500 pl-4 italic text-slate-500 mb-4">
         {children}
       </blockquote>
     ),

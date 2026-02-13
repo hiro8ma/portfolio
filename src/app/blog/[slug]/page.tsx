@@ -106,14 +106,14 @@ export default async function PostPage({ params }: PageProps) {
         <div className="flex items-center gap-4 mb-8">
           <Link
             href="/"
-            className="text-teal-400 hover:text-teal-300"
+            className="text-violet-400 hover:text-violet-300"
           >
             Home
           </Link>
           <span className="text-slate-600">/</span>
           <Link
             href="/blog"
-            className="text-teal-400 hover:text-teal-300"
+            className="text-violet-400 hover:text-violet-300"
           >
             Blog
           </Link>
@@ -133,7 +133,7 @@ export default async function PostPage({ params }: PageProps) {
               {post.tags.map((tag) => (
                 <span
                   key={tag}
-                  className="rounded-full bg-teal-400/10 px-3 py-1 text-xs text-teal-300"
+                  className="rounded-full bg-violet-400/10 px-3 py-1 text-xs text-violet-300"
                 >
                   {tag}
                 </span>
@@ -142,7 +142,7 @@ export default async function PostPage({ params }: PageProps) {
           )}
         </header>
 
-        <div className="prose prose-invert prose-teal max-w-none">
+        <div className="prose prose-invert prose-violet max-w-none">
           <MDXRemote source={post.content} />
         </div>
 
@@ -151,7 +151,7 @@ export default async function PostPage({ params }: PageProps) {
             href={`https://github.com/hiro8ma/portfolio/edit/main/content/posts/${slug}.mdx`}
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex items-center gap-2 text-sm text-slate-500 hover:text-teal-400"
+            className="inline-flex items-center gap-2 text-sm text-slate-500 hover:text-violet-400"
           >
             <Pencil size={14} />
             Edit on GitHub
@@ -162,13 +162,13 @@ export default async function PostPage({ params }: PageProps) {
           {prev ? (
             <Link
               href={`/blog/${prev.slug}`}
-              className="group rounded-lg border border-slate-700/50 p-4 hover:border-teal-500/50"
+              className="group rounded-lg border border-slate-700/50 p-4 hover:border-violet-500/50"
             >
               <span className="flex items-center gap-1 text-xs text-slate-500">
                 <ChevronLeft size={14} />
                 前の記事
               </span>
-              <span className="mt-1 block text-sm text-slate-300 group-hover:text-teal-300">
+              <span className="mt-1 block text-sm text-slate-300 group-hover:text-violet-300">
                 {prev.title}
               </span>
             </Link>
@@ -178,13 +178,13 @@ export default async function PostPage({ params }: PageProps) {
           {next ? (
             <Link
               href={`/blog/${next.slug}`}
-              className="group rounded-lg border border-slate-700/50 p-4 hover:border-teal-500/50 text-right"
+              className="group rounded-lg border border-slate-700/50 p-4 hover:border-violet-500/50 text-right"
             >
               <span className="flex items-center justify-end gap-1 text-xs text-slate-500">
                 次の記事
                 <ChevronRight size={14} />
               </span>
-              <span className="mt-1 block text-sm text-slate-300 group-hover:text-teal-300">
+              <span className="mt-1 block text-sm text-slate-300 group-hover:text-violet-300">
                 {next.title}
               </span>
             </Link>
