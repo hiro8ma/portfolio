@@ -1,0 +1,32 @@
+<svg width="1200" height="630" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <pattern id="grid" width="100" height="100" patternUnits="userSpaceOnUse">
+      <circle cx="25" cy="25" r="2" fill="#1e293b"/>
+      <circle cx="75" cy="75" r="2" fill="#1e293b"/>
+    </pattern>
+  </defs>
+
+  <!-- Background -->
+  <rect width="1200" height="630" fill="#0f172a"/>
+  <rect width="1200" height="630" fill="url(#grid)"/>
+
+  <!-- Content -->
+  <text x="600" y="220" text-anchor="middle" font-family="system-ui, -apple-system, sans-serif" font-size="64" font-weight="700" fill="#f1f5f9">Hiroyuki Masuda</text>
+  <text x="600" y="280" text-anchor="middle" font-family="system-ui, -apple-system, sans-serif" font-size="28" fill="#a78bfa">増田 浩之 / hiro8ma</text>
+  <text x="600" y="350" text-anchor="middle" font-family="system-ui, -apple-system, sans-serif" font-size="32" fill="#94a3b8">Engineering Manager &amp; Architect</text>
+
+  <!-- Skills -->
+  <g transform="translate(600, 420)">
+    <rect x="-280" y="-20" width="70" height="40" rx="20" fill="rgba(167, 139, 250, 0.2)"/>
+    <text x="-245" y="8" text-anchor="middle" font-family="system-ui, sans-serif" font-size="18" fill="#a78bfa">Go</text>
+
+    <rect x="-190" y="-20" width="130" height="40" rx="20" fill="rgba(167, 139, 250, 0.2)"/>
+    <text x="-125" y="8" text-anchor="middle" font-family="system-ui, sans-serif" font-size="18" fill="#a78bfa">Kubernetes</text>
+
+    <rect x="-40" y="-20" width="80" height="40" rx="20" fill="rgba(167, 139, 250, 0.2)"/>
+    <text x="0" y="8" text-anchor="middle" font-family="system-ui, sans-serif" font-size="18" fill="#a78bfa">GCP</text>
+
+    <rect x="60" y="-20" width="90" height="40" rx="20" fill="rgba(167, 139, 250, 0.2)"/>
+    <text x="105" y="8" text-anchor="middle" font-family="system-ui, sans-serif" font-size="18" fill="#a78bfa">AI/ML</text>
+  </g>
+</svg>
