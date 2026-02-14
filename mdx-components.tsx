@@ -37,6 +37,30 @@ export function useMDXComponents(components: MDXComponents): MDXComponents {
         {children}
       </blockquote>
     ),
+    table: ({ children }) => (
+      <div className="overflow-x-auto mb-4">
+        <table className="min-w-full border-collapse border border-slate-700">
+          {children}
+        </table>
+      </div>
+    ),
+    thead: ({ children }) => (
+      <thead className="bg-slate-800">{children}</thead>
+    ),
+    tbody: ({ children }) => <tbody>{children}</tbody>,
+    tr: ({ children }) => (
+      <tr className="border-b border-slate-700">{children}</tr>
+    ),
+    th: ({ children }) => (
+      <th className="px-4 py-2 text-left text-slate-200 font-semibold border border-slate-700">
+        {children}
+      </th>
+    ),
+    td: ({ children }) => (
+      <td className="px-4 py-2 text-slate-400 border border-slate-700">
+        {children}
+      </td>
+    ),
     ...components,
   };
 }
