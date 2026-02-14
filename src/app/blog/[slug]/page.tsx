@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import { getAllPostSlugs, getPostBySlug, getAdjacentPosts, calculateReadingTime } from "@/lib/posts";
 import { MDXRemote } from "next-mdx-remote/rsc";
 import { Metadata } from "next";
+import { useMDXComponents } from "../../../../mdx-components";
 
 const siteUrl = "https://hiro8ma.github.io/portfolio";
 
@@ -143,7 +144,7 @@ export default async function PostPage({ params }: PageProps) {
         </header>
 
         <div className="prose prose-invert prose-violet max-w-none">
-          <MDXRemote source={post.content} />
+          <MDXRemote source={post.content} components={useMDXComponents({})} />
         </div>
 
         <div className="mt-12 pt-8 border-t border-slate-700 flex items-center justify-between">
