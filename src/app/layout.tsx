@@ -13,6 +13,8 @@ export const metadata: Metadata = {
     "Engineering Manager & Architect with 10+ years experience. Go, Kubernetes, GCP, AI/ML. Building scalable systems and leading engineering teams.",
   keywords: [
     "Hiroyuki Masuda",
+    "増田 浩之",
+    "増田浩之",
     "hiro8ma",
     "Engineering Manager",
     "Software Architect",
@@ -81,7 +83,7 @@ export default function RootLayout({
               "@context": "https://schema.org",
               "@type": "Person",
               name: "Hiroyuki Masuda",
-              alternateName: "hiro8ma",
+              alternateName: ["hiro8ma", "増田 浩之", "増田浩之"],
               url: siteUrl,
               jobTitle: "Engineering Manager & Architect",
               worksFor: {
