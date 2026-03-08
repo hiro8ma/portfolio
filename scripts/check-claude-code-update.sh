@@ -5,6 +5,17 @@
 VERSION_FILE="$HOME/.claude-code-version"
 CHANGELOG_URL="https://raw.githubusercontent.com/anthropics/claude-code/main/CHANGELOG.md"
 
+# macOS デスクトップ通知を送信
+notify_mac() {
+    local title="$1"
+    local message="$2"
+
+    # macOS の場合のみ実行
+    if [[ "$OSTYPE" == "darwin"* ]]; then
+        osascript -e "display notification \"$message\" with title \"$title\" sound name \"Glass\""
+    fi
+}
+
 # 最新バージョンを取得
 LATEST_VERSION=$(npm view @anthropic-ai/claude-code version 2>/dev/null)
 
@@ -30,6 +41,9 @@ echo "🎉 新バージョン検出！"
 echo "   前回: v$PREVIOUS_VERSION"
 echo "   最新: v$LATEST_VERSION"
 echo ""
+
+# Mac デスクトップ通知
+notify_mac "Claude Code 🎉" "v${LATEST_VERSION} がリリースされました！"
 
 # CHANGELOG を取得
 echo "📋 CHANGELOG の最新セクション:"
