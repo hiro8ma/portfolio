@@ -3,12 +3,30 @@
     "allow": [
       "Bash(brew info:*)",
       "Bash(curl:*)",
-      "WebSearch",
+      "Bash(jq:*)",
+      "Bash(cat ~/.claude-code-version)",
+      "Bash(cat ~/.claude-blog-last-check)",
+      "Bash(cat ~/.codex-version)",
+      "Bash(cat ~/.codex-blog-last-check)",
+      "Bash(echo * > ~/.claude-code-version)",
+      "Bash(echo * > ~/.claude-blog-last-check)",
+      "Bash(echo * > ~/.codex-version)",
+      "Bash(echo * > ~/.codex-blog-last-check)",
       "Bash(claude --version)",
-      "Bash(~/.claude-code-version)",
-      "Bash(npm view @anthropic-ai/claude-code version)",
-      "WebFetch(domain:developers.openai.com)",
-      "Bash(~/.codex-version)"
+      "Bash(codex --version)",
+      "Bash(git checkout:*)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(git push:*)",
+      "Bash(git branch:*)",
+      "Bash(git status)",
+      "Bash(git log:*)",
+      "Bash(git diff:*)",
+      "Bash(gh pr create:*)",
+      "Bash(gh pr merge:*)",
+      "WebSearch",
+      "WebFetch(domain:claude.com)",
+      "WebFetch(domain:developers.openai.com)"
     ]
   }
 }
