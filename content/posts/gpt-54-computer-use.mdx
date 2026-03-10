@@ -1,0 +1,144 @@
+---
+title: "GPT-5.4 登場 — native computer use で人間基準を超え、エージェント時代が本格化"
+date: "2026-03-10"
+description: "2026年3月5日、OpenAIがGPT-5.4を発表。初の native computer use を搭載し、OSWorld benchmark で人間の72.4%を上回る75.0%を達成。Thinking モードの mid-response steering と 1M トークンコンテキストも同時投入。"
+tags: ["openai", "gpt", "ai-agents", "computer-use", "llm"]
+---
+
+## 概要
+
+2026年3月5日、OpenAI が GPT-5.4 を発表した。「プロフェッショナルワークにおける最も有能かつ効率的な frontier model」と位置づける。
+
+最大の特徴は **native computer use**。GPT-5.4 は初の汎用モデルとして、PC の画面を見てマウスとキーボードを操作し、複雑なワークフローを自律実行できる。OSWorld-Verified benchmark で 75.0% を記録し、OpenAI が提示した人間基準の 72.4% を初めて超えた。
+
+同日、ChatGPT for Excel（beta）も発表。Excel アドインとして GPT-5.4 が直接ワークブック内で動作する。
+
+## 主要スペックと機能
+
+### モデル仕様
+
+| 項目 | GPT-5.4 |
+|------|---------|
+| リリース日 | 2026年3月5日 |
+| 標準コンテキスト | 272K tokens |
+| Codex 経由 | 最大 1M tokens |
+| 最大出力 | 128K tokens |
+| API 入力単価 | $2.50 / 1M tokens |
+| API 出力単価 | $15.00 / 1M tokens |
+| 272K 超過時の入力単価 | $5.00 / 1M tokens（2倍） |
+
+### 主要機能一覧
+
+| 機能 | 概要 | 提供チャネル |
+|------|------|------------|
+| Native Computer Use | スクリーンショット認識 + マウス/キーボード操作 | Codex / API |
+| GPT-5.4 Thinking | Mid-response steering（思考中に軌道修正） | chatgpt.com, Android |
+| 1M Token Context | 長大なリポジトリ・ドキュメントを一括処理 | Codex 経由 |
+| Tool Search | MCP サーバーを動的に選択し不要なコンテキストを削減 | API |
+| ChatGPT for Excel | ワークブック内で直接 GPT-5.4 を呼び出す | ChatGPT Plus 以上（beta） |
+
+## Benchmark — 特に computer use が突出
+
+| Benchmark | GPT-5.4 | GPT-5.2 | 人間基準 |
+|-----------|---------|---------|---------|
+| OSWorld-Verified（computer use） | **75.0%** | 47.3% | 72.4% |
+| SWE-bench Pro（コーディング） | 57.7% | — | — |
+| Graphwalks BFS 0–128K | 93.0% | — | — |
+| Graphwalks BFS 256K–1M | 21.4% | — | — |
+
+OSWorld は PC 上の実際のタスク（ファイル操作、ブラウザ操作、アプリ間連携）を AI が自律実行できるかを測る benchmark。75.0% は人間の 72.4% を上回る初のケースだ。
+
+## GPT-5.4 Thinking — 思考中に介入できる
+
+従来の Thinking モデルは「考えてから答える」構造だった。GPT-5.4 Thinking は **mid-response steering** を導入した。
+
+モデルが複雑なタスクを処理し始める前に、アプローチの概要（プラン）を先に表示する。ユーザーはそのプランを読んで修正指示を出せる。最終出力が来る前に方向を変えられるため、余計なトークンを消費せず、プロンプトを書き直す手間も省ける。
+
+```
+ユーザー: このコードをリファクタリングして
+
+GPT-5.4 Thinking:
+[プラン表示]
+1. 共通ロジックを関数に抽出
+2. エラーハンドリングを統一
+3. テストを追加
+
+↑ここでユーザーが介入できる
+
+ユーザー: 2と3はスキップ、1だけでいい
+
+→ 1だけを実行して出力
+```
+
+## Tool Search — MCP サーバーの動的選択
+
+OpenAI は Scale の MCP Atlas benchmark（36 MCP サーバー、250 タスク）で GPT-5.4 の tool search を評価した。
+
+- 全サーバーを常時有効にした場合 vs. 必要なサーバーを動的に選択した場合
+- 動的選択で **トークン使用量 47% 削減**、精度は同等
+
+MCP（Model Context Protocol）の普及が進む中、膨大な外部ツールをどう効率的に呼び出すかは実運用の課題だった。GPT-5.4 はモデルレベルでこれを解決している。
+
+## ChatGPT for Excel — ホワイトカラーへの直接攻撃
+
+ChatGPT for Excel は Excel アドインとして GPT-5.4 を直接ワークブックに統合する。財務モデルの構築、DCF のアップデート、バリュエーション資料の生成などを自然言語で指示できる。
+
+現在のベータ提供は **米国・カナダ・オーストラリア** のみ。ChatGPT Plus 以上のプランが対象で、Enterprise / Edu 向けはデフォルト無効（管理者が有効化）。
+
+## 日本への示唆
+
+### computer use の到達点が変えること
+
+PC 操作の自律化は今まで「RPA でやること」だった。GPT-5.4 の computer use は手順書なしで動く。SaaS の画面、レガシー Web システム、デスクトップアプリを問わない。
+
+日本のエンタープライズは RPA（UiPath, WinActor 等）への依存が高い。GPT-5.4 ベースのエージェントが普及すれば、ルール記述型 RPA の存在意義は問われる。
+
+| 観点 | 従来の RPA | GPT-5.4 computer use |
+|------|-----------|----------------------|
+| セットアップ | フロー設計が必要 | 自然言語で指示 |
+| 変更対応 | 画面変更のたびに修正 | 視覚的に再認識 |
+| 適用範囲 | 定型タスクのみ | 判断を含む複合タスク |
+| 導入コスト | 高 | API コストのみ |
+
+### ChatGPT for Excel が日本に来るとき
+
+現時点では日本未対応だが、この機能は Excel が業務の中核を占める日本企業に直撃する。財務・経理・IR 部門での Excel 作業は依然として膨大だ。日本展開は時間の問題で、展開時には業務フローの見直しを迫られる企業が続出する。
+
+### API コストの構造変化
+
+272K トークンを超えると入力単価が倍になる。リポジトリ全体や長大なドキュメントを処理するワークロードは、1M コンテキストと価格設計を慎重に考慮する必要がある。
+
+```python
+# 272K token 超過のコスト試算
+input_tokens = 500_000  # 50万トークン
+base_rate = 2.50        # $/1M tokens
+over_rate = 5.00        # 272K超過後
+
+cost_within = (272_000 / 1_000_000) * base_rate       # $0.68
+cost_over   = (228_000 / 1_000_000) * over_rate        # $1.14
+total_input = cost_within + cost_over                  # $1.82
+
+# 272K以内なら: (500K / 1M) * $2.50 = $1.25
+# 超過すると 46% 高くなる
+```
+
+## まとめ
+
+| ポイント | 内容 |
+|----------|------|
+| computer use が人間超え | OSWorld 75.0% で人間基準 72.4% を初めて超えた |
+| 1M コンテキスト | Codex 経由で利用可。272K 超過後は単価 2 倍に注意 |
+| Thinking の mid-response steering | 最終出力前にユーザーが方向修正できる新機能 |
+| Tool Search | MCP 動的選択でトークン 47% 削減 |
+| ChatGPT for Excel | 英語圏 beta。日本展開は未定だが時間の問題 |
+
+エージェントが「人間並みに PC を操作できる」段階に入った。RPA 市場と Office ワーカーの業務設計は、この転換点から再評価が始まる。
+
+## 参考リンク
+
+- [Introducing GPT-5.4 | OpenAI](https://openai.com/index/introducing-gpt-5-4/)
+- [OpenAI launches GPT-5.4 with Pro and Thinking versions | TechCrunch](https://techcrunch.com/2026/03/05/openai-launches-gpt-5-4-with-pro-and-thinking-versions/)
+- [GPT-5.4: Native Computer Use, 1M Context Window, Tool Search | DataCamp](https://www.datacamp.com/blog/gpt-5-4)
+- [OpenAI launches GPT-5.4 with native computer use mode, financial plugins | VentureBeat](https://venturebeat.com/technology/openai-launches-gpt-5-4-with-native-computer-use-mode-financial-plugins-for)
+- [Introducing ChatGPT for Excel | OpenAI](https://openai.com/index/chatgpt-for-excel/)
+- [GPT-5.4 Thinking System Card | OpenAI](https://openai.com/index/gpt-5-4-thinking-system-card/)
