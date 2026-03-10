@@ -1,0 +1,14 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(brew info:*)",
+      "Bash(curl:*)",
+      "WebSearch",
+      "Bash(claude --version)",
+      "Bash(~/.claude-code-version)",
+      "Bash(npm view @anthropic-ai/claude-code version)",
+      "WebFetch(domain:developers.openai.com)",
+      "Bash(~/.codex-version)"
+    ]
+  }
+}
