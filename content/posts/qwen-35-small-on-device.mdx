@@ -1,0 +1,148 @@
+---
+title: "Qwen 3.5 Small — Alibaba の 9B モデルが 120B を超えた、オンデバイス AI 元年"
+date: "2026-03-11"
+description: "2026年3月2日、Alibaba が Qwen 3.5 Small シリーズを公開。0.8B〜9B の 4 モデルがすべて Apache 2.0 で、9B は OpenAI の 120B モデルを複数 benchmark で上回った。262K context・ネイティブマルチモーダル・スマートフォン動作というスペックが「クラウド不要の AI」時代を本格化させる。"
+tags: ["alibaba", "qwen", "open-source", "on-device-ai", "llm", "edge-ai"]
+---
+
+## 概要
+
+2026年3月2日、Alibaba の Qwen チームが **Qwen 3.5 Small シリーズ**を公開した。0.8B・2B・4B・9B の 4 モデルをすべて Apache 2.0 ライセンスで提供する。
+
+最大の話題は **9B モデルの benchmark 性能**。OpenAI の GPT-OSS-120B（13 倍のパラメータ数）を MMLU-Pro、GPQA Diamond、IFEval、LongBench v2 で上回った。「大きいモデルが強い」という常識を崩す数字だ。
+
+3月9日には edge device 向けの追加機能強化版が続いており、Alibaba は 16 日間で Small シリーズの全 9 モデルをロールアウトした。
+
+## モデルラインナップと動作環境
+
+### モデル仕様
+
+| モデル | VRAM（BF16） | VRAM（4bit 量子化） | 主な用途 |
+|--------|-------------|-------------------|---------|
+| Qwen3.5-0.8B | ~1.6 GB | ~0.5 GB | IoT・組み込み・オフライン chatbot |
+| Qwen3.5-2B | ~4 GB | ~1.2 GB | スマートフォン・ラップトップ |
+| Qwen3.5-4B | ~8 GB | ~2.5 GB | コーディング・マルチモーダル推論 |
+| Qwen3.5-9B | ~18 GB | ~5.5 GB | 複雑な推論・エージェント |
+
+2B はスマートフォンで動作可能。9B でも 4bit 量子化（Q4_K_M フォーマット）を使えば 8GB GPU で動く。
+
+### コンテキストウィンドウ
+
+全モデル **262K トークン** をネイティブサポート。YaRN 圧縮を使えば **1M トークン超**まで拡張できる。
+
+### 対応フレームワーク
+
+llama.cpp、Ollama、MLX（Apple Silicon）、vLLM に対応しており、既存のローカル LLM 環境にそのまま組み込める。
+
+## Benchmark — 9B が 13 倍のモデルを超えた
+
+### 主要 benchmark 比較
+
+| Benchmark | Qwen3.5-9B | GPT-OSS-120B | Qwen3.5-4B | GPT-5-Nano |
+|-----------|-----------|--------------|-----------|------------|
+| MMMU-Pro（視覚推論） | **70.1** | — | — | 57.2 |
+| MathVision（数学 × 視覚） | **78.9** | — | — | 62.2 |
+| GPQA Diamond（理科推論） | **81.7** | 77.2 | — | — |
+| IFEval（指示遵守） | **91.5** | 88.9 | — | — |
+| LongBench v2（長文） | **55.2** | 48.0 | — | — |
+
+9B の MMMU-Pro スコアは GPT-5-Nano を 12.9 ポイント上回る。MathVision の差は 16.7 ポイント。4B ですら GPT-5-Nano と Gemini 2.5 Flash を複数 benchmark で超えた。
+
+### 0.8B の実用性
+
+最小モデルの 0.8B でも MathVista 62.2、OCRBench 74.5 を記録しており、IoT デバイスや組み込み環境で実際に使えるレベルに達している。
+
+## アーキテクチャ — Gated DeltaNet の仕組み
+
+Qwen 3.5 Small は **Gated DeltaNet** と呼ぶハイブリッドアテンション機構を採用している。
+
+線形アテンション層と従来の softmax アテンション層を **3:1 の比率**で混在させる設計だ。線形アテンションはメモリ複雑度を定数に保ち、softmax アテンションが推論の精度を補完する。長い context を扱いながら消費メモリを抑える構造的な工夫がこの benchmark 性能を支えている。
+
+Vision encoder には **Conv3d patch embeddings** を使用しており、静止画だけでなく動画のフレーム間の時間的ダイナミクスも理解できる。テキスト・画像・動画を 1 つのモデルで同時に処理するネイティブマルチモーダルはシリーズ全モデルに共通している。
+
+## オープンソース × Apache 2.0 の意味
+
+Qwen 3.5 Small は全モデルが **Apache 2.0** ライセンスで公開されている。商用利用・改変・再配布が自由だ。
+
+| ライセンス | 商用利用 | 改変 | 再配布 | 代表モデル |
+|-----------|---------|------|-------|---------|
+| Apache 2.0 | ✅ | ✅ | ✅ | Qwen 3.5 Small、Llama 3.x |
+| MIT | ✅ | ✅ | ✅ | Phi-3-mini |
+| Meta Custom | 制限あり | 制限あり | 制限あり | 旧 Llama 2 |
+| 独自（非公開） | ❌ | ❌ | ❌ | GPT-4o、Claude |
+
+「使えるが中身は見えない」クラウド API との最大の差異は、重みを手元に置いて改変できる点だ。ファインチューニングして自社特化モデルを作り、そのまま商品化できる。
+
+## 日本への示唆
+
+### プライバシー規制とオンデバイス AI の相性
+
+日本では個人情報保護法の改正（2022年）以降、個人データを第三者サーバーに送信する際の規制が厳格化している。医療・金融・行政の現場では「データを外に出せない」制約が依然として多い。
+
+Qwen 3.5 のようなオンデバイス・オンプレミスで動く高性能モデルは、この制約と整合する。
+
+| 業界 | クラウド AI の制約 | オンデバイス AI でできること |
+|------|-------------------|--------------------------|
+| 医療 | 電子カルテの外部送信は要同意 | 院内 GPU で推論、データは院外に出ない |
+| 金融 | 顧客情報の第三者提供は制限あり | オンプレサーバーで契約書・稟議を AI 処理 |
+| 製造 | 設計図・製造レシピは門外不出 | 工場内エッジデバイスで品質判定 |
+| 行政 | 機密文書はクラウド利用禁止 | ローカル LLM でドキュメント要約・分類 |
+
+### SI 企業・ベンダーのビジネスチャンス
+
+Apache 2.0 ライセンスは「改変して製品として売れる」ことを意味する。日本の SI 企業が Qwen 3.5 をベースに業界特化ファインチューニングを施し、オンプレパッケージとして販売するビジネスが成立する。
+
+「API を売る」だけでなく「ファインチューニング済みモデル + 運用保守」という形で差別化できる。GPT-4o や Claude の API 再販と違い、参入障壁を自社で構築しやすい。
+
+### エンジニアのローカル開発環境が変わる
+
+4B モデルが 8GB RAM で動くということは、M3 MacBook Air（16GB 統合メモリ）で 9B を快適に走らせられる。
+
+```bash
+# Ollama でのインストールと実行
+ollama pull qwen3.5:9b
+ollama run qwen3.5:9b "このコードをレビューして"
+
+# vLLM での API サーバー起動
+python -m vllm.entrypoints.openai.api_server \
+  --model Qwen/Qwen3.5-9B-Instruct \
+  --dtype bfloat16 \
+  --max-model-len 32768
+```
+
+Claude Code や Cursor の backend を Qwen 3.5 に差し替えて、ネット接続なしで AI コーディング補助を使う、という構成が現実的になった。
+
+### 中国 AI の競争力という文脈
+
+DeepSeek R1（2025年1月）が「中国のオープンソース AI が西側 frontier モデルに迫る」という衝撃を与えた。Qwen 3.5 Small はその延長線上にある。
+
+| 中国オープンソース AI の主要リリース | 時期 | ハイライト |
+|----------------------------------|------|-----------|
+| DeepSeek-V2 | 2024年5月 | MoE で低コスト高性能 |
+| Qwen 2.5 | 2024年9月 | 72B が GPT-4o に迫る |
+| DeepSeek R1 | 2025年1月 | 推論特化でo1 相当 |
+| Qwen 3（旗艦） | 2025年Q3 | 235B MoE モデル |
+| Qwen 3.5 Small | 2026年3月 | 9B で 120B 超え |
+
+中国発の研究が「効率性」の競争軸で先行している。「大きいモデルを作れば勝てる」時代から「小さくて速いモデルが現場を制する」時代へのシフトを Alibaba が象徴する。
+
+## まとめ
+
+| ポイント | 内容 |
+|----------|------|
+| 9B で 120B 超え | GPT-OSS-120B を複数 benchmark で上回る capability density |
+| Apache 2.0 | 改変・商用利用・再配布が自由。SI 製品化の素材になる |
+| オンデバイス動作 | 2B はスマートフォン、9B は 8GB GPU。クラウド不要 |
+| 262K context | 長文書類・大規模コードベースをそのまま処理 |
+| 日本のプライバシー制約と相性抜群 | データを外に出さない AI 処理が規制環境に整合 |
+
+「高性能 AI = クラウド API」という前提が崩れ始めた。Qwen 3.5 Small はその加速装置だ。日本の医療・金融・製造という規制の厚い産業で、オンプレ AI 導入の選択肢が現実的な重みを持ち始める。
+
+## 参考リンク
+
+- [Qwen 3.5 Small Series Ships Four Models From 0.8B to 9B | Awesome Agents](https://awesomeagents.ai/news/qwen-3-5-small-models-series/)
+- [Qwen 3.5 Small Models: 9B Parameters That Beat 120B | NYU Shanghai RITS](https://rits.shanghai.nyu.edu/ai/qwen-3-5-small-models-9b-parameters-that-beat-120b/)
+- [Alibaba launches Qwen 3.5: High-power AI for edge devices | TechBriefly](https://techbriefly.com/2026/03/09/alibaba-launches-qwen-3-5-high-power-ai-for-edge-devices/)
+- [Alibaba Launches Qwen 3.5 AI Models For Edge Devices | Dataconomy](https://dataconomy.com/2026/03/09/__trashed-8/)
+- [Qwen 3.5 Small Models: 9B AI Beats GPT on Phone | Digital Applied](https://www.digitalapplied.com/blog/qwen-3-5-small-models-9b-beats-gpt-phone-guide)
+- [Alibaba's Qwen3.5 for AI agents | CNBC](https://www.cnbc.com/2026/02/17/china-alibaba-qwen-ai-agent-latest-model.html)
