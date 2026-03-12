@@ -1,32 +1,16 @@
 {
   "permissions": {
     "allow": [
-      "Bash(brew info:*)",
-      "Bash(curl:*)",
-      "Bash(jq:*)",
-      "Bash(cat ~/.claude-code-version)",
-      "Bash(cat ~/.claude-blog-last-check)",
-      "Bash(cat ~/.codex-version)",
-      "Bash(cat ~/.codex-blog-last-check)",
-      "Bash(echo * > ~/.claude-code-version)",
-      "Bash(echo * > ~/.claude-blog-last-check)",
-      "Bash(echo * > ~/.codex-version)",
-      "Bash(echo * > ~/.codex-blog-last-check)",
-      "Bash(claude --version)",
-      "Bash(codex --version)",
-      "Bash(git checkout:*)",
-      "Bash(git add:*)",
-      "Bash(git commit:*)",
-      "Bash(git push:*)",
-      "Bash(git branch:*)",
-      "Bash(git status)",
-      "Bash(git log:*)",
-      "Bash(git diff:*)",
-      "Bash(gh pr create:*)",
-      "Bash(gh pr merge:*)",
+      "Bash",
+      "Read",
+      "Write",
+      "Edit",
+      "Glob",
+      "Grep",
       "WebSearch",
-      "WebFetch(domain:claude.com)",
-      "WebFetch(domain:developers.openai.com)"
+      "WebFetch",
+      "mcp__playwright__browser_evaluate",
+      "mcp__Claude_Preview__preview_start"
     ]
   }
 }
