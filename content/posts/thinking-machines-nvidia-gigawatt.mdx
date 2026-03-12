@@ -1,0 +1,125 @@
+---
+title: "Thinking Machines × Nvidia — 1GW 契約が示す、コンピュートを制する者が AI を制する時代"
+date: "2026-03-12"
+description: "2026年3月10日、Nvidia が元 OpenAI CTO の Mira Murati 率いる Thinking Machines Lab に戦略的投資を行い、次世代チップ Vera Rubin を 1GW 規模で供給する複数年契約を締結。コンピュートの「土地争い」が frontier AI の命運を分け始めた。"
+tags: ["nvidia", "thinking-machines", "mira-murati", "compute", "ai-infrastructure", "vera-rubin"]
+---
+
+## 概要
+
+2026年3月10日、Nvidia と Thinking Machines Lab が複数年の戦略的パートナーシップを発表した。内容は2本柱。Nvidia が Thinking Machines に「significant investment（重要な出資）」を行うこと、そして少なくとも **1GW（ギガワット）** 相当の Vera Rubin システムを 2027年初頭から優先供給することだ。
+
+Thinking Machines を率いるのは元 OpenAI CTO の **Mira Murati**。2025年2月の創業からわずか1年で a16z・Accel・Nvidia 等から累計 **$2B 超**を調達し、「より理解可能で、カスタマイズ可能で、汎用的な AI」を掲げて frontier モデル開発を進めている。
+
+## 1GW とはどのスケールか
+
+「1GW の計算資源」は電力換算で 75 万世帯分のエネルギー消費量に相当する。
+
+| スケール | 電力 | 規模感 |
+|----------|------|-------|
+| エンタープライズ DC（中規模） | 1〜10 MW | ビル数棟 |
+| ハイパースケーラー 1 キャンパス | 200〜500 MW | 中規模都市の電力需要 |
+| **Thinking Machines 契約分** | **1,000 MW（= 1GW）** | **75 万世帯分** |
+| Stargate プロジェクト（全体目標） | 数 GW（計画中） | 米国 AI インフラ計画全体 |
+
+設立1年のスタートアップが gigawatt 級のコンピュートを確保した事実が、今回の発表の本質だ。
+
+## Vera Rubin — Blackwell の次世代チップ
+
+Thinking Machines が獲得するのは 2026年H2 から出荷開始予定の **Vera Rubin** プラットフォーム。現行の Blackwell（H200 等）の後継にあたる。
+
+| 指標 | Blackwell | Vera Rubin | 倍率 |
+|------|-----------|-----------|------|
+| Inference 性能（NVFP4） | 基準 | 50 PFLOPs | **5x** |
+| Training 性能（NVFP4） | 基準 | 35 PFLOPs | **3.5x** |
+| HBM 帯域幅（GPU 単体） | ~8 TB/s | 22 TB/s | **~3x** |
+| NVLink 帯域（GPU 間） | 1.8 TB/s | 3.6 TB/s | **2x** |
+| Token 推論コスト | 基準 | 基準の 1/10 | **10x 削減** |
+| MoE 学習の必要 GPU 数 | 基準 | 基準の 1/4 | **4x 削減** |
+
+Token コストが Blackwell の 1/10 になるということは、同じインフラ投資で 10 倍の推論をこなせる計算になる。Vera Rubin へのアクセス権そのものが競争優位に直結する。
+
+## Thinking Machines Lab — Mira Murati が描く AI 像
+
+Mira Murati は 2018 年に OpenAI に参加し、2022 年から CTO を務めた。GPT-4・DALL-E 2・Sora の技術責任者として立ち上げを牽引した後、2024 年 10 月に退社した。
+
+| 観点 | OpenAI | Thinking Machines Lab |
+|------|--------|-----------------------|
+| 設立 | 2015 年 | 2025 年 2 月 |
+| コンピュート確保方法 | Stargate / Microsoft Azure | Nvidia と直接複数年契約 |
+| 調達額 | $55B+ | $2B+ |
+| 主な投資家 | SoftBank, Microsoft, a16z | a16z, Accel, Nvidia |
+| プロダクト | ChatGPT, API, GPT-5.x | 未発表（frontier モデル開発中） |
+
+Nvidia が出資する意味は大きい。チップメーカーが特定のスタートアップに「戦略的投資」することは、開発ロードマップへの優先アクセスや供給保証の含意を持つ。OpenAI が Microsoft・SoftBank という資本を通じてコンピュートを確保したのに対し、Thinking Machines は Nvidia との直接契約で同等のパスを開いた。
+
+> "AI is the most powerful knowledge discovery instrument in human history. Thinking Machines has brought together a world-class team to advance the frontier of AI."
+> — Jensen Huang（Nvidia CEO）
+
+## AI コンピュート獲得競争の現在地
+
+2025〜2026 年、大手 AI スタートアップが gigawatt スケールのコンピュート争奪戦を繰り広げている。
+
+| スタートアップ | コンピュート供給元 | 規模 | 時期 |
+|--------------|-----------------|------|------|
+| OpenAI | Microsoft Azure + Stargate | GW 〜 数 GW（計画） | 2025〜 |
+| xAI（Elon Musk） | Colossus + Oracle | GW 級 | 2024〜 |
+| Anthropic | Amazon AWS + Google Cloud | 大規模（非公開） | 継続中 |
+| Mistral | 欧州 DC（自社） | 数十 MW 規模 | 2025〜 |
+| **Thinking Machines** | **Nvidia 直接契約** | **1GW** | **2027〜** |
+
+GPT-4 時代を動かした技術者が設立1年でこのポジションに立った事実は、AI 産業の資本集中の速度を象徴している。
+
+## 日本への示唆
+
+### コンピュートの「土地争い」で日本は後手
+
+1GW 規模の計算資源を確保できるのは、現状では Tier 1 の米国 AI 企業群に限られる。日本の AI スタートアップはこの構造的非対称性に直面している。
+
+| 主体 | コンピュート規模（推定） | 課題 |
+|------|----------------------|------|
+| Thinking Machines | 1GW（2027〜） | なし（Nvidia と直接契約） |
+| xAI | GW 級 | — |
+| Sakana AI（日本） | 非公開（数 MW 推定） | 資金規模、国内電力制約 |
+| Preferred Networks | 自社 MN-Core + GPU クラスタ | 汎用 LLM より特化型優先 |
+| NTT グループ | DC 拡張中（数十〜百 MW 規模） | 国内電力容量制約 |
+
+### 電力・インフラの構造的ボトルネック
+
+日本ではデータセンターの電力確保が構造的なネックになっている。関東圏の電力容量は逼迫しており、新設 DC の審査が厳格化している。東北・北海道への DC 分散が進んでいるが、1GW スケールの施設を国内に建設するには電力インフラの抜本整備が前提になる。
+
+経済産業省は AI 向けデータセンター整備を国家戦略として推進しているが、SoftBank が推進する Stargate との比較では一周遅れと言わざるを得ない。
+
+### Vera Rubin へのアクセス格差
+
+Thinking Machines のような米国 AI ラボは Nvidia と「長期契約 + 戦略的出資」のパッケージでチップを優先確保する。日本企業は通常、NTT・ソフトバンク・富士通を経由した調達になり、優先アロケーションの交渉力で劣る。
+
+| 観点 | 米国 frontier ラボ | 日本 AI 企業 |
+|------|-----------------|------------|
+| Nvidia との関係 | 直接契約・共同出資 | 代理店・クラウド経由 |
+| 優先供給 | あり（パートナー枠） | なし（一般枠） |
+| Vera Rubin 入手時期 | 2026年H2〜2027年 | 遅延リスクあり |
+| コンピュートコスト | 大量発注で割安 | スポット調達で割高 |
+
+Vera Rubin が出荷開始するタイミングで日本企業が同じ性能水準のインフラに到達するまでのラグが、モデル品質の差に直結する。
+
+## まとめ
+
+| ポイント | 内容 |
+|----------|------|
+| 1GW 契約 | 75 万世帯分の電力相当を単一スタートアップが確保 |
+| Vera Rubin | Blackwell 比 5x 推論性能・10x コスト削減。2026年H2 出荷開始 |
+| Nvidia の意図 | 投資 + 供給で frontier AI ラボとのエコシステム統合を深化 |
+| Mira Murati | OpenAI 卒業後わずか1年で $2B 調達 + gigawatt コンピュート確保 |
+| 日本への影響 | コンピュート格差がモデル品質格差に直結。電力・インフラ整備の遅れが課題 |
+
+「誰が計算資源を持つか」が AI の競争構造を決定する時代が到来した。土地を持つ者が農業を制したように、コンピュートを持つ者が frontier AI を制する。Thinking Machines × Nvidia の 1GW 契約はその再編の象徴だ。
+
+## 参考リンク
+
+- [NVIDIA and Thinking Machines Lab Announce Long-Term Gigawatt-Scale Strategic Partnership | NVIDIA Blog](https://blogs.nvidia.com/blog/nvidia-thinking-machines-lab/)
+- [Thinking Machines Lab inks massive compute deal with Nvidia | TechCrunch](https://techcrunch.com/2026/03/10/thinking-machines-lab-inks-massive-compute-deal-with-nvidia/)
+- [Nvidia makes 'significant investment' in Mira Murati's Thinking Machines Lab | CNBC](https://www.cnbc.com/2026/03/10/nvidia-mira-murati-thinking-machines-lab-ai.html)
+- [Thinking Machines Lab's Mira Murati commits to a gigawatt of Nvidia compute | Axios](https://www.axios.com/2026/03/10/nvidia-thinking-machines-mira-murati)
+- [NVIDIA Vera Rubin NVL72: 5x greater inference performance over Blackwell | Tom's Hardware](https://www.tomshardware.com/pc-components/gpus/nvidia-launches-vera-rubin-nvl72-ai-supercomputer-at-ces-promises-up-to-5x-greater-inference-performance-and-10x-lower-cost-per-token-than-blackwell-coming-2h-2026)
+- [Nvidia says Rubin will deliver 5x AI inference boost over Blackwell | HPCwire](https://www.hpcwire.com/2026/01/05/nvidia-says-rubin-will-deliver-5x-ai-inference-boost-over-blackwell/)
