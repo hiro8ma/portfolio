@@ -80,9 +80,12 @@ Claude Code / Codex のリリースノートテキストを受け取り、Anthro
 </head>
 <body>
   <div class="header">      <!-- バージョン + カテゴリバッジ -->
-  <div class="body">        <!-- 2カラムグリッド -->
-    <div class="col">       <!-- 左: 新機能 + バグ修正前半 -->
-    <div class="col">       <!-- 右: バグ修正後半 + 改善 + 変更 + 非推奨 -->
+  <div class="body">        <!-- 1カラム、スクロールなし -->
+    <div class="card">      <!-- カテゴリごとのカード: 角丸 + 薄い背景 + 左ボーダー -->
+      <div class="card-label">  <!-- カテゴリ名 -->
+      <ul class="items">        <!-- 項目リスト -->
+    </div>
+    <!-- 各カテゴリ分繰り返し -->
   </div>
   <div class="footer">      <!-- Anthropic + claude.ai/code -->
 </body>

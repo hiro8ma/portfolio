@@ -328,22 +328,22 @@ Claude Code / Codex 関連のアップデートをチェック:
 
 ■ チェック1: Claude Code CLI バージョン
 1. brew info claude-code --json=v2 | jq -r '.[0].version' でバージョン確認
-2. ~/.claude-code-version と比較
+2. .versions/claude-code と比較
 3. 新バージョンなら CHANGELOG.md を取得して分析
 
 ■ チェック2: Claude Code 公式ブログ
 1. https://claude.com/blog-category/claude-code の最新記事を確認
-2. ~/.claude-blog-last-check に前回チェックした記事タイトルを保存
+2. .versions/claude-blog-last-check に前回チェックした記事タイトルを保存
 3. 新しい記事があれば内容を取得して分析
 
 ■ チェック3: Codex CLI バージョン
 1. brew info codex | sed -n 's/^==> codex: //p' | head -1 でバージョン確認
-2. ~/.codex-version と比較
+2. .versions/codex と比較
 3. 新バージョンなら https://developers.openai.com/codex/changelog を取得して分析
 
 ■ チェック4: Codex 公式発信
 1. https://developers.openai.com/blog/topic/codex の最新記事を確認
-2. ~/.codex-blog-last-check に前回チェックした記事タイトルを保存
+2. .versions/codex-blog-last-check に前回チェックした記事タイトルを保存
 3. 新しい記事があれば内容を取得して分析
 
 ■ 共通
