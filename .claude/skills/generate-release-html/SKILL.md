@@ -1,12 +1,12 @@
 ---
 name: generate-release-html
-description: Claude Code / Codex のリリースノートテキストを Anthropic カラーの日本語 HTML 画像（900x900px・2カラム）として出力する
+description: Claude Code / Codex のリリースノートテキストを Anthropic カラーの日本語 HTML 画像（900x900px・1カラム・カード表示）として出力する
 disable-model-invocation: true
 user-invocable: true
 allowed-tools: Bash, Read, Write, Edit, Glob, Grep
 ---
 
-Claude Code / Codex のリリースノートテキストを受け取り、Anthropic カラーの日本語 HTML 画像（900×900px・2カラム）として出力する。
+Claude Code / Codex のリリースノートテキストを受け取り、Anthropic カラーの日本語 HTML 画像（900×900px・1カラム・カード表示）として出力する。
 
 ## 入力形式
 
@@ -19,7 +19,7 @@ Claude Code / Codex のリリースノートテキストを受け取り、Anthro
 - ファイル: `release-notes-{バージョン番号}.html`（例: `release-notes-2172.html`）
 - 保存先: `~/Desktop/`
 - サイズ: `width: 900px; height: 900px; overflow: hidden`（スクショで正方形画像になる想定）
-- レイアウト: 2カラムグリッド（左右均等）
+- レイアウト: 1カラム・カード表示（カテゴリごとにカードを縦に並べる）
 
 ## デザイン仕様
 
@@ -52,8 +52,8 @@ Claude Code / Codex のリリースノートテキストを受け取り、Anthro
 ### 構成要素
 
 1. **ヘッダー**: バージョン番号（コッパー）+ 製品名 + カテゴリ別件数バッジ
-2. **本文**: 左右2カラム、カテゴリセクションごとにタグ＋仕切り線＋項目リスト
-3. **各項目**: カラードット＋テキスト（`code` はインラインコードスタイル）
+2. **本文**: 1カラム、カテゴリごとにカード（角丸 + 薄い背景色 + 左ボーダー）を縦に並べる
+3. **各カード**: カテゴリラベル + 項目リスト（カラードット＋テキスト、`code` はインラインコードスタイル）
 4. **フッター**: "Anthropic" ロゴ + "claude.ai/code"
 
 ## 分類ルール
@@ -66,7 +66,7 @@ Claude Code / Codex のリリースノートテキストを受け取り、Anthro
 - Changed → 変更
 - Deprecated → 非推奨
 
-項目数が多い場合（バグ修正8件超など）は、同カテゴリを左右カラムに分割して「（続き）」と付記する。
+項目数が多い場合は、カード内で2列グリッドにして項目を並べてもよい。
 
 ## HTML テンプレート構造
 

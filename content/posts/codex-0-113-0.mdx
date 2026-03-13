@@ -1,0 +1,190 @@
+---
+title: "Codex 0.113.0 リリース — 実行中の権限要求、プラグインマーケットプレイス、TTY/PTY サポート"
+date: "2026-03-10"
+description: "Codex 0.113.0 の主要変更。実行ターン中の動的権限要求、プラグイン管理の強化、コマンド実行への TTY/PTY 対応、permission-profile 設定言語など"
+tags: ["codex", "openai", "ai", "cli", "release"]
+---
+
+## Codex 0.113.0 がリリース
+
+[Codex CLI](https://github.com/openai/codex) の 0.113.0 がリリースされた。
+
+今回は機能の幅が広い。実行中の権限要求（`request_permissions`）、プラグインマーケットプレイス、TTY/PTY サポート、新しい permission-profile 設定言語と、ワークフロー周りが一気に強化された。
+
+## 新機能
+
+### request_permissions ツール — 実行中の動的権限要求
+
+ターンの実行中に追加権限を要求できる `request_permissions` ツールが追加された。
+
+これまで Codex が実行前に権限を確認していたのに対し、実行中に「この操作に権限が必要です」と要求できるようになった。TUI 側にも承認 UI が追加されている。
+
+**従来のフロー:**
+```
+実行前 → 権限確認 → 承認 → 実行
+```
+
+**新しいフロー:**
+```
+実行開始 → 作業中 → 権限が必要になったら要求 → 承認 → 続行
+```
+
+実行途中で初めて必要になる権限（例: 特定ディレクトリへの書き込み）を、あらかじめすべて許可しておかなくて済む。
+
+### プラグインマーケットプレイス
+
+プラグイン管理が大幅に強化された。
+
+**追加された機能:**
+
+| 機能 | 説明 |
+|------|------|
+| マーケットプレイス発見 | キュレートされたプラグイン一覧から選べる |
+| `plugin/list` メタデータ | インストール済みプラグインの詳細情報が取得可能に |
+| インストール時認証チェック | プラグインインストール時に必要な認証を事前確認 |
+| `plugin/uninstall` エンドポイント | アンインストールが正式対応 |
+
+### app-server コマンド実行の強化 — TTY/PTY サポート
+
+`command/exec` にストリーミング stdin/stdout/stderr と TTY/PTY サポートが追加された。
+
+インタラクティブな CLI ツールや、ターミナルのカラー出力・プログレスバーに依存するコマンドが正しく動くようになる。
+
+```bash
+# インタラクティブなツールが Codex 経由で正しく動作するようになる
+codex exec "run the interactive setup wizard"
+```
+
+### Web 検索設定の拡充
+
+Web 検索が on/off の切り替えだけでなく、詳細なツール設定を受け付けるようになった。
+
+```toml
+# config.toml
+[web_search]
+enabled = true
+location = "JP"
+safe_search = "strict"
+```
+
+フィルタや位置情報など、検索クエリの質を上げる設定が可能になった。
+
+### permission-profile 設定言語
+
+`config.toml` に新しい permission-profile の設定言語が追加された。filesystem と network のサンドボックスポリシーを個別に定義できる。
+
+```toml
+# config.toml
+[[permission_profile]]
+name = "my-profile"
+
+[permission_profile.filesystem]
+read = ["~/projects", "/tmp"]
+write = ["~/projects/output"]
+
+[permission_profile.network]
+allow = ["api.github.com", "*.anthropic.com"]
+```
+
+より細かいサンドボックス制御が設定ファイルで管理できるようになった。
+
+### 画像生成の出力先変更
+
+画像生成ツールの出力ファイルが、カレントディレクトリに保存されるようになった。
+
+```bash
+# 生成した画像がカレントディレクトリに保存される
+codex exec "generate a diagram of the architecture"
+# → ./diagram.png
+```
+
+## バグ修正
+
+### git コマンドの早期実行問題
+
+**問題**: project trust が確立する前に `git` コマンドが実行されていた
+
+**修正済み**。trust bootstrap の処理順を修正。
+
+### Windows PTY の TerminateProcess 問題
+
+**問題**: Windows で PTY のプロセス終了ハンドリングが反転していた（成功/失敗の判定が逆）
+
+**修正済み**。
+
+### ネットワークプロキシのグローバルワイルドカード
+
+**問題**: ネットワークプロキシポリシーでグローバルワイルドカード `*` を指定できてしまっていた
+
+```toml
+# これが通ってしまっていた（意図しない全通し設定）
+allow = ["*"]
+```
+
+**修正済み**。`*` を拒否しつつ、スコープ付きワイルドカード（例: `*.github.com`）は引き続き使える。
+
+### 認証エラーハンドリングの改善
+
+**問題**: cloud requirements の取得で 401 エラーが出ると、通常の認証回復メッセージではなく汎用のワークスペース設定エラーになっていた
+
+**修正済み**。401 は正しく認証フローに誘導されるようになった。
+
+### macOS 自動化権限の互換性
+
+**問題**: macOS の automation 権限承認ペイロードが 2 種類の入力形式を受け付けていなかった
+
+**修正済み**。両方の形式に対応。
+
+## 改善・その他
+
+### ログの SQLite 移行
+
+ログが専用の SQLite データベースに移行された。
+
+| 変更点 | 内容 |
+|--------|------|
+| タイムスタンプ | フィードバックログにタイムスタンプを追加 |
+| 保持期間 | 10日間に短縮 |
+| 行制限 | テーブルごとの最大行数を設定 |
+| 分離 | ログ専用 DB として切り出し |
+
+起動時間の短縮とストレージ消費の削減が目的。
+
+### Windows: winget 自動更新
+
+Windows 向けに winget 経由の自動更新配布が対応した。
+
+```powershell
+winget upgrade openai.codex
+```
+
+## アップデート方法
+
+```bash
+brew upgrade codex
+```
+
+または npm 経由:
+
+```bash
+npm update -g @openai/codex
+```
+
+## まとめ
+
+Codex 0.113.0 の主要な変更:
+
+| カテゴリ | 内容 |
+|---------|------|
+| **権限管理** | 実行中の動的権限要求（`request_permissions`） |
+| **プラグイン** | マーケットプレイス、メタデータ、アンインストール対応 |
+| **実行環境** | TTY/PTY サポートでインタラクティブ CLI が動作 |
+| **設定** | permission-profile 設定言語でサンドボックスを細かく制御 |
+| **セキュリティ** | ワイルドカードプロキシの制限、git 実行タイミングの修正 |
+
+`request_permissions` ツールと permission-profile 設定言語は、Codex を本番ワークフローに組み込む際のセキュリティコントロールを大きく改善する。実行前に全権限を開放するか、実行させないかの二択だったところから、実行中に必要な権限だけを動的に許可できるようになった。
+
+## 参考リンク
+
+- [Codex GitHub](https://github.com/openai/codex)
+- [Release Notes v0.113.0](https://github.com/openai/codex/releases/tag/rust-v0.113.0)
