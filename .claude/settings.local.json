@@ -10,7 +10,8 @@
       "WebSearch",
       "WebFetch",
       "mcp__playwright__browser_evaluate",
-      "mcp__Claude_Preview__preview_start"
+      "mcp__Claude_Preview__preview_start",
+      "mcp__playwright__browser_navigate"
     ]
   }
 }
