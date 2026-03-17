@@ -1,0 +1,152 @@
+---
+title: "NVIDIA GTC 2026 キーノート — $1兆注文・東京ロボタクシー・Groq 3 LPU で AI インフラの覇権が固まった"
+date: "2026-03-17"
+description: "2026年3月16日、NVIDIA GTC 2026 キーノートで Jensen Huang が Vera Rubin GPU、Groq 3 LPU、AWS への 100万 GPU 展開、東京ロボタクシー pilot（Nissan + Wayve + Uber）を発表。Blackwell と Vera Rubin に $1 兆の受注残が積み上がった。"
+tags: ["nvidia", "gtc-2026", "vera-rubin", "robotaxi", "japan", "ai-infrastructure"]
+---
+
+## 概要
+
+2026年3月16日、NVIDIA は GTC 2026 キーノートを San Jose で開催した。
+
+Jensen Huang は Blackwell・Vera Rubin GPU の累計受注が **$1 兆（約 150 兆円）** に達したと明言。同日、Vera Rubin 世代の詳細スペック、NVIDIA による **Groq 買収**後初のアクセラレータ「Groq 3 LPU」、AWS への **100 万 GPU 展開**、そして日本に直接関わる **Nissan LEAF ベースの東京ロボタクシー pilot** を一挙発表した。
+
+---
+
+## Vera Rubin GPU — Blackwell の 5 倍推論性能
+
+Vera Rubin は 2025年発表済みだったが、GTC 2026 でアーキテクチャの詳細が公開された。
+
+| メトリクス | Vera Rubin | Blackwell 比 |
+|-----------|-----------|------------|
+| トランジスタ数 | 3,360 億（デュアルダイ） | 1.6x |
+| メモリ | 最大 288 GB HBM4 | HBM4 世代初 |
+| メモリ帯域 | 22 TB/s | 2.8x |
+| 推論性能（NVFP4） | 50 PFLOPS | 5x |
+| 学習性能（NVFP4） | 35 PFLOPS | 3.5x |
+| 推論コスト | — | 10x 削減 |
+| NVLink | NVLink 6 | — |
+
+**NVL72 ラック**（72 GPU + 36 Vera CPU）では **3.6 EFLOPS** の推論性能と 260 TB/s のスケールアップ帯域を達成。
+
+**Vera Rubin Ultra**（2027 年予定）はトランジスタ数 ~5,000 億、メモリ 384 GB HBM4E、帯域 32 TB/s まで拡張される。
+
+---
+
+## Groq 3 LPU — $200 億買収が生んだ超低レイテンシ推論
+
+2025年12月に NVIDIA が **$200 億で Groq を買収**したが、GTC 2026 が統合後初の製品発表だった。
+
+| メトリクス | Groq 3 LPU | Vera Rubin GPU |
+|-----------|-----------|--------------|
+| オンチップ SRAM | 500 MB/チップ | HBM4（外部） |
+| オンチップ帯域 | 150 TB/s | 22 TB/s |
+| ラック構成 | Groq LPX: 256 LPU | NVL72: 72 GPU |
+| ラック SRAM | 128 GB | — |
+| ラック帯域 | 40 PB/s | 260 TB/s（NVLink） |
+| 出荷時期 | 2026 Q3 | 2026 年 |
+
+**役割分担が明確だ。** Vera Rubin GPU はプリフィル（高演算量の文脈理解）を担い、Groq 3 LPU はデコード（超低レイテンシのトークン生成）を担う。Spectrum-X でラック間を接続し、**分離推論（Disaggregated Inference）**を一枚のプラットフォームとして提供する。
+
+> 「NVIDIA はこれで推論の全レイヤーをカバーした」
+> — Tom's Hardware, 2026年3月16日
+
+この構造で NVIDIA は **最大 $45/百万トークン** の価格帯でサービスを提供できる。コモディティ GPU だけでは届かないレイテンシ要件（リアルタイムエージェント・音声・ロボット）が主ターゲットだ。
+
+---
+
+## AWS — 100 万 GPU 展開でクラウド AI の標準スタックに
+
+AWS との戦略的深化が正式発表された。
+
+| 項目 | 詳細 |
+|------|------|
+| 規模 | AWS グローバルリージョンに 100 万+ NVIDIA GPU を展開 |
+| 対象製品 | Blackwell, Vera Rubin, RTX PRO Blackwell Server, Groq 3 LPU |
+| 開始時期 | 2026 年 |
+| テーマ | "AI from pilot to production" |
+| ターゲット | エージェント AI ワークロード |
+
+「PoC から本番量産へ」という GTC 2026 の中心テーゼが、AWS という最大のクラウドプラットフォームで実装される。Anthropic Claude Partner Network が同週に発表した「$100M でエンタープライズ量産を加速する」方針と、インフラレイヤーで整合している。
+
+---
+
+## 自動運転 — Nissan LEAF が東京でロボタクシーを走らせる
+
+GTC 2026 で発表された **NVIDIA DRIVE Hyperion 採用**の自動車メーカー一覧。
+
+| メーカー | 地域 | レベル | パートナー | 特記 |
+|---------|------|--------|----------|------|
+| BYD | グローバル | Level 4 | — | GTC 2026 新規発表 |
+| Geely | グローバル | Level 4 | — | GTC 2026 新規発表 |
+| Hyundai | グローバル | Level 4 | — | GTC 2026 新規発表 |
+| Isuzu | 中国 | Level 4 | Tier IV | 自律バス |
+| **Nissan** | **東京** | **Level 4** | **Wayve + Uber** | **2026年後半 pilot** |
+
+**Nissan の東京 pilot 詳細：**
+
+- ベース車両: **Nissan LEAF**（電動）
+- 計算基盤: デュアル **NVIDIA DRIVE AGX Thor**
+- センサー: 360° カメラ + サラウンドレーダー + 前方 LiDAR
+- ソフトウェア: NVIDIA DriveOS + NVIDIA Halos（安全・サイバーセキュリティ）
+- タイムライン: 2026年後半、規制当局の認可を前提にパイロット開始
+
+GTC 2026 では実機プロトタイプが展示された。Uber が乗客配送インフラを提供し、Wayve が AI ドライビングソフトウェアを担う三社体制だ。
+
+---
+
+## 日本への示唆
+
+### Nissan の「NVIDIA 依存」と Toyota/Honda との戦略分岐
+
+Nissan が DRIVE Hyperion を採用したことで、日本の主要 OEM のチップ戦略の分岐が明確になりつつある。
+
+| OEM | チップ戦略 | 自動運転レベル（直近） | 備考 |
+|-----|-----------|-------------------|------|
+| Nissan | NVIDIA DRIVE Hyperion | Level 4（東京 pilot） | Wayve・Uber と協業 |
+| Toyota | 独自 + Woven Planet | Level 2+（ToyotaCare） | 内製・慎重路線 |
+| Honda | NVIDIA + Mobileye | Level 3（Legend） | マルチベンダー |
+| Subaru | Mobileye EyeQ | Level 2+ | 外販チップ依存 |
+
+Tesla が Dojo を廃止し AI5 チップ（TSMC/Samsung 外注 → Terafab 内製）に一本化したのとは対照的に、Nissan は NVIDIA エコシステムに乗る選択をした。自社チップ開発能力を持たない OEM にとって NVIDIA DRIVE Hyperion は現実解だが、**チップ供給を NVIDIA の価格・ロードマップに依存する構造**でもある。
+
+### Rapidus と Vera Rubin の 2nm 競争
+
+NVIDIA Vera Rubin は **TSMC の最先端ノード**（2nm 相当）で製造される見込みだ。一方、日本政府が $13B 以上を投じる **Rapidus** は北海道千歳に 2nm ファブを建設中で、2027年の本格稼働を目指している。
+
+| ファブ | ターゲットノード | 量産開始 | バックアップ顧客 |
+|-------|--------------|---------|--------------|
+| TSMC N2 | 2nm | 2025〜2026 | Apple, NVIDIA, AMD |
+| Samsung 2nm | 2nm | 2025〜2026 | Tesla AI5（試作） |
+| Rapidus 2A | 2nm 相当 | 2027 | IBM、国内向け |
+| Tesla Terafab | 2nm（目標） | 2027+ | Tesla 自社のみ |
+
+NVIDIA が TSMC に依存し続ける限り、Rapidus が NVIDIA の受注を取りにいく可能性はある。ただし Vera Rubin の量産スケールに Rapidus が対応できるかは 2027年時点で不明だ。
+
+### 東京ロボタクシーが問うもの
+
+東京での Nissan LEAF ロボタクシー pilot は、単なる技術デモではない。
+
+日本の道路交通法と自動運転の規制は 2023年の改正で Level 4 の公道走行を条件付きで認めた。Uber が乗客インフラとして参入するのは、日本のライドシェア解禁（2024年4月）と連動した動きだ。2026年後半の pilot が成功すれば、**東京が自動運転ロボタクシーの実用化都市として世界的な注目を集める**ことになる。
+
+---
+
+## まとめ
+
+- 2026年3月16日、NVIDIA GTC 2026 キーノートで Blackwell・Vera Rubin の累計受注が **$1 兆**に到達
+- Vera Rubin GPU（推論 5x）＋ Groq 3 LPU（150 TB/s オンチップ帯域）で推論の全レイヤーを NVIDIA が掌握
+- AWS に 100 万 GPU 展開。「PoC から本番へ」というテーゼがインフラレイヤーで具現化
+- **Nissan LEAF** が東京で Wayve・Uber と Level 4 ロボタクシー pilot へ。2026年後半を目標
+- 日本の OEM はチップ内製（Tesla路線）か NVIDIA 依存（Nissan路線）かの戦略分岐点に差し掛かっている
+
+---
+
+## 参考リンク
+
+- [NVIDIA GTC 2026: CEO Jensen Huang sees $1 trillion in orders for Blackwell and Vera Rubin | CNBC](https://www.cnbc.com/2026/03/16/nvidia-gtc-2026-ceo-jensen-huang-keynote-blackwell-vera-rubin.html)
+- [BYD, Geely, Isuzu and Nissan Adopt NVIDIA DRIVE Hyperion for Level 4 Vehicles | NVIDIA Newsroom](https://nvidianews.nvidia.com/news/drive-hyperion-level-4)
+- [Wayve and Nissan to exhibit global robotaxi prototype for Uber trials | Nissan News](https://usa.nissannews.com/en-US/releases/wayve-and-nissan-to-exhibit-global-robotaxi-prototype-vehicle-powered-by-nvidia-drive-hyperion-for-uber-trials)
+- [Uber, Wayve, and Nissan are bringing robotaxis to Tokyo | The Next Web](https://thenextweb.com/news/uber-wayve-nissan-tokyo-robotaxi-pilot)
+- [AWS and NVIDIA deepen strategic collaboration | AWS Blog](https://aws.amazon.com/blogs/machine-learning/aws-and-nvidia-deepen-strategic-collaboration-to-accelerate-ai-from-pilot-to-production/)
+- [NVIDIA Groq 3 LPU and Groq LPX racks join Rubin platform at GTC | Tom's Hardware](https://www.tomshardware.com/pc-components/gpus/nvidia-groq-3-lpu-and-groq-lpx-racks-join-rubin-platform-at-gtc-sram-packed-accelerator-boosts-every-layer-of-the-ai-model-on-every-token)
+- [NVIDIA Vera Rubin NVL72 Detailed | VideoCardz](https://videocardz.com/newz/nvidia-vera-rubin-nvl72-detailed-72-gpus-36-cpus-260-tb-s-scale-up-bandwidth)
