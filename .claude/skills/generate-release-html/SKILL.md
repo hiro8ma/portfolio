@@ -1,12 +1,13 @@
 ---
 name: generate-release-html
-description: Claude Code / Codex のリリースノートテキストを Anthropic カラーの日本語 HTML 画像（900x900px・1カラム・カード表示）として出力する
+description: Claude Code / Codex のリリースノートテキストを各ブランドカラーの日本語 HTML 画像（900x900px・1カラム・カード表示）として出力する
 disable-model-invocation: true
 user-invocable: true
 allowed-tools: Bash, Read, Write, Edit, Glob, Grep
 ---
 
-Claude Code / Codex のリリースノートテキストを受け取り、Anthropic カラーの日本語 HTML 画像（900×900px・1カラム・カード表示）として出力する。
+Claude Code / Codex のリリースノートテキストを受け取り、各ブランドカラーの日本語 HTML 画像（900×900px・1カラム・カード表示）として出力する。
+Claude Code → Anthropic カラー、Codex → OpenAI カラーを使い分ける。
 
 ## 入力形式
 
@@ -23,7 +24,7 @@ Claude Code / Codex のリリースノートテキストを受け取り、Anthro
 
 ## デザイン仕様
 
-### カラーパレット（Anthropic カラー）
+### カラーパレット — Claude Code（Anthropic カラー）
 
 | 用途 | カラー |
 |------|--------|
@@ -33,7 +34,7 @@ Claude Code / Codex のリリースノートテキストを受け取り、Anthro
 | ミュート | `#8a7d6e` |
 | ボーダー | `#e0d8cc` |
 
-### カテゴリ別カラー
+#### カテゴリ別カラー（Claude Code）
 
 | カテゴリ | 文字色 | 背景色 |
 |---------|--------|--------|
@@ -41,6 +42,26 @@ Claude Code / Codex のリリースノートテキストを受け取り、Anthro
 | バグ修正 | `#cc785c` | `#fdf3ee` |
 | 改善 | `#4a6fa5` | `#eef2f8` |
 | 変更 | `#7a5ca0` | `#f4f0fa` |
+| 非推奨 | `#8a7020` | `#faf5e4` |
+
+### カラーパレット — Codex（OpenAI カラー）
+
+| 用途 | カラー |
+|------|--------|
+| 背景 | `#f7f7f8`（クールグレーホワイト） |
+| テキスト | `#171717`（ニアブラック） |
+| アクセント | `#10a37f`（OpenAI グリーン） |
+| ミュート | `#6e6e80` |
+| ボーダー | `#d9d9e3` |
+
+#### カテゴリ別カラー（Codex）
+
+| カテゴリ | 文字色 | 背景色 |
+|---------|--------|--------|
+| 新機能 | `#10a37f` | `#e6f7f2` |
+| バグ修正 | `#cf4e2e` | `#fdf0ed` |
+| 改善 | `#2e6fba` | `#eaf1fb` |
+| 変更 | `#7c5cbf` | `#f3effc` |
 | 非推奨 | `#8a7020` | `#faf5e4` |
 
 ### フォント
@@ -51,10 +72,10 @@ Claude Code / Codex のリリースノートテキストを受け取り、Anthro
 
 ### 構成要素
 
-1. **ヘッダー**: バージョン番号（コッパー）+ 製品名 + カテゴリ別件数バッジ
+1. **ヘッダー**: バージョン番号（アクセント色）+ 製品名 + カテゴリ別件数バッジ
 2. **本文**: 1カラム、カテゴリごとにカード（角丸 + 薄い背景色 + 左ボーダー）を縦に並べる
 3. **各カード**: カテゴリラベル + 項目リスト（カラードット＋テキスト、`code` はインラインコードスタイル）
-4. **フッター**: "Anthropic" ロゴ + "claude.ai/code"
+4. **フッター**: Claude Code → "Anthropic" + "claude.ai/code" / Codex → "OpenAI" + "developers.openai.com/codex"
 
 ## 分類ルール
 
