@@ -1,0 +1,260 @@
+---
+title: "Claude Dispatch 完全ガイド — スマホから PC の AI エージェントを遠隔操作"
+date: "2026-03-18"
+description: "Anthropic が Cowork に Dispatch 機能を追加。スマホで QR スキャンするだけで、PC 上の Claude エージェントをリモートコントロール。セットアップ方法、できること、制限事項を徹底解説"
+tags: ["anthropic", "claude", "cowork", "dispatch", "ai-agents", "mobile", "productivity"]
+---
+
+## Claude Dispatch とは
+
+2026年3月17日、Anthropic は **Claude Dispatch** を発表した。
+
+Dispatch は Claude Cowork の新機能で、**スマートフォンを PC 上の AI エージェントのリモコンにする**。モバイルアプリとデスクトップアプリの会話が同期され、外出先から PC の Claude に作業を指示できる。
+
+## どんな問題を解決するのか
+
+従来の Cowork は「PC の前にいないと使えない」という制約があった。
+
+| 状況 | 従来の Cowork | Dispatch 対応後 |
+|------|--------------|----------------|
+| 通勤中 | 使えない | スマホから指示 |
+| 会議中 | 使えない | 裏で作業継続 |
+| カフェで PC なし | 使えない | PC の Claude を遠隔操作 |
+
+Dispatch により、**24時間どこからでも** PC の Claude エージェントに作業を依頼できるようになった。
+
+## セットアップ方法
+
+### 必要なもの
+
+- **Claude Desktop アプリ**（最新版）
+- **Claude モバイルアプリ**（iOS / Android）
+- **有料プラン**（Max または Pro）
+
+### 手順
+
+1. Claude Desktop アプリを最新版にアップデート
+2. Cowork モードで「Dispatch」オプションをクリック
+3. 表示される **QR コードをスマホでスキャン**
+4. モバイルアプリとデスクトップがペアリング完了
+
+これだけ。数秒で設定完了。
+
+### 重要な前提条件
+
+| 条件 | 詳細 |
+|------|------|
+| **PC の状態** | スリープ解除＆アプリ起動中が必須 |
+| **ネットワーク** | PC・スマホ両方がインターネット接続 |
+| **プラン** | Max は即日、Pro は数日後から利用可能 |
+
+## できること
+
+Dispatch を使うと、スマホから以下のような作業を Claude に依頼できる。
+
+### 1. ローカルファイル操作
+
+```
+「デスクトップの sales_data.xlsx から今月の売上サマリーを作って」
+```
+
+PC 上のスプレッドシートを読み込み、レポートを生成。
+
+### 2. マルチソース統合
+
+```
+「Slack と Gmail から今日のメンションを要約して、ブリーフィングを作成」
+```
+
+Connectors 経由で複数のサービスから情報を収集し、一つのドキュメントにまとめる。
+
+### 3. プレゼン作成
+
+```
+「Google Drive の資料から来週のプレゼンスライドを作って」
+```
+
+Google Workspace 連携で、ドライブのファイルからプレゼンを自動生成。
+
+### 4. ファイル整理
+
+```
+「Downloads フォルダを種類別に整理して」
+```
+
+大量のファイルを自動分類・リネーム。
+
+## Connectors との連携
+
+Dispatch は Cowork で設定済みの **Connectors** をすべて利用できる。
+
+### 利用可能な主要 Connectors
+
+| サービス | できること |
+|----------|-----------|
+| **Slack** | メッセージ検索、送信 |
+| **Gmail** | メール検索、下書き作成 |
+| **Google Drive** | ファイル検索、作成 |
+| **Linear** | Issue 作成、検索 |
+| **Notion** | ページ検索、作成 |
+| **GitHub** | PR、Issue 操作 |
+
+50以上のツールと連携可能。
+
+## Scheduled Tasks との組み合わせ
+
+Dispatch は **Scheduled Tasks**（スケジュールタスク）と組み合わせると真価を発揮する。
+
+### 活用例
+
+| タスク | スケジュール | 効果 |
+|--------|-------------|------|
+| 朝のブリーフィング | 毎日 6:00 | 出社前にメール・Slack 要約を確認 |
+| 週次レポート | 毎週金曜 17:00 | 週の成果を自動まとめ |
+| 競合価格監視 | 毎日 12:00 | 競合の価格変動をトラッキング |
+| ファイルクリーンアップ | 毎週日曜 10:00 | 不要ファイルを自動整理 |
+
+### スケジュールタスクの設定方法
+
+```
+/schedule "毎朝の Slack・メール要約" daily 6:00
+```
+
+ただし、**PC がスリープ状態だとタスクはスキップ**される点に注意。
+
+## セキュリティとプライバシー
+
+### ローカル実行の維持
+
+Dispatch を使っても、**Claude の処理は PC 上で実行**される。
+
+| 項目 | 詳細 |
+|------|------|
+| **データの送信先** | Anthropic API（TLS 暗号化） |
+| **ファイルアクセス** | 許可したフォルダのみ |
+| **AI 学習への利用** | API 経由のデータは学習に使用されない |
+
+### 通信の仕組み
+
+1. スマホからの指示 → Anthropic サーバー
+2. サーバー → PC の Claude Desktop へルーティング
+3. Claude がローカルで実行
+4. 結果 → サーバー経由でスマホへ
+
+**インバウンドポートは開かない**。PC からのアウトバウンド HTTPS のみ。
+
+## 現在の制限事項
+
+Dispatch はまだ **リサーチプレビュー** 段階。いくつかの制限がある。
+
+### 成功率
+
+| 項目 | 現状 |
+|------|------|
+| **タスク成功率** | 約 50% |
+| **Connectors 動作** | 動くが遅い |
+| **複雑なタスク** | 失敗しやすい |
+
+初期テストでは、約半分のタスクしか期待通りに完了しない。
+
+### その他の制限
+
+| 制限 | 詳細 |
+|------|------|
+| **PC のスリープ** | スリープ中は動作不可 |
+| **オフライン** | PC・スマホ両方がオンライン必須 |
+| **対応 OS** | macOS のみ（Windows は未対応） |
+
+## 競合との比較
+
+### Claude Dispatch vs OpenAI Operator
+
+| | Claude Dispatch | OpenAI Operator |
+|---|-----------------|-----------------|
+| **実行環境** | ローカル PC | クラウド VM |
+| **ファイルアクセス** | ローカルファイル直接 | なし |
+| **Web 操作** | Connectors 経由 | ブラウザ直接操作 |
+| **プライバシー** | データがローカルに残る | クラウドで処理 |
+| **得意分野** | デスクトップ作業 | Web タスク |
+
+Dispatch は「ローカル PC の作業」、Operator は「Web ブラウジング」が得意。
+
+### Claude Code Remote Control との違い
+
+| | Dispatch | Remote Control |
+|---|----------|----------------|
+| **対象** | Cowork（GUI） | Claude Code（CLI） |
+| **ユーザー層** | 一般ユーザー | 開発者 |
+| **起動方法** | Cowork 内のオプション | `/rc` コマンド |
+
+開発者は Remote Control、非エンジニアは Dispatch という棲み分け。
+
+## 実践的なユースケース
+
+### 1. 営業担当者
+
+```
+朝: スマホで「今日の商談先の最新ニュースをまとめて」
+Claude: PC の CRM と Web から情報収集 → レポート生成
+通勤中: スマホで確認
+```
+
+### 2. プロダクトマネージャー
+
+```
+会議中: 「今週の GitHub Issue をステータス別に整理」
+Claude: Linear/GitHub から情報取得 → スプレッドシート作成
+会議後: PC で確認して共有
+```
+
+### 3. リサーチャー
+
+```
+外出中: 「論文フォルダから AI 関連の引用頻度をまとめて」
+Claude: ローカル PDF を解析 → レポート生成
+帰宅後: 完成したレポートを確認
+```
+
+## 今後の展望
+
+### 予想されるロードマップ
+
+| 時期 | 機能 |
+|------|------|
+| **2026 Q2** | Windows 対応 |
+| **2026 Q2** | 成功率の改善 |
+| **2026 H2** | Wake-on-LAN 連携（PC 自動起動） |
+| **2027** | 複数 PC の一括管理 |
+
+### Anthropic のビジョン
+
+Anthropic は Claude を **「24時間稼働のデジタル同僚」** にしようとしている。
+
+Dispatch は、
+- Cowork（デスクトップエージェント）
+- Scheduled Tasks（自動実行）
+- Connectors（外部サービス連携）
+
+これらを **モバイルから統合操作** する最後のピース。
+
+## まとめ
+
+Claude Dispatch のポイント：
+
+- **スマホで QR スキャン** → PC の Claude を遠隔操作
+- **ローカルファイル + Connectors** を外出先から利用
+- **Scheduled Tasks と組み合わせ** で24時間自動化
+- **成功率は約50%**（リサーチプレビュー段階）
+- **Max プランは今日から、Pro は数日後から利用可能**
+
+「PC の前にいなくても AI が働いてくれる」世界が、現実になりつつある。
+
+## 参考リンク
+
+- [Anthropic Dispatch Turns Claude Into Your Always-On Creative Coworker - COEY](https://coey.com/resources/blog/2026/03/17/anthropic-dispatch-turns-claude-into-your-always-on-creative-coworker/)
+- [Claude Cowork Dispatch - Latent Space](https://www.latent.space/p/ainews-claude-cowork-dispatch-anthropics)
+- [Assign tasks to Claude from anywhere in Cowork - Claude Help Center](https://support.claude.com/en/articles/13947068-assign-tasks-to-claude-from-anywhere-in-cowork)
+- [Get started with Cowork - Claude Help Center](https://support.claude.com/en/articles/13345190-get-started-with-cowork)
+- [Hands-On with Claude Dispatch for Cowork - MacStories](https://www.macstories.net/stories/hands-on-with-claude-dispatch-for-cowork/)
+- [Use connectors to extend Claude's capabilities - Claude Help Center](https://support.claude.com/en/articles/11176164-use-connectors-to-extend-claude-s-capabilities)
+- [Schedule recurring tasks in Cowork - Claude Help Center](https://support.claude.com/en/articles/13854387-schedule-recurring-tasks-in-cowork)
