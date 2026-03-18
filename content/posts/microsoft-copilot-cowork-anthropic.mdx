@@ -1,0 +1,111 @@
+---
+title: "Microsoft Copilot Cowork × Anthropic — Claude が M365 に融合し、$99/月 E7 で企業 AI が再定義された"
+date: "2026-03-18"
+description: "2026年3月9日、Microsoft が Anthropic と協業して Copilot Cowork を発表。M365 上でマルチステップのエージェント型タスクを実行し、新ティア M365 E7（$99/ユーザー/月）に同梱される。OpenAI との深い関係を持ちながら Anthropic とも組む「マルチモデル戦略」が企業 AI 市場を塗り替える。"
+tags: ["microsoft", "anthropic", "m365", "copilot", "enterprise-ai", "ai-agents"]
+---
+
+## 概要
+
+2026年3月9日、Microsoft は **Copilot Cowork** を発表した。Anthropic と共同開発したエージェント型 AI 機能で、M365 Copilot 上でメールの定期送信・会議準備・複数ステップのタスク実行を自動でこなす。
+
+同日、Microsoft は新ライセンスティア **M365 E7**（$99/ユーザー/月）も発表。Copilot + Agent 365 + Entra Suite をバンドルし、2026年5月1日から提供開始。M365 Copilot の商業ユーザーは 4.5億人にのぼるが、有料転換率はわずか **3.3%** にとどまる。E7 はその突破口として設計されている。
+
+---
+
+## Copilot Cowork とは何か
+
+Copilot Cowork は、Anthropic の **Claude Cowork**（デスクトップアプリ）と同じ「agentic harness」を使いながら、M365 のクラウドテナント内で動作する点が異なる。
+
+| 観点 | Copilot Cowork（Microsoft） | Claude Cowork（Anthropic） |
+|------|--------------------------|--------------------------|
+| 実行場所 | M365 クラウドテナント | ローカルデバイス |
+| データ保護 | 企業データ保護ポリシー適用 | デバイスに依存 |
+| コンテキスト | Work IQ（メール・ファイル・会議・チャット） | ローカルファイル中心 |
+| 価格 | $30/ユーザー/月（E7 に同梱） | Anthropic 側の課金 |
+| 提供時期 | 2026年3月〜 Frontier Preview | 2026年3月 GA |
+
+Work IQ は M365 内のメール・ドキュメント・Teamsチャット・会議録から自動的にコンテキストを構築する。「来週の取締役会向けに資料を準備して、関連ミーティング参加者に事前アジェンダを送信する」といったタスクを、人間の指示なしに複数ステップで遂行できる。
+
+---
+
+## M365 E7 — $99 の中身を解剖する
+
+M365 E7 は既存の E5 ライセンス体系に AI コンポーネントを加算した構成だ。
+
+| コンポーネント | 単体価格/月 | 内容 |
+|-------------|-----------|------|
+| M365 E5 | $57 | Office + Teams + advanced Security |
+| M365 Copilot | $30 | AI アシスタント（Copilot Cowork 含む） |
+| Agent 365 | $15 | AI エージェント管理・デプロイ基盤 |
+| Entra Suite | $12 | ID・アクセス管理（SSPR, PIM, etc.） |
+| **M365 E7 合計** | **$99** | 上記すべて（ただし割引後） |
+
+E5 から E7 への移行は実質 **65% の価格上昇**だが、個別に揃えると $114/月になる計算。バンドル割引として機能する構造だ。Microsoft は 2027年3月を転換目標としており、E7 への移行で $25B の追加収益を見込む。
+
+---
+
+## マルチモデル戦略 — OpenAI と並んで Anthropic も選べる
+
+M365 Copilot のモデルセレクターに Claude が加わった。
+
+| モデル | 用途 | 提供先 |
+|--------|------|--------|
+| OpenAI GPT-5.4 | 汎用（デフォルト） | 全 Copilot ユーザー |
+| Claude Sonnet 4.5 | 一般クエリ | EU/EFTA/UK 以外は自動有効 |
+| Claude Opus 4.5 | 深い推論・構造化クエリ | EU/EFTA/UK 以外は自動有効 |
+
+Microsoft の立場は明確だ。「モデルの選択権を企業に渡す」ことで、どちらのベンダーが優勢になっても Copilot プラットフォームが生き残る設計にした。OpenAI への依存リスクを分散しながら、エンタープライズ需要を囲い込む。
+
+**EU/EFTA・UK・政府クラウドは Claude 利用がデフォルトでオフ**。データ主権の観点から規制当局との調整が先行している。日本ではデフォルトでオンになる見込みだが、IT 管理者は M365 管理センターのトグルを確認すべきだ。
+
+---
+
+## 日本への示唆
+
+### M365 依存の日本企業に直撃する価格改定
+
+日本企業の M365 導入率は世界でも高水準で、メガバンク・大手 SI・官公庁のほぼすべてが E3/E5 ライセンスを使用している。E7 が 2026年5月から購入可能になることで、日本の IT 調達部門は三択を迫られる。
+
+| 選択肢 | コスト | メリット | デメリット |
+|--------|--------|---------|----------|
+| E5 維持 | 現行コスト | 変化なし | AI 機能は別途購入 |
+| E5 + Copilot 追加 | +$30/ユーザー | Copilot のみ取得 | Agent 365・Entra Suite 別管理 |
+| **E7 移行** | **+$42/ユーザー** | **全 AI バンドル** | **65% コスト増** |
+
+1万人規模の企業で全員 E7 に移行すると、**年間 $5M（約 7.5 億円）** の追加コストになる。日本の IT 予算の承認サイクルは年1回が多く、2026年度の予算に組み込めなかった企業は移行が 2027年度以降にずれ込む。
+
+### SI の再販ビジネスが変わる
+
+日本の SI はこれまで M365 ライセンスの再販で安定収益を得てきた。E7 の導入は単価を上げる一方で、AI エージェントの設計・導入・運用という新たな付加価値サービスの商機を開く。
+
+「ライセンスを売る」から「Copilot Cowork を業務フローに組み込む」へのシフトが加速する。この移行に出遅れた SI は、クラウド移行期に出遅れたのと同じ構図に陥る。
+
+### データ主権と Work IQ
+
+Copilot Cowork の Work IQ は、社内のメール・会議録・ドキュメントを AI が読み込む前提で動く。日本では個人情報保護法と社内規程の観点から、「AI に社内データを学習させる」ことへの懸念が根強い。
+
+Microsoft のデータ処理契約上、Copilot で処理したデータはモデル学習に使用されないと明示されているが、現場への説明と IT 部門の監査対応が不可欠になる。
+
+---
+
+## まとめ
+
+- 2026年3月9日、Microsoft が **Copilot Cowork**（Anthropic Claude 搭載）と **M365 E7**（$99/月）を発表
+- Copilot Cowork は M365 クラウド上でマルチステップのエージェント型タスクを実行。Work IQ が社内コンテキストを自動構築
+- M365 のモデルセレクターに Claude Sonnet/Opus 4.5 が追加。OpenAI と Anthropic を並列で使えるマルチモデル戦略へ
+- E5 から E7 移行は **65% の価格上昇**。日本の大企業では年間数億円規模の追加コストになる
+- 日本 SI にとっては「ライセンス再販」から「AI エージェント実装」への転換を迫られるターニングポイント
+
+---
+
+## 参考リンク
+
+- [Copilot Cowork: A new way of getting work done | Microsoft 365 Blog](https://www.microsoft.com/en-us/microsoft-365/blog/2026/03/09/copilot-cowork-a-new-way-of-getting-work-done/)
+- [Introducing the First Frontier Suite built on Intelligence + Trust | Microsoft Blog](https://blogs.microsoft.com/blog/2026/03/09/introducing-the-first-frontier-suite-built-on-intelligence-trust/)
+- [Microsoft debuts Copilot Cowork built with Anthropic's help and E7 software suite | Fortune](https://fortune.com/2026/03/09/microsoft-copilot-cowork-ai-agents-anthropic-e7-m365-saas/)
+- [Microsoft's new Copilot Cowork integrates Anthropic's Claude in rollout of new E7 licensing tier | GeekWire](https://www.geekwire.com/2026/microsofts-new-copilot-cowork-integrates-anthropics-claude-in-rollout-of-new-e7-licensing-tier/)
+- [M365 Copilot gets its own version of Claude Cowork | Computerworld](https://www.computerworld.com/article/4142551/m365-copilot-gets-its-own-version-of-claude-cowork.html)
+- [Anthropic Claude Sonnet is now available in Microsoft 365 Copilot | M365 Admin](https://m365admin.handsontek.net/anthropic-claude-sonnet-now-available-microsoft-365-copilot/)
+- [Microsoft adds higher-priced Office tier with Copilot | CNBC](https://www.cnbc.com/2026/03/09/microsoft-office-365-e7-copilot-ai.html)
+- [Microsoft 365 E7 Licensing Guide | SAMexpert](https://samexpert.com/microsoft-365-e7-licensing-guide/)
