@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <title>Codex CLI {{VERSION}}</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=DM+Mono:wght@400;500&family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #f7f7f8;
+      --text: #171717;
+      --accent: #10a37f;
+      --muted: #6e6e80;
+      --border: #d9d9e3;
+      --new-text: #10a37f;  --new-bg: #e6f7f2;  --new-border: #7dd4b8;
+      --fix-text: #cf4e2e;  --fix-bg: #fdf0ed;  --fix-border: #e8a090;
+      --imp-text: #2e6fba;  --imp-bg: #eaf1fb;  --imp-border: #90b8e0;
+      --chg-text: #7c5cbf;  --chg-bg: #f3effc;  --chg-border: #beade0;
+      --dep-text: #8a7020;  --dep-bg: #faf5e4;  --dep-border: #d4c878;
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      width: 900px; height: 900px; overflow: hidden;
+      background: var(--bg); color: var(--text);
+      font-family: 'Noto Sans JP', sans-serif;
+      display: flex; flex-direction: column;
+    }
+
+    /* ── header ── */
+    .header {
+      padding: 22px 32px 16px;
+      border-bottom: 1.5px solid var(--border);
+      display: flex; align-items: baseline; gap: 14px;
+      flex-shrink: 0;
+    }
+    .version {
+      font-family: 'Instrument Serif', serif;
+      font-size: 36px; color: var(--accent); line-height: 1;
+    }
+    .product { font-size: 16px; font-weight: 700; }
+    .badges { display: flex; gap: 6px; margin-left: auto; }
+    .badge {
+      font: 500 10px/1 'DM Mono', monospace;
+      padding: 4px 9px; border-radius: 12px;
+    }
+    .b-new { background: var(--new-bg); color: var(--new-text); }
+    .b-fix { background: var(--fix-bg); color: var(--fix-text); }
+    .b-imp { background: var(--imp-bg); color: var(--imp-text); }
+    .b-chg { background: var(--chg-bg); color: var(--chg-text); }
+    .b-dep { background: var(--dep-bg); color: var(--dep-text); }
+
+    /* ── body ── */
+    .content {
+      flex: 1; padding: 16px 28px 12px;
+      display: flex; flex-direction: column; gap: 10px;
+      overflow: hidden;
+    }
+
+    /* ── card ── */
+    .card {
+      border-radius: 10px; padding: 10px 16px;
+      border-left: 4px solid;
+    }
+    .card-new { background: var(--new-bg); border-left-color: var(--new-border); }
+    .card-fix { background: var(--fix-bg); border-left-color: var(--fix-border); }
+    .card-imp { background: var(--imp-bg); border-left-color: var(--imp-border); }
+    .card-chg { background: var(--chg-bg); border-left-color: var(--chg-border); }
+    .card-dep { background: var(--dep-bg); border-left-color: var(--dep-border); }
+
+    .card-label {
+      font-size: 10.5px; font-weight: 700;
+      letter-spacing: 0.05em; margin-bottom: 6px;
+    }
+    .card-new .card-label { color: var(--new-text); }
+    .card-fix .card-label { color: var(--fix-text); }
+    .card-imp .card-label { color: var(--imp-text); }
+    .card-chg .card-label { color: var(--chg-text); }
+    .card-dep .card-label { color: var(--dep-text); }
+
+    /* ── items ── */
+    .items {
+      list-style: none;
+      display: flex; flex-direction: column; gap: 3.5px;
+    }
+    .items-2col {
+      display: grid; grid-template-columns: 1fr 1fr;
+      gap: 3.5px 18px;
+    }
+    .item {
+      display: flex; align-items: flex-start; gap: 7px;
+      font-size: 11px; line-height: 1.5;
+    }
+    .dot {
+      width: 5px; height: 5px; border-radius: 50%;
+      flex-shrink: 0; margin-top: 5px;
+    }
+    .d-new { background: var(--new-text); }
+    .d-fix { background: var(--fix-text); }
+    .d-imp { background: var(--imp-text); }
+    .d-chg { background: var(--chg-text); }
+    .d-dep { background: var(--dep-text); }
+
+    code {
+      font-family: 'DM Mono', monospace; font-size: 9.5px;
+      background: rgba(0,0,0,.06); padding: 1px 4px;
+      border-radius: 3px; color: #333;
+    }
+
+    /* ── footer ── */
+    .footer {
+      padding: 10px 32px;
+      border-top: 1.5px solid var(--border);
+      display: flex; align-items: center; justify-content: space-between;
+      flex-shrink: 0;
+    }
+    .footer-brand {
+      font-family: 'Instrument Serif', serif;
+      font-size: 14px; color: var(--accent);
+    }
+    .footer-meta {
+      font-family: 'DM Mono', monospace;
+      font-size: 10px; color: var(--muted);
+    }
+  </style>
+</head>
+<body>
+
+  <!-- header -->
+  <div class="header">
+    <span class="version">{{VERSION}}</span>
+    <span class="product">Codex CLI</span>
+    <div class="badges">
+      <!-- {{BADGES}} -->
+      <!-- 例: <span class="badge b-new">新機能 5</span> -->
+    </div>
+  </div>
+
+  <!-- body -->
+  <div class="content">
+    <!-- {{CARDS}} -->
+    <!--
+    カードの書き方（カテゴリごとに1つ）:
+
+    <div class="card card-new">
+      <div class="card-label">新機能</div>
+      <ul class="items">
+        <li class="item"><span class="dot d-new"></span><span>項目テキスト</span></li>
+      </ul>
+    </div>
+
+    項目が7件以上の場合は <ul class="items items-2col"> で2列にする。
+
+    カテゴリと対応クラス:
+      新機能  → card-new / d-new / b-new
+      バグ修正 → card-fix / d-fix / b-fix
+      改善    → card-imp / d-imp / b-imp
+      変更    → card-chg / d-chg / b-chg
+      非推奨  → card-dep / d-dep / b-dep
+    -->
+  </div>
+
+  <!-- footer -->
+  <div class="footer">
+    <span class="footer-brand">OpenAI</span>
+    <span class="footer-meta">{{DATE}}</span>
+    <span class="footer-meta">developers.openai.com/codex</span>
+  </div>
+
+</body>
+</html>
