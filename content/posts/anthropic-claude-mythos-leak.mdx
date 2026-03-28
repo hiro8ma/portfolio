@@ -1,0 +1,125 @@
+---
+title: "Anthropic が「Claude Mythos」を誤って流出 — 能力の飛躍とサイバーリスクの二面性"
+date: "2026-03-28"
+description: "2026年3月26日、Anthropic の CMS 設定ミスにより未公開モデル Claude Mythos の詳細が外部から参照可能な状態になった。内部文書は「これまでで最も能力の高いモデル」と記し、Opus 4.6 を大幅に上回るベンチマーク結果と、前例のないサイバーセキュリティリスクへの警告を同時に含んでいた。"
+tags: ["anthropic", "claude", "ai-safety", "cybersecurity", "model-release"]
+---
+
+## 概要
+
+2026年3月26日、Anthropic のコンテンツ管理システム（CMS）の設定ミスにより、約3,000件の非公開アセットが一時的に外部から検索・取得できる状態になった。
+
+その中に含まれていたのが、未発表の新モデル **Claude Mythos**（内部コードネーム候補: Capybara）の詳細情報だ。Fortune がこの流出を報じた後、Anthropic は即座に公開アクセスを遮断した。モデル自体は現在、選定された早期アクセス顧客にのみ提供されている。
+
+---
+
+## 流出内容の詳細
+
+### 能力の飛躍
+
+流出した内部文書は Mythos を「これまでに構築した中で最も能力の高いモデル（the most capable model we've ever built）」と表現している。
+
+| ベンチマーク領域 | Opus 4.6 比 |
+|----------------|-------------|
+| コーディング | 劇的に高い（"dramatically higher"） |
+| 学術的推論 | 劇的に高い |
+| サイバーセキュリティ | 劇的に高い |
+
+数値の具体値は文書内で明示されていないが、"dramatic" という表現は Anthropic の社内文書では珍しく、能力の非線形な向上を示唆している。
+
+### サイバーセキュリティリスクへの警告
+
+内部文書が特に注目されたのは、能力の高さと同時に**前例のないサイバーリスク**を明記していたためだ。
+
+Mythos は、ソフトウェア脆弱性の**発見**と**悪用（weaponization）**の両方を加速させる可能性があるとされている。これは既存の Claude モデルにも一定のリスクがあるが、Mythos の能力水準では従来の安全策が通用しない懸念があることを示している。
+
+> 「このモデルはサイバーセキュリティの文脈において、私たちがこれまで構築してきたどのモデルよりも大きなリスクをはらんでいる」
+> — 流出した Anthropic 内部文書（Fortune 報道による）
+
+---
+
+## 流出の経緯
+
+| タイムライン | 内容 |
+|------------|------|
+| 3月26日 | CMS 設定ミスにより ~3,000件の非公開アセットが外部参照可能に |
+| 3月26日 | Fortune が流出を報道 |
+| 3月26〜27日 | Anthropic がデータストアへの公開アクセスを即時遮断 |
+| 3月27日 | Anthropic が Fortune 向けにコメントを発表 |
+
+Anthropic は CMS のアクセス制御に関する具体的な設定ミスの内容を公表していない。ただし「意図せず公開状態になっていたデータを発見し次第、即座に対処した」と述べている。
+
+---
+
+## Mythos のポジショニング
+
+現時点で確認できる情報を整理する。
+
+| 観点 | 内容 |
+|------|------|
+| モデル名 | Claude Mythos |
+| コードネーム（候補） | Capybara |
+| 対象 Opus 4.6 比 | コーディング・推論・サイバー領域で劇的に高い |
+| リリース形態 | 限定早期アクセス（一般提供時期未定） |
+| 安全対策 | 従来の ASL（AI Safety Level）評価を改めて実施中とみられる |
+
+Anthropic は現在、能力と安全性の両方で前例のない水準のモデルを抱えている。**Responsible Scaling Policy**（RSP）に基づく ASL-3 または ASL-4 の評価プロセスが進行中であることが推察される。
+
+---
+
+## AI Safety と能力のジレンマ
+
+Anthropic は「安全性を最優先にする AI 企業」というポジショニングを一貫して取ってきた。Mythos の流出内容はその姿勢の**複雑な現実**を浮き彫りにした。
+
+### RSP（Responsible Scaling Policy）の文脈
+
+| レベル | 意味 | 対応状況 |
+|--------|------|---------|
+| ASL-1 | 既存ツール以下のリスク | — |
+| ASL-2 | 既存モデル相当 | Claude 3.x まで |
+| ASL-3 | 国家行為者レベルのリスク増大 | 厳格な展開制限が必要 |
+| ASL-4 | 大規模な壊滅的ダメージのリスク | 展開条件は未定 |
+
+Mythos のサイバーセキュリティ能力が内部で「前例のない」と評価されているなら、ASL-3 の閾値を超えている可能性がある。ASL-3 では展開前に第三者機関による評価と政府への報告が求められる。
+
+---
+
+## 日本への示唆
+
+### サイバーセキュリティの脅威面
+
+日本のセキュリティエンジニアにとって、Mythos 級のモデルが攻撃者の手に渡るシナリオは現実的なリスクとして評価する必要がある。
+
+| 脅威 | 現状 | Mythos 級モデルの影響 |
+|------|------|----------------------|
+| 脆弱性スキャン | 既存ツールで自動化 | 未知の脆弱性発見が加速 |
+| エクスプロイト開発 | 高度な専門知識が必要 | 開発の敷居が大幅低下 |
+| ソーシャルエンジニアリング | 人間が実行 | 高度なフィッシング自動化 |
+| ゼロデイ市場 | 希少・高価 | 生成コストが下がる可能性 |
+
+重要インフラを持つ日本の金融・エネルギー・製造セクターは、こうした高能力モデルの出現を前提とした防御設計の見直しを検討するフェーズに入っている。
+
+### モデル開発競争と日本企業の立ち位置
+
+Mythos の存在は、フロンティアモデルの能力水準が公表情報よりも早いペースで進んでいることを示している。「現在の API で使えるモデル」が最新とは限らない。
+
+国内で AI を活用するエンタープライズ企業にとっては、非公開段階のモデルへのアクセスを持つ企業（早期アクセスパートナー）と一般公開待ちの企業との**能力格差**が広がるリスクがある。
+
+---
+
+## まとめ
+
+- 2026年3月26日、Anthropic の CMS 設定ミスにより未公開モデル **Claude Mythos** の存在と詳細が流出
+- 内部文書は Opus 4.6 を大幅に上回る能力と、前例のないサイバーセキュリティリスクを同時に記載
+- Anthropic は即時アクセス遮断。モデルは限定早期アクセスの段階で一般提供時期は未発表
+- ASL-3 以上の評価プロセスが必要な可能性があり、能力と安全性のバランスが問われる局面
+- 日本のセキュリティエンジニアは高能力モデルを前提とした攻撃シナリオを今から想定すべき
+
+---
+
+## 参考リンク
+
+- [Anthropic leak reveals new model 'Claude Mythos' | The Decoder](https://the-decoder.com/anthropic-leak-reveals-new-model-claude-mythos-with-dramatically-higher-scores-on-tests-than-any-previous-model/)
+- [Anthropic accidentally leaked details of its most powerful AI | Fortune (March 26)](https://fortune.com/2026/03/26/anthropic-says-testing-mythos-powerful-new-ai-model-after-data-leak-reveals-its-existence-step-change-in-capabilities/)
+- [Anthropic's leaked AI poses an unprecedented cybersecurity threat | Fortune (March 27)](https://fortune.com/2026/03/27/anthropic-leaked-ai-mythos-cybersecurity-risk/)
+- [Anthropic Responsible Scaling Policy | Anthropic](https://www.anthropic.com/responsible-scaling-policy)
