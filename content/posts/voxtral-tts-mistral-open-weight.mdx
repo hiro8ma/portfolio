@@ -1,0 +1,174 @@
+---
+title: "Mistral が Voxtral TTS をオープン公開 — ElevenLabs を超え、半額・自己ホスト可能な音声生成モデル"
+date: "2026-03-29"
+description: "2026年3月26日、Mistral AI がオープンウェイトの TTS モデル「Voxtral TTS（4B）」をリリース。ElevenLabs を品質・価格の両面で上回りつつ、CC BY-NC 4.0 で重みを公開。70ms の低レイテンシ、3秒での声クローン、vLLM によるセルフホスト対応。"
+tags: ["mistral", "tts", "open-source", "audio", "ai-tools"]
+---
+
+## 概要
+
+2026年3月26日、Mistral AI が **Voxtral TTS**（モデル ID: `mistralai/Voxtral-4B-TTS-2603`）を発表・公開した。
+
+4B パラメータのオープンウェイト TTS モデルで、ElevenLabs Flash v2.5 を品質で上回りつつ API 価格を約半額に設定。重みは Hugging Face に CC BY-NC 4.0 で公開されており、vLLM を使えばセルフホストも可能だ。
+
+> 「私たちはオーディオが自然なインターフェースになる世界のために構築している。特に作業を委任できるエージェントのための」
+> — Pierre Stock, VP of Science Operations, Mistral AI
+
+---
+
+## モデル仕様
+
+### アーキテクチャ
+
+| コンポーネント | パラメータ数 | 役割 |
+|--------------|-------------|------|
+| Transformer decoder backbone | 3.4B | Ministral ベースの言語モデル |
+| Flow-matching acoustic transformer | 390M | 音響特徴の生成 |
+| Neural audio codec | 300M | 音声のエンコード／デコード |
+| **合計** | **4B** | |
+
+出力は 24 kHz で WAV / PCM / FLAC / MP3 / AAC / Opus 形式に対応。セルフホスト時は ≥16 GB GPU が必要で、H200 上で動作確認済み。
+
+### 主要スペック
+
+| 項目 | 値 |
+|------|-----|
+| レイテンシ（標準） | **70 ms**（10秒の参考音声 + 500文字） |
+| Real-time factor | 0.103（単一リクエスト） |
+| 音声クローン最小長 | **3秒** |
+| プリセット音声 | 20種 |
+| 最大生成長 | 2分 |
+| 対応言語 | 9言語（英・仏・独・西・蘭・葡・伊・ヒンディー・アラビア語） |
+
+単一 GPU でのスループット特性は以下のとおり。
+
+| 並列数 | レイテンシ | RTF | 文字/秒/GPU |
+|--------|-----------|-----|------------|
+| 1 | 70 ms | 0.103 | 119 |
+| 16 | 331 ms | 0.237 | 879 |
+| 32 | 552 ms | 0.302 | 1,431 |
+
+---
+
+## 競合比較
+
+### ベンチマーク（SEED-TTS）
+
+| モデル | WER（↓） | 話者類似度（↑） | 自然性 UTMOS-v2（↑） |
+|--------|----------|--------------|---------------------|
+| **Voxtral TTS** | **1.23%** | **0.628** | **4.11** |
+| ElevenLabs v3 | 1.26% | 0.392 | — |
+| ElevenLabs Flash v2.5 | — | — | 4.09 |
+
+人間評価では、ElevenLabs Flash v2.5 と同等の TTFA（音声開始までの時間）でありながら Voxtral TTS が約 **63%** の確率で選ばれた。声のカスタマイズ（声クローン）タスクでは **70%** の優位を示した。
+
+### 価格比較
+
+| サービス | 価格 | オープンウェイト | セルフホスト |
+|---------|------|----------------|------------|
+| Voxtral TTS（API） | $0.016 / 1K 文字 | ✅ CC BY-NC 4.0 | ✅ vLLM 対応 |
+| ElevenLabs Flash v2.5 | ~$0.030 / 1K 文字 | ❌ | ❌ |
+| ElevenLabs v3 | ~$0.050 / 1K 文字 | ❌ | ❌ |
+| OpenAI TTS | $0.015 / 1K 文字 | ❌ | ❌ |
+
+価格は OpenAI TTS と同水準だが、オープンウェイトでセルフホスト可能な点が本質的な差別化だ。
+
+---
+
+## 使い方
+
+### Mistral API 経由（クラウド）
+
+```python
+import io, httpx, soundfile as sf
+
+BASE_URL = "https://api.mistral.ai/v1"
+
+payload = {
+    "input": "Paris is a beautiful city!",
+    "model": "mistralai/Voxtral-4B-TTS-2603",
+    "response_format": "wav",
+    "voice": "casual_male",
+}
+
+response = httpx.post(
+    f"{BASE_URL}/audio/speech",
+    json=payload,
+    timeout=120.0,
+    headers={"Authorization": f"Bearer {MISTRAL_API_KEY}"},
+)
+audio_array, sr = sf.read(io.BytesIO(response.content), dtype="float32")
+```
+
+### vLLM によるセルフホスト
+
+```bash
+# vLLM >= 0.18.0 が必要
+uv pip install -U vllm
+uv pip install git+https://github.com/vllm-project/vllm-omni.git --upgrade
+
+# モデルを起動
+vllm serve mistralai/Voxtral-4B-TTS-2603 --omni
+```
+
+起動後は `BASE_URL = "http://localhost:8000/v1"` に変更するだけで、上記のコードがそのまま動作する。OpenAI 互換エンドポイントを使うため、既存の音声パイプラインへの組み込みが容易だ。
+
+---
+
+## 特徴的な機能
+
+Voxtral TTS にはいくつかの技術的なユニークポイントがある。
+
+**ゼロショット声クローン（クロスリンガル対応）**: 3秒の参考音声から音声クローンが可能で、フランス語の声でそのまま英語を生成するクロスリンガル合成もネイティブに対応する。リアルタイム翻訳パイプラインの音声出力段に直接組み込める。
+
+**感情表現の推論**: プロンプトのコンテキストから自然・喜び・皮肉などのトーンを自動で推定し、音声に反映する。特別なプロンプトエンジニアリング不要。
+
+**エッジ対応サイズ**: Mistral は「スマートウォッチ・スマートフォン・ラップトップで動作する」と主張する。量子化により PC 上での推論が視野に入る。
+
+---
+
+## 日本への示唆
+
+### 制限: 日本語は非対応
+
+現時点の対応 9 言語に日本語は含まれていない。エンタープライズの音声アシスタントや顧客対応 AI への直接導入は不可だ。
+
+日本語対応の TTS としては現状、VOICEVOX（OSS）・Style-Bert-VITS2（OSS）・OpenAI TTS（未対応）・ElevenLabs（限定対応）などが選択肢になる。Mistral が日本語を追加する予定は未発表。
+
+### オープンウェイトがもたらす構造変化
+
+| 観点 | クローズド TTS（ElevenLabs 等） | Voxtral TTS |
+|------|-------------------------------|-------------|
+| データのオンプレ処理 | 不可 | ✅ セルフホスト可 |
+| 個人情報・音声データ | 外部送信が必要 | 社内完結 |
+| カスタムファインチューニング | ベンダー依存 | 独自学習が可能 |
+| コスト上限 | API 従量課金 | GPU コストのみ |
+
+日本の金融・医療・製造業など、音声データをクラウドに送れないユースケースで Voxtral のオープンウェイトは重要な選択肢になる。英語が主言語のプロダクト（グローバル向けサービス、社内英語音声）でなら今すぐ実運用に使える。
+
+### エージェント音声インターフェースの加速
+
+Mistral の Pierre Stock が語るように「エージェントへの音声デリゲーション」が Voxtral の設計思想だ。音声→テキスト（Whisper 等）→ LLM 推論→テキスト→音声（Voxtral）というパイプラインのコストが $0.016/1K 文字で調達できるようになった。
+
+音声入出力を持つ AI エージェントの開発コストが一段階下がる。日本語対応が来れば即座に日本の現場へも影響が及ぶ。
+
+---
+
+## まとめ
+
+- 2026年3月26日、Mistral AI が 4B パラメータの TTS モデル **Voxtral TTS** をオープンウェイトで公開
+- ElevenLabs Flash v2.5 を品質・価格の両面で上回り、セルフホスト対応
+- API 価格 $0.016/1K 文字、CC BY-NC 4.0 ライセンスで重みを無償公開
+- 現時点で日本語は非対応（英・仏・独・西・蘭・葡・伊・ヒンディー・アラビア語のみ）
+- オンプレ要件のある日本企業向けには、英語 TTS ユースケースで即座に実用価値がある
+
+---
+
+## 参考リンク
+
+- [Speaking of Voxtral | Mistral AI Blog](https://mistral.ai/news/voxtral-tts)
+- [Research Paper: arXiv 2603.25551](https://arxiv.org/abs/2603.25551)
+- [mistralai/Voxtral-4B-TTS-2603 | Hugging Face](https://huggingface.co/mistralai/Voxtral-4B-TTS-2603)
+- [Mistral releases a new open source model for speech generation | TechCrunch](https://techcrunch.com/2026/03/26/mistral-releases-a-new-open-source-model-for-speech-generation/)
+- [Mistral AI just released a text-to-speech model it says beats ElevenLabs | VentureBeat](https://venturebeat.com/orchestration/mistral-ai-just-released-a-text-to-speech-model-it-says-beats-elevenlabs-and)
+- [Mistral AI TTS Docs](https://docs.mistral.ai/capabilities/audio/text_to_speech)
