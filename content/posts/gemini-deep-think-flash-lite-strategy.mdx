@@ -1,0 +1,146 @@
+---
+title: "Google が両端を攻める — Gemini 3 Deep Think と 3.1 Flash-Lite の二正面作戦"
+date: "2026-03-30"
+description: "ARC-AGI-2 84.6%・Humanity's Last Exam 48.4%を達成した Gemini 3 Deep Think と、$0.25/M トークンで2.5倍速の Gemini 3.1 Flash-Lite。Google が同時に推論フロンティアとコスト底上げを攻める構造と、日本エンジニアが今すぐ使える判断基準を整理する。"
+tags: ["google", "gemini", "llm", "api", "context-engineering"]
+---
+
+## 2026年3月、Google が両極から動いた
+
+2026年3月初旬、Google は正反対の性格を持つ2つのモデルをほぼ同時に市場に投入した。
+
+**Gemini 3 Deep Think**（Ultra 向け GA / 研究者・企業向け API 早期アクセス）は、AI の推論能力の限界を塗り替える旗艦モデルだ。**Gemini 3.1 Flash-Lite**（2026年3月3日 GA）は、1M 入力トークンあたり $0.25 という価格で前世代比 2.5 倍の速度を出すコスト破壊モデルだ。
+
+フロンティアとコスト底辺を同時に更新する。これが Google の 2026年第1四半期の戦略だった。
+
+## Gemini 3 Deep Think — ベンチマークが示す推論の到達点
+
+### 主要ベンチマーク比較
+
+| ベンチマーク | Gemini 3 Deep Think | o3 / GPT-5.4 | DeepSeek R1 | 人間の平均 |
+|------------|-------------------|-------------|------------|-----------|
+| ARC-AGI-2 | **84.6%** | ~75% | - | ~60% |
+| Humanity's Last Exam | **48.4%** | 26.6%（Deep Research） | 9.4% | ~80% |
+| Codeforces Elo | **3455**（Legendary Grandmaster） | - | - | 上位0.1% |
+
+ARC-AGI-2 は「暗記ではなく適応推論」を測るベンチマークで、AI が新規パターンをゼロから解くことを要求する。人間の平均 60% を Deep Think が 84.6% で超えた。
+
+Humanity's Last Exam（HLE）は各分野の専門家が作成した難問集だ。人間でも正解率が約 80% に留まる設問が並ぶ中、Deep Think は 48.4% を記録した。1年前に o3 が約 9% だった時点でも「AI の進歩は早い」と騒がれたが、48.4% という数字はその話を全面的に書き直す。
+
+### なぜここまで上がったか — test-time compute の実装
+
+Deep Think は「推論に使う時間を増やす」アプローチで性能を上げる。
+
+| アプローチ | 説明 |
+|-----------|------|
+| 複数仮説の並列探索 | 回答を一本に絞らず、複数の推論パスを同時に走らせる |
+| iterative reasoning | 問題を小分けにして繰り返し検証する |
+| 文脈長に依存しない精度 | 長い入力でも推論精度を落とさない設計 |
+
+この仕組みは「コンテキストエンジニアリング」の観点から重要だ。Function Calling や RAG でどれだけ精緻な文脈を与えても、モデル自体が多段推論を苦手にしていれば結果が出ない。Deep Think はモデル側で多段推論を内包している。
+
+### 現実世界での実証
+
+Rutgers 大学の数学者が過去に人間のピアレビューを通過した論文の論理的欠陥を Deep Think に指摘させたところ、**見落とされていた誤りを特定した**。ベンチマークの数字が実務でも成立することを示す事例だ。
+
+## Gemini 3.1 Flash-Lite — コスト・速度でのフロア更新
+
+### 前世代との比較
+
+| 指標 | Gemini 2.5 Flash | Gemini 3.1 Flash-Lite | 変化 |
+|------|----------------|--------------------|------|
+| 入力価格 | $0.30/M | **$0.25/M** | -17% |
+| 出力価格 | $2.50/M | **$1.50/M** | -40% |
+| Time to First Token | ベースライン | **2.5倍高速** | - |
+| 出力スループット | ベースライン | **45%向上** | - |
+| コンテキストウィンドウ | - | **1.0M トークン** | - |
+
+出力価格の 40% 削減は数字以上の意味を持つ。API コストの大半はアウトプットに乗る。大量生成ワークロード（コンテンツ生成、要約、データ変換）ではランニングコストが直接変わる。
+
+### thinking level 制御が使えるようになった
+
+Flash-Lite は `minimal / low / medium / high` の thinking レベルを指定できる。簡単なタスクは `minimal` で高速処理し、複雑な判断は `high` でじっくり推論する。1つのモデルで用途に応じたコスト・速度のトレードオフを制御できる。
+
+```python
+# Gemini 3.1 Flash-Lite — thinking level の指定例
+import google.generativeai as genai
+
+model = genai.GenerativeModel("gemini-3.1-flash-lite-preview")
+response = model.generate_content(
+    "このコードのバグを特定してください: ...",
+    generation_config=genai.GenerationConfig(
+        thinking_config={"thinking_budget": "high"}  # 複雑な問題には high
+    )
+)
+```
+
+```python
+# 単純な分類タスクには minimal で高速化
+response = model.generate_content(
+    "このテキストをカテゴリ分類してください: ...",
+    generation_config=genai.GenerationConfig(
+        thinking_config={"thinking_budget": "minimal"}
+    )
+)
+```
+
+## 「どちらを使うか」の判断基準
+
+| ユースケース | 推奨モデル | 理由 |
+|------------|----------|------|
+| 科学的問題・数学・論理パズル | Deep Think | 多段推論が必要 |
+| 競技プログラミングレベルの実装 | Deep Think | Codeforces 3455 Elo の実力 |
+| 大量テキスト処理（要約・翻訳・分類） | Flash-Lite | 低コスト・高スループット |
+| リアルタイムチャット・ストリーミング | Flash-Lite | 低レイテンシが優先 |
+| RAG + 検索結合型応答 | Flash-Lite（thinking: low〜medium） | コスト効率と精度のバランス |
+| 高度なコードレビュー・設計判断 | Deep Think | 複雑な文脈の多角的検証が必要 |
+
+## 日本への示唆
+
+### Vertex AI 経由での利用がエンタープライズ標準になりつつある
+
+日本の大企業では AWS Bedrock か Google Vertex AI を経由した API 利用が主流だ。Gemini 3.1 Flash-Lite は Vertex AI に本番対応済みで、**既存の GCP 契約に乗せて使える**。
+
+| 観点 | 日本企業への影響 |
+|------|---------------|
+| 調達コスト | 出力価格 -40% はバッチ処理コストに直結する |
+| データガバナンス | Vertex AI ではデータが Google のトレーニングに使われないオプションあり |
+| 契約関係 | 既存の Google Workspace 契約企業は商談ルートが短い |
+
+### 「推論モデルを使う場面」の判断が次のスキルになる
+
+Flash（速い・安い）と Deep Think（遅い・高い・賢い）の使い分けは、今後のアーキテクチャ設計で避けられない判断だ。
+
+エージェント設計では特に重要になる。メインの判断ループに Deep Think を使い、サブタスクの実行に Flash-Lite を使うような **階層的モデル配置** が現実的なパターンになる。
+
+```
+User Query
+  └─ Orchestrator（Deep Think）: タスク分解・戦略決定
+       ├─ Tool Call 1（Flash-Lite）: 検索・データ取得
+       ├─ Tool Call 2（Flash-Lite）: コード実行・変換
+       └─ Final Response（Deep Think）: 統合・品質チェック
+```
+
+この構成は MCP（Model Context Protocol）ベースのエージェントでそのまま実装できる。
+
+### ベンチマークの読み方自体が重要になった
+
+HLE 48.4% は「人間の専門家でも 80% しか取れない問題を AI が半分近く解く」状況を意味する。この数字を「まだ半分しか解けない」と読むか「1年で 9% から 48% になった」と読むかで、AI への投資判断が変わる。
+
+日本の経営者・意思決定者にとって、**ベンチマークの意味を自分で解釈できること**が戦略的優位になりつつある。
+
+## まとめ
+
+- Gemini 3 Deep Think は ARC-AGI-2 84.6%・HLE 48.4%・Codeforces Legendary Grandmaster を達成。推論フロンティアを更新した
+- Gemini 3.1 Flash-Lite は $0.25/M・2.5倍速で前世代を破壊的に更新。バッチ処理コストが 40% 下がる
+- Google は「最強の推論」と「最安のスループット」を同時に市場投入する戦略を取っている
+- エンジニアに求められるのは「どの問題にどのモデルを使うか」の判断能力
+- 日本のエンタープライズは Vertex AI を通じて今すぐ両モデルにアクセスできる
+
+## 参考リンク
+
+- [Google Blog: Gemini 3 Deep Think — Advancing science, research and engineering](https://blog.google/innovation-and-ai/models-and-research/gemini-models/gemini-3-deep-think/)
+- [Google Blog: Gemini 3.1 Flash Lite — Our most cost-effective AI model yet](https://blog.google/innovation-and-ai/models-and-research/gemini-models/gemini-3-1-flash-lite/)
+- [MarkTechPost: Is This AGI? Gemini 3 Deep Think Shatters Humanity's Last Exam](https://www.marktechpost.com/2026/02/12/is-this-agi-googles-gemini-3-deep-think-shatters-humanitys-last-exam-and-hits-84-6-on-arc-agi-2-performance-today/)
+- [VentureBeat: Google releases Gemini 3.1 Flash Lite at 1/8th the cost of Pro](https://venturebeat.com/technology/google-releases-gemini-3-1-flash-lite-at-1-8th-the-cost-of-pro/)
+- [Google Cloud Docs: Gemini 3.1 Flash-Lite on Vertex AI](https://docs.cloud.google.com/vertex-ai/generative-ai/docs/models/gemini/3-1-flash-lite)
