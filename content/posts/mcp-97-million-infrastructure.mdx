@@ -1,0 +1,115 @@
+---
+title: "MCP が月間9700万ダウンロード突破 — 16ヶ月で AI エージェントの基盤層に"
+date: "2026-03-31"
+description: "2026年3月25日、Anthropic の Model Context Protocol が月間SDK ダウンロード数9700万を突破。発足16ヶ月で実験的プロトコルから AI エージェントインフラの標準へ転換した経緯と、日本企業が直面する次のフェーズを読む。"
+tags: ["mcp", "anthropic", "ai-agents", "open-source", "infrastructure"]
+---
+
+## 概要
+
+2026年3月25日、Anthropic の **Model Context Protocol（MCP）** の月間 SDK ダウンロード数が **9700万** を超えた。
+
+2024年11月のリリース時点では月間約10万。16ヶ月で970倍に成長したことになる。同期間に公開レジストリ上の MCP サーバー数は20,000件超に達し、Claude、GPT-5.4、Gemini、Microsoft Copilot、Cursor といった主要 AI プラットフォームがすべて MCP 対応を完了した。
+
+AI エージェントが外部システムと通信するための「接続規格」が、事実上 MCP に収束した。
+
+## MCP の成長軌跡
+
+| 時点 | 月間DL数 | MCP サーバー数 |
+|------|---------|--------------|
+| 2024年11月（リリース直後） | 〜10万 | 数十 |
+| 2025年中頃 | 〜500万 | 約425 |
+| 2025年12月（AAIF 寄贈） | — | 約2,000 |
+| 2026年3月25日 | **9,700万** | **20,000+** |
+
+### ガバナンスの転換点
+
+2025年12月、Anthropic は MCP を **Agentic AI Foundation（AAIF）** に寄贈した。AAIF は Linux Foundation の下に設立された directed fund で、Anthropic、Block、OpenAI が共同創設し、Google、Microsoft、AWS、Cloudflare、Bloomberg がサポートする。
+
+競合ラボ同士が同一のガバナンス構造に入ったことで、MCP は「Anthropic の規格」から「業界のインフラ」に昇格した。
+
+## MCP の現在地
+
+### 接続できるシステムのカバレッジ
+
+| カテゴリ | 代表的な MCP サーバー |
+|---------|---------------------|
+| データベース | PostgreSQL, MySQL, MongoDB, Snowflake |
+| CRM / 業務 | Salesforce, HubSpot, Notion, Jira |
+| クラウド | AWS, GCP, Azure（各種リソース操作） |
+| 開発ツール | GitHub, GitLab, Docker, Kubernetes |
+| コミュニケーション | Slack, Gmail, Google Calendar |
+| 生産性 | Google Workspace, Microsoft 365 |
+
+GitHub Copilot や VS Code が MCP クライアントとして動作するため、エンジニアは既存のエディタ環境のままエージェントに外部システムを操作させられる。
+
+### 2026年ロードマップの焦点
+
+MCP の公式 2026 ロードマップは4つの課題に絞っている。
+
+| 優先課題 | 内容 |
+|---------|------|
+| **Transport Scalability** | Streamable HTTP のロードバランサー問題解消、水平スケーリング対応 |
+| **Enterprise Readiness** | 監査ログ、SSO 統合、ゲートウェイ動作の標準化 |
+| **Governance Maturation** | SEP（Spec Enhancement Proposal）プロセス、Working Group への権限委譲 |
+| **Agent Communication** | エージェント間通信（A2A との共存も視野） |
+
+実験フェーズは終わった。2026年は本番運用に向けた「堅牢化」の年だ。
+
+## なぜ MCP が勝ったか
+
+2024年末時点では、LangChain の Tool、OpenAI の Function Calling、独自プラグイン形式と複数の接続方式が乱立していた。MCP が収束した理由は3点。
+
+**1. 双方向ストリーミングと型安全性**
+単発のツール呼び出しではなく、セッションを維持したまま連続的に状態を保てる。JSON-Schema ベースの型定義が実装者のコストを下げた。
+
+**2. クライアント実装の速度**
+Cursor が早期に対応したことで、エンジニアコミュニティへの普及速度が上がった。ツール側が「MCP サーバーを出せばどのクライアントからも使われる」という構造ができた。
+
+**3. 中立的なガバナンス**
+Linux Foundation への寄贈で「Anthropic 依存」というリスクが消えた。エンタープライズが採用しやすくなった。
+
+## 日本への示唆
+
+### SIer・エンタープライズ IT への波及
+
+日本のエンタープライズ IT は SAP、ServiceNow、Salesforce の導入企業が多く、これらはすでに MCP サーバーが存在する。AI エージェントが業務システムに直接アクセスする構造が整いつつある。
+
+2026年以降、SIer が「AI を業務システムに繋ぐ」案件で問われるのは、独自 API 開発の能力ではなく MCP サーバーの設計・セキュリティ設定・運用監視になる。
+
+| 観点 | 従来のシステム連携 | MCP を使ったエージェント連携 |
+|------|-----------------|--------------------------|
+| 接続方式 | カスタム API / ETL | MCP サーバー（標準化） |
+| 指示方法 | バッチ処理・スケジューラ | 自然言語 → エージェント |
+| 監査 | API ログ | MCP セッションログ + LLM トレース |
+| セキュリティ管理 | IP 制限 / API キー | SSO + パーミッション制御（整備中） |
+
+### エンジニアのスキルシフト
+
+MCP サーバーの実装は Python・TypeScript の SDK で数十行から書ける。しかし本番運用では「どのツールに何の権限を与えるか」というパーミッション設計がボトルネックになる。
+
+ゼロトラスト的な発想でエージェントの権限を最小化し、操作ログを LLM Observability ツールで監視する設計が求められる。これは従来の「API を叩くアプリ」とは異なる脅威モデルだ。
+
+### Shadow IT リスク
+
+Qualys の調査（2026年3月）は、企業内で無許可に立ち上げられた MCP サーバーを「AI 版シャドー IT」と位置付けた。開発者が個人の判断で業務データへのアクセスを AI エージェントに付与するケースが増えている。
+
+日本でもエンジニアが Claude Desktop や Cursor に社内 DB の MCP サーバーを接続するケースは既に起きている。情報セキュリティ部門が MCP を把握していない段階では、これがインシデントの入口になりうる。
+
+## まとめ
+
+MCP の9700万 DL は単なるマイルストーンではなく、AI エージェントインフラの標準が決まったことを意味する。
+
+Linux Foundation のガバナンスのもと、Claude・GPT-5.4・Gemini がすべて MCP クライアントとして動作する世界で、システム連携の競争軸は「どう接続するか」から「何を・どの権限で・どう監査するか」に移った。
+
+日本のエンタープライズ IT とエンジニアにとっての優先アクションは明確だ。MCP の技術仕様を理解し、セキュリティ設計と Observability を先に整える。接続先は後から増やせる。
+
+## 参考リンク
+
+- [Anthropic's Model Context Protocol Hits 97 Million Installs on March 25 - AI Unfiltered](https://www.arturmarkus.com/anthropics-model-context-protocol-hits-97-million-installs-on-march-25-mcp-transitions-from-experimental-to-foundation-layer-for-agentic-ai/)
+- [The 2026 MCP Roadmap | Model Context Protocol Blog](http://blog.modelcontextprotocol.io/posts/2026-mcp-roadmap/)
+- [Donating the Model Context Protocol and establishing the Agentic AI Foundation | Anthropic](https://www.anthropic.com/news/donating-the-model-context-protocol-and-establishing-of-the-agentic-ai-foundation)
+- [MCP's 2026 roadmap makes enterprise readiness a top priority | WorkOS](https://workos.com/blog/2026-mcp-roadmap-enterprise-readiness)
+- [MCP Servers: The New Shadow IT for AI in 2026 | Qualys](https://blog.qualys.com/product-tech/2026/03/19/mcp-servers-shadow-it-ai-qualys-totalai-2026)
+- [Why the Model Context Protocol Won | The New Stack](https://thenewstack.io/why-the-model-context-protocol-won/)
+- [MCP in 2026: 97 Million Downloads and Growing Crypto Infrastructure | Bitcoin News](https://news.bitcoin.com/mcp-in-2026-97-million-downloads-and-growing-crypto-infrastructure-from-bitgo-to-coingecko/)
