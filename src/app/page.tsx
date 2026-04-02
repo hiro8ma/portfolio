@@ -238,10 +238,10 @@ export default function Home() {
                 </p>
                 <p>
                   On the backend, I work with{" "}
-                  <span className="text-slate-200">Go, Rust, TypeScript, Python</span>{" "}
+                  <span className="text-slate-200">Go, Rust, C++, TypeScript, Python</span>{" "}
                   and architect systems using{" "}
                   <span className="text-slate-200">Event Sourcing, CQRS, Saga patterns</span>{" "}
-                  with <span className="text-slate-200">gRPC, GraphQL, Pub/Sub</span>{" "}
+                  with <span className="text-slate-200">gRPC, ConnectRPC, GraphQL, Pub/Sub</span>{" "}
                   for service communication.
                 </p>
                 <p>
