@@ -237,18 +237,32 @@ export default function Home() {
                   <span className="text-slate-200">Vertex AI, Claude, and Gemini</span>.
                 </p>
                 <p>
-                  On the backend, I work with{" "}
+                  Depending on the requirements, I work with{" "}
                   <span className="text-slate-200">Go, Rust, C++, TypeScript, Python</span>{" "}
-                  and architect systems using{" "}
-                  <span className="text-slate-200">Event Sourcing, CQRS, Saga patterns</span>{" "}
-                  with <span className="text-slate-200">gRPC, ConnectRPC, GraphQL, Pub/Sub</span>{" "}
+                  for development, and commonly use{" "}
+                  <span className="text-slate-200">gRPC, ConnectRPC, GraphQL, Pub/Sub</span>{" "}
                   for service communication.
                 </p>
                 <p>
-                  Managing cloud-native infrastructure on{" "}
-                  <span className="text-slate-200">Google Cloud / AWS</span> (GKE, Cloud Run, Spanner, BigQuery, Vertex AI) with{" "}
-                  <span className="text-slate-200">Kubernetes, Istio, Terraform, Prometheus</span>{" "}
-                  and CI/CD via <span className="text-slate-200">Argo Rollouts, GitHub Actions</span>.
+                  I actively engage in re-architecting systems, including reviewing{" "}
+                  <span className="text-slate-200">domain modeling</span> for complex core services,
+                  service decomposition, and implementing{" "}
+                  <span className="text-slate-200">Event Sourcing & CQRS</span> on top of
+                  orchestration-based <span className="text-slate-200">Saga patterns</span>.
+                  Event store data is utilized for aggregate reconstruction, audit logs, and training data.
+                </p>
+                <p>
+                  I also manage cloud-native infrastructure, including microservice container operations,
+                  CI/CD (<span className="text-slate-200">Argo Rollouts, PipeCD, Cloud Build, GitHub Actions</span>),
+                  and environment setup using{" "}
+                  <span className="text-slate-200">Kubernetes, Istio, Prometheus, Grafana, Terraform</span>.
+                  I focus on building productivity tools and reducing toil.
+                </p>
+                <p>
+                  On <span className="text-slate-200">Google Cloud / AWS</span>, I have hands-on experience with a wide range of services including{" "}
+                  <span className="text-slate-200">
+                    GKE, Anthos, Cloud Run, Pub/Sub, AlloyDB, Spanner, BigQuery, Vertex AI
+                  </span>.
                 </p>
               </div>
             </section>
