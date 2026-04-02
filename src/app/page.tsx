@@ -57,7 +57,8 @@ const skills = [
   "React", "Next.js", "Electron", "HTML/CSS",
   "NestJS", "GraphQL", "RabbitMQ", "Firebase",
   "AWS", "GCP", "Docker", "Kubernetes", "Grafana",
-  "Vertex AI", "Gemini", "BigQuery ML", "TensorFlow", "RAG",
+  "Vertex AI", "Gemini", "Claude", "LiteLLM", "LangChain", "Langfuse",
+  "RAG", "MCP", "FastMCP", "LoRA", "MLX", "TensorFlow", "BigQuery ML",
   "Engineering Management", "Product Management", "Agile/Scrum",
 ];
 
