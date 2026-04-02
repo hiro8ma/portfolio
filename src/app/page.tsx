@@ -57,8 +57,10 @@ const skills = [
   "React", "Next.js", "Electron", "HTML/CSS",
   "NestJS", "GraphQL", "RabbitMQ", "Firebase",
   "AWS", "GCP", "Docker", "Kubernetes", "Grafana",
-  "Vertex AI", "Gemini", "Claude", "LiteLLM", "LangChain", "Langfuse",
-  "RAG", "MCP", "FastMCP", "LoRA", "MLX", "TensorFlow", "BigQuery ML",
+  "Terraform", "Istio", "Prometheus", "Argo Rollouts",
+  "Vertex AI", "Gemini", "Claude", "Claude Code", "LiteLLM", "LangChain", "Langfuse",
+  "RAG", "MCP", "FastMCP", "Genkit", "Ollama", "Pydantic",
+  "LoRA", "MLX", "TensorFlow", "BigQuery ML",
   "Engineering Management", "Product Management", "Agile/Scrum",
 ];
 
