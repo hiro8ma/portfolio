@@ -225,7 +225,7 @@ export default function Home() {
                   on top of 10+ years of backend and infrastructure experience.
                   Designing AI agent architectures with{" "}
                   <span className="text-slate-200">Function Calling, MCP, RAG, and Fine-tuning</span>,
-                  while leading an engineering team of 11.
+                  while leading an engineering team.
                 </p>
                 <p>
                   Building and operating{" "}
