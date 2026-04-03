@@ -1,0 +1,165 @@
+---
+title: "Gemma 4 — Apache 2.0 で商用制限を全解放、Gemini 3 品質の 31B がオープンモデル世界 3 位"
+date: "2026-04-03"
+description: "2026年4月2日、Google が Gemma 4 を Apache 2.0 ライセンスで公開。Gemma シリーズ初の商用フリー。31B Dense はオープンモデル世界 3 位、エージェント tool use が 6.6% から 86.4% へ急伸。エッジから商用ファインチューンまで、オープン AI の選択肢が再び塗り替わった。"
+tags: ["google", "gemma", "open-source", "llm", "fine-tuning", "on-device-ai", "apache"]
+---
+
+## 2026年4月2日、Google が Gemma シリーズを全開放した
+
+2026年4月2日、Google は **Gemma 4** を Apache 2.0 ライセンスで公開した。Gemma シリーズとして初めて OSI 承認の商用フリーライセンスが適用された。
+
+モデルは 4 種類。スマートフォン向けの E2B・E4B から、コンシューマー GPU 向けの 26B MoE、ファインチューニング用途の 31B Dense まで、一つのファミリーがエッジからワークステーションを網羅する。31B は Arena AI のオープンモデルリーダーボードで **世界 3 位**を記録した。
+
+Gemma シリーズはこれまで Google 独自の制限ライセンスで配布されていた。Apache 2.0 への切り替えは、ダウンロード 4 億回・派生バリアント 10 万件超のコミュニティに商用利用・改変・再配布の権利を与えることを意味する。
+
+## モデルラインナップ
+
+### 4 バリアントの仕様
+
+| モデル | 実効パラメータ | 動作環境 | context | 用途 |
+|-------|------------|---------|---------|------|
+| E2B | 2B | スマートフォン・Raspberry Pi | 128K | オフライン chatbot・音声入力 |
+| E4B | 4B | スマートフォン・Jetson Nano | 128K | エッジ推論・マルチモーダル |
+| 26B MoE | 26B（活性 3.8B） | コンシューマー GPU | 256K | 高速推論・コスト効率 |
+| 31B Dense | 31B | ワークステーション | 256K | ファインチューニング・高品質生成 |
+
+E2B・E4B はネイティブ音声入力に対応しており、テキスト・画像・動画・音声をモデル単体で処理できる。26B MoE は活性パラメータが 3.8B に抑えられているため、コンシューマー GPU でも実用的な速度が出る。
+
+### 入手先
+
+Hugging Face、Kaggle、Ollama、Google AI Studio（大型）、Google AI Edge Gallery（エッジ向け）で公開されている。
+
+```bash
+# Ollama での取得と実行
+ollama pull gemma4:31b
+ollama run gemma4:31b "このコードのバグを特定して"
+
+# エッジモデルの動作確認
+ollama pull gemma4:e4b
+ollama run gemma4:e4b "この画像に写っているものを説明して"
+```
+
+## Gemma 3 からの差分
+
+### ベンチマーク比較（31B vs Gemma 3）
+
+| ベンチマーク | Gemma 3 | Gemma 4 31B | 変化 |
+|------------|---------|------------|------|
+| MMLU（一般知識） | 67.6% | **85.2%** | +17.6pt |
+| AIME 2026（数学） | 20.8% | **89.2%** | +68.4pt |
+| Agentic tool use | 6.6% | **86.4%** | +79.8pt |
+| Arena AI オープン順位 | — | **世界 3 位** | — |
+
+最も目を引くのは **Agentic tool use の 6.6% → 86.4%** という跳ね上がりだ。1 世代前のモデルは function calling をほとんど使えなかったが、Gemma 4 はエージェントワークフローの実戦投入に耐える性能に達した。
+
+数学も同様に劇的だ。AIME 2026 で 89.2% は、オープンモデルとしては突出している。Gemini 3 の研究・技術を転写した構造が数字に出ている。
+
+### アーキテクチャの継続性
+
+公式は「Gemini 3 と同じ世界水準の研究・技術から構築された」と説明している。Gemma シリーズは Google の旗艦モデルのダウンスケール版ではなく、同じ研究基盤から派生したオープン分岐だ。
+
+## Apache 2.0 が意味すること
+
+### ライセンス比較
+
+| ライセンス | 商用利用 | 改変 | 再配布 | ファインチューン後の販売 | 代表モデル |
+|-----------|---------|------|-------|----------------------|---------|
+| Apache 2.0 | ✅ | ✅ | ✅ | ✅ | Gemma 4、Qwen 3.5 Small |
+| MIT | ✅ | ✅ | ✅ | ✅ | Phi-3-mini |
+| Google 独自（旧 Gemma） | 制限あり | 制限あり | 制限あり | ❌ | Gemma 1〜3 |
+| Meta Custom | 利用者数制限 | 制限あり | 制限あり | 制限あり | 旧 Llama 2 |
+
+Gemma 1〜3 では「Google のサービスと競合するプロダクトへの使用禁止」などの制約が課せられていた。Gemma 4 はそれを全廃した。
+
+Apache 2.0 の実質的な意味は「モデル重みを手元で改変し、製品として販売できる」ことだ。GPT-4o や Claude の API を再販するビジネスとは根本的に異なる。上位レイヤーに自社の差別化を積めるかどうかが、今後の競争軸になる。
+
+## 日本への示唆
+
+### SI 企業にとってのビジネス機会
+
+日本のシステムインテグレーターは長年、海外 SaaS のライセンス再販と保守でマージンを取ってきた。OpenAI API の再販もその延長線上にある。
+
+Gemma 4 Apache 2.0 が変えるのは、**「作って売る」ことができる素材が生まれた**という点だ。
+
+| ビジネスモデル | 従来 | Gemma 4 以降 |
+|-------------|------|------------|
+| 調達 | GPT-4o/Claude API 再販 | Gemma 4 ベースの自社モデルを販売 |
+| 差別化 | プロンプトエンジニアリング | 業界特化ファインチューニング（医療・法律・製造） |
+| マージン構造 | API 通過料 | モデル製品 + 運用保守 |
+| 参入障壁 | ほぼなし（誰でも同じ API を呼べる） | ファインチューニングの質と継続改善 |
+
+製造業向けに設計図・品質マニュアルで fine-tune したモデル、医療機関向けに診療記録フォーマットで学習したモデルを自社パッケージとして提供する——という構成が Apache 2.0 によって初めて成立する。
+
+### プライバシー規制との相性
+
+個人情報保護法の厳格化以降、日本の医療・金融・行政の現場では「データをクラウドに送れない」制約が残っている。Gemma 4 のオンプレ・エッジ展開は、この制約と整合する数少ない高性能オープンモデルの選択肢だ。
+
+| 業界 | クラウド AI の制約 | Gemma 4 オンプレで解決できること |
+|------|-----------------|-------------------------------|
+| 医療 | 電子カルテの外部送信は要同意 | 院内 GPU で推論、データは院外に出ない |
+| 金融 | 顧客情報の第三者提供は制限あり | オンプレサーバーで稟議・契約書を AI 処理 |
+| 製造 | 設計図は門外不出 | 工場内エッジで品質判定・異常検知 |
+| 行政 | 機密文書はクラウド利用禁止 | ローカル LLM でドキュメント要約・分類 |
+
+### ローカル開発環境の変化
+
+31B が Ollama で動き、26B MoE が 3.8B の活性パラメータで高速推論できるということは、M4 MacBook Pro（24GB 統合メモリ）でも実用的な速度が出る。
+
+```python
+# MLX（Apple Silicon）での Gemma 4 31B fine-tuning
+# mlx_lm を使った LoRA fine-tune
+
+from mlx_lm import load, generate
+from mlx_lm.tuner import train
+
+model, tokenizer = load("google/gemma-4-31b-it")
+
+# LoRA fine-tune（4bit量子化で VRAM 節約）
+train(
+    model=model,
+    tokenizer=tokenizer,
+    data="./data/medical_qa.jsonl",
+    lora_rank=8,
+    num_layers=16,
+    batch_size=4,
+    num_epochs=3,
+)
+```
+
+Claude Code や Cursor のバックエンドをローカル Gemma 4 に差し替えて、ネット接続なし・API コストゼロで AI コーディングを使う構成が現実的になった。
+
+### Qwen 3.5 との比較
+
+直近では Qwen 3.5 Small が「9B で 120B 超え」を示した。Gemma 4 はアーキテクチャの継続性と multimodal の幅で差別化する。
+
+| 比較軸 | Qwen 3.5 Small | Gemma 4 |
+|-------|--------------|---------|
+| 最大モデル | 9B | 31B Dense |
+| ライセンス | Apache 2.0 | Apache 2.0 |
+| Agentic tool use | △（Qwen 2.5 世代から改善） | **86.4%**（31B） |
+| multimodal | 画像・動画（テキスト・画像） | 画像・動画・音声（全モデル） |
+| 音声入力 | E4B 相当なし | E2B・E4B にネイティブ搭載 |
+| 出自 | Alibaba（中国） | Google（Gemini 3 派生） |
+
+どちらを選ぶかはユースケース次第。ファインチューニング重視なら Gemma 4 の 31B、超軽量・コスト優先なら Qwen 3.5 E2B が候補に入る。
+
+## まとめ
+
+| ポイント | 内容 |
+|----------|------|
+| Apache 2.0 初採用 | Gemma 1〜3 の制限ライセンスを全廃。商用製品化が解禁 |
+| Agentic tool use 86.4% | Gemma 3 の 6.6% から 80pt 近い跳ね上がり。エージェント実用レベル |
+| 31B がオープン世界 3 位 | Gemini 3 の研究基盤を Apache で解放 |
+| エッジ → ワークステーション対応 | E2B からスタートし 31B まで同一ファミリー |
+| 日本の SI に新ビジネス機会 | 業界特化ファインチューンモデルを製品として販売できる素材が揃った |
+
+「高性能 AI = クラウド API」という前提が、また一段崩れた。Google がこのタイミングで Apache 2.0 に踏み切ったのは、オープンソースコミュニティへのシグナルであり、同時に Hugging Face に群雄割拠するオープンモデル市場での存在感確保でもある。日本の SI 企業にとって、Apache 2.0 のオープン重みは「仕入れ先」ではなく「製造原材料」に変わる。
+
+## 参考リンク
+
+- [Gemma 4: Expanding the Gemmaverse with Apache 2.0 | Google Open Source Blog](https://opensource.googleblog.com/2026/03/gemma-4-expanding-the-gemmaverse-with-apache-20.html)
+- [Google announces open Gemma 4 model with Apache 2.0 license | 9to5Google](https://9to5google.com/2026/04/02/google-gemma-4/)
+- [Google's Gemma 4 is now available with Apache 2.0 licensing for the first time | The Decoder](https://www.the-decoder.com/googles-gemma-4-is-now-available-with-apache-2-0-licensing-for-the-first-time/)
+- [From RTX to Spark: NVIDIA Accelerates Gemma 4 for Local Agentic AI | NVIDIA Blog](https://blogs.nvidia.com/blog/rtx-ai-garage-open-models-google-gemma-4/)
+- [Google releases Gemma 4, a family of open models built off of Gemini 3 | Engadget](https://www.engadget.com/ai/google-releases-gemma-4-a-family-of-open-models-built-off-of-gemini-3-160000332.html)
