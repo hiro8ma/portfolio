@@ -91,7 +91,7 @@ body {
   position: absolute;
   border-radius: 50%;
   filter: blur(100px);
-  opacity: 0.18;
+  opacity: 0.25;
   mix-blend-mode: screen;
 }
 
