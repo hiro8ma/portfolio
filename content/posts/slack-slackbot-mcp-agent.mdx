@@ -1,0 +1,107 @@
+---
+title: "Slackbot が MCP クライアントに — Salesforce が Slack を 6,000 以上のアプリに繋がるエージェント基盤に変えた"
+date: "2026-04-04"
+description: "2026年4月1日、Salesforce は Slackbot を 30 以上の AI 機能でフルエージェント化。MCP クライアントとして 6,000 以上のエンタープライズアプリに接続し、Claude で動作する。会議の書き起こし、デスクトップ監視、リユーザブル AI スキルまで、Slack が企業の「AI ハブ」になる意味を読む。"
+tags: ["salesforce", "slack", "mcp", "ai-agents", "anthropic", "enterprise"]
+---
+
+## 概要
+
+2026年4月1日、Salesforce はサンフランシスコで Slack の大規模 AI アップデートを発表した。Slackbot が **30以上の新機能** を得て、Personal Agent として GA（一般提供）に移行した。
+
+最大の変化は MCP（Model Context Protocol）クライアントとしての対応だ。Slackbot は Slack マニフェストに MCP サーバーを登録したアプリに自動接続できるようになり、Agentforce・Google Workspace・Microsoft 365・Notion・Workday・ServiceNow を含む **6,000以上のアプリ**に人間の介在なしでアクセスする。
+
+AI 基盤は Anthropic の Claude。Salesforce が Claude を選んだ理由は機能だけでなく、Slackbot の構築開始時点で Claude が **FedRAMP Moderate 認定**を取得していた唯一のモデルだったことにある。
+
+## 主要機能
+
+### MCP クライアントと Agentforce 連携
+
+| 接続先カテゴリ | 代表的なアプリ |
+|--------------|--------------|
+| CRM / 業務 | Salesforce Customer 360, HubSpot |
+| 生産性 | Google Workspace, Microsoft 365, Notion |
+| HR / ERP | Workday, ServiceNow |
+| 開発 | GitHub, Jira, Confluence |
+| その他 | Slack マニフェスト登録ずみ 6,000+ |
+
+Slackbot はユーザーからの自然言語入力を受けて、適切な MCP サーバーにルーティングする。「来週の予算会議の資料を作って」と打つと、Slack チャンネルから関連スレッドを集め、Agentforce で数字を整理し、Google カレンダーで関係者に招待を送る。これを単一の指示で完結させる。
+
+### リユーザブル AI スキル
+
+チームが一度定義した処理手順を「スキル」として保存し、任意のコンテキストで呼び出せる。例えば「月次レポート作成」スキルを作れば、毎月 `/report` と打つだけで同じフローが走る。
+
+従来のワークフロービルダーと異なり、スキルはトリガー条件を学習する。Slackbot が「このチャンネルでは毎週月曜に進捗共有が来る」と判断すると、スキルを自動で起動するよう提案してくる。
+
+### ミーティングインテリジェンス
+
+| 機能 | 詳細 |
+|------|------|
+| 文字起こし | Zoom / Google Meet / Slack Huddle のデスクトップ音声を取得 |
+| 要約 | 議論のサマリーと意思決定の列挙 |
+| アクションアイテム | 通話終了直後に自動生成 |
+| ビジネスコンテキスト | Salesforce CRM の案件データと突き合わせた議事録 |
+
+Zoom と Google Meet にはネイティブ連携がある。Slackbot がバックグラウンドで音声を取得するため、会議ごとに「録画ボタン」を押す手間がない。
+
+### デスクトップアクセス
+
+Slackbot は Slack の外でも動作する。ユーザーの「案件・カレンダー・メール・過去の会話・作業パターン」を監視し、コンテキストに基づく提案やドラフトを自動生成する。
+
+この機能は現時点で Business+ と Enterprise+ プランのみ。**2026年4月から Free と Pro ユーザーにも preview 提供**が始まる。
+
+### ビジネス機能の拡張
+
+| プラン | 主な追加機能 |
+|--------|-----------|
+| SMB（中小企業） | 顧客管理、インタラクション追跡、Deal 更新の自動化 |
+| Enterprise | Customer 360 全体へのアクセス、ケースルーティング、ワークフロートリガー |
+| 全プラン | 音声入力、ディープリサーチ、シェアラブルプロンプト、アダプティブメモリ |
+
+## Salesforce と Anthropic の深化
+
+今回のアップデートと並行して、Salesforce と Anthropic は**ビジネスコンテキストと AI アクションの統合**に関する発表も行った。Claude が Slack 内のデータを信頼できるコンテキストとして参照しながら Agentforce 経由で実際のアクションを実行する、という構造だ。
+
+Slackbot が Claude で動き、Claude が Slack のデータを読み、Agentforce がシステムを操作する。三者が閉じたループを形成している。
+
+## 日本への示唆
+
+### Slack 導入企業への即時影響
+
+日本の IT 企業・スタートアップの多くが Slack を使っている。特に Business+ 以上のプランであれば今日から Slackbot の拡張機能を試せる。
+
+問題は「何ができるか」ではなく「何を許可するか」だ。Slackbot がデスクトップを監視し、Salesforce の案件データにアクセスし、カレンダーを操作するとなると、従業員の行動データが AI に流れ込む。日本企業の情報セキュリティポリシーと個人情報保護法への適合を先に確認する必要がある。
+
+### MCP クライアントとしての意味
+
+MCP の月間ダウンロードが9700万を超えた今、主要 SaaS が次々 MCP サーバーを公開している。Slackbot がその MCP クライアントになることで、Slack はエンタープライズデータの**集約・実行レイヤー**に変わる。
+
+| 観点 | 従来の Slack | MCP 対応 Slackbot |
+|------|-----------|-----------------|
+| データアクセス | Slack 内メッセージのみ | 接続済み全アプリのデータ |
+| 操作範囲 | 通知 / リマインダー | CRM 更新・ワークフロートリガー |
+| 指示方法 | コマンド・ボタン | 自然言語 |
+| 人間の介在 | 都度操作 | 承認なしで自律実行（設定次第） |
+
+### SIer・コンサルへの構造変化
+
+Salesforce や ServiceNow の導入支援を行ってきた SIer にとって、今回のアップデートは前提を変える。「システムを使わせる」から「エージェントに正しく動かせる」へのシフトだ。
+
+Slackbot にどのスキルを定義するか、どのデータへのアクセスを許可するか、操作ログをどう監査するか。これらの設計がコンサルの付加価値になる。MCP サーバーの設計・権限管理・Observability が、従来の「画面設計・要件定義」に並ぶスキルセットになる。
+
+## まとめ
+
+Slackbot の GA は、Slack が「コミュニケーションツール」から「企業の AI 実行基盤」に転換したことを意味する。
+
+MCP クライアント対応により 6,000以上のアプリに接続し、Claude が自然言語を理解して Agentforce がシステムを動かす。設計次第では、今まで人間が担っていた「データ収集 → 判断 → アクション」の一部を Slackbot が代替する。
+
+日本企業の優先アクションは3つ。**①情報セキュリティポリシーを Slackbot の権限設計に合わせて見直す、②MCP サーバーを持つ既存ツールとの連携設計を始める、③スキル定義と権限制御の運用フローを確立する。** 機能が整ってから動き始めると遅い。
+
+## 参考リンク
+
+- [Salesforce announces an AI-heavy makeover for Slack, with 30 new features | TechCrunch](https://techcrunch.com/2026/03/31/salesforce-announces-an-ai-heavy-makeover-for-slack-with-30-new-features/)
+- [Slack delivers major update to Slackbot, introducing over 30 new AI-powered capabilities | AlternativeTo](https://alternativeto.net/news/2026/4/slack-delivers-major-update-to-slackbot-introducing-over-30-new-ai-powered-capabilities/)
+- [Salesforce and Anthropic Bring Trusted Business Context and AI Actions to Claude Through Slack and Agentforce 360 | Salesforce](https://www.salesforce.com/news/stories/salesforce-anthropic-trusted-context-ai-actions-on-claude/)
+- [How Slack's new platform is fueling the agentic era | Slack Blog](https://slack.com/blog/news/powering-agentic-collaboration)
+- [Salesforce's Slack deepens Anthropic's Claude integration | NoJitter](https://www.nojitter.com/ai-automation/salesforce-s-slack-deepens-anthropic-s-claude-integration)
+- [Salesforce looks to Slackbot to help solve SaaSpocalypse | The Register](https://www.theregister.com/2026/04/02/salesforce_slack_update/)
