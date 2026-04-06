@@ -220,12 +220,12 @@ export default function Home() {
               </div>
               <div className="space-y-4">
                 <p>
-                  Currently building{" "}
-                  <span className="text-slate-200">AI-powered systems</span>{" "}
-                  on top of 10+ years of backend and infrastructure experience.
-                  Designing AI agent architectures with{" "}
-                  <span className="text-slate-200">Function Calling, MCP, RAG, and Fine-tuning</span>,
-                  while leading an engineering team.
+                  Product Lead Engineer with 10+ years of{" "}
+                  <span className="text-slate-200">backend and infrastructure</span>{" "}
+                  experience. Owning product-wide engineering accountability —{" "}
+                  <span className="text-slate-200">technical strategy, team growth, and cross-functional decision-making</span>.
+                  Recently building AI systems that let agents call internal APIs from natural language,
+                  search knowledge bases, and automate operational tasks.
                 </p>
                 <p>
                   Building and operating{" "}
