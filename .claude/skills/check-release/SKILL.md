@@ -11,7 +11,7 @@ Claude Code / Codex の最新バージョンと公式ブログをチェックし
 作業前に、このプロジェクトの `.claude/RELEASE_NOTES_GUIDE.md` を必ず参照してください。
 
 ■ チェック1: Claude Code CLI バージョン
-1. `brew info claude-code --json=v2 | jq -r '.[0].version'` で最新バージョンを確認
+1. `brew info claude-code@latest --json=v2 | jq -r '.casks[0].version'` で最新バージョンを確認
 2. `~/.claude-code-version` と比較。同じなら次へ
 3. 新バージョンの場合:
    - `curl -s https://raw.githubusercontent.com/anthropics/claude-code/main/CHANGELOG.md` で CHANGELOG を取得・分析

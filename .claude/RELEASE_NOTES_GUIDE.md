@@ -9,7 +9,7 @@
 curl -s https://raw.githubusercontent.com/anthropics/claude-code/main/CHANGELOG.md | head -200
 
 # brew でバージョン確認
-brew info claude-code --json=v2 | jq -r '.casks[0].version'
+brew info claude-code@latest --json=v2 | jq -r '.casks[0].version'
 ```
 
 ### 確認すべきソース
@@ -20,7 +20,7 @@ brew info claude-code --json=v2 | jq -r '.casks[0].version'
 | **GitHub Releases** | `github.com/anthropics/claude-code/releases` | リリースノート | GitHub API で取得 |
 | **Anthropic 公式ブログ** | `claude.com/blog` | 新プロダクト発表、機能紹介 | RSSまたはWebフェッチ |
 | **Claude Code カテゴリ** | `claude.com/blog-category/claude-code` | Claude Code 関連の記事のみ | 上記に含む |
-| **brew** | `brew info claude-code` | バージョン情報 | `brew info --json=v2` |
+| **brew** | `brew info claude-code@latest` | バージョン情報 | `brew info --json=v2` |
 
 > **重要**: CHANGELOG には CLI のバージョン更新のみ記載される。
 > Code Review のような新プロダクト発表やプラットフォーム変更は **公式ブログ** でのみ告知されることがあるため、ブログも必ずチェックすること。
@@ -118,7 +118,7 @@ tags: ["claude-code", "anthropic", "ai", "cli", "release"]
 
 ## アップデート方法
 ```bash
-brew upgrade claude-code
+brew upgrade claude-code@latest
 ```
 
 ## まとめ
@@ -327,7 +327,7 @@ codex -c model=\"gpt-5.4\" exec "Summarize this repository"
 Claude Code / Codex 関連のアップデートをチェック:
 
 ■ チェック1: Claude Code CLI バージョン
-1. brew info claude-code --json=v2 | jq -r '.casks[0].version' でバージョン確認
+1. brew info claude-code@latest --json=v2 | jq -r '.casks[0].version' でバージョン確認
 2. .versions/claude-code と比較
 3. 新バージョンなら CHANGELOG.md を取得して分析
 
