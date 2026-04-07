@@ -224,8 +224,8 @@ export default function Home() {
                   <span className="text-slate-200">backend and infrastructure</span>{" "}
                   experience. Owning product-wide engineering accountability —{" "}
                   <span className="text-slate-200">technical strategy, team growth, and cross-functional decision-making</span>.
-                  Recently building AI systems that let agents call internal APIs from natural language,
-                  search knowledge bases, and automate operational tasks.
+                  Recently building AI systems that automate complex workflows — from natural language
+                  understanding to API orchestration, knowledge retrieval, and operational decision support.
                 </p>
                 <p>
                   Building and operating{" "}
