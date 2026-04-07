@@ -5,6 +5,8 @@ disable-model-invocation: true
 user-invocable: true
 argument-hint: "[トピックやURL（省略可）]"
 allowed-tools: Bash, Read, Write, Edit, Glob, Grep, WebSearch, WebFetch
+version: "1.0"
+last_updated: "2026-04-07"
 ---
 
 AI関連の最新ニュース・海外記事を1つ選び、ブログ記事を作成してmainにプッシュしてください。
