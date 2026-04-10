@@ -1,0 +1,109 @@
+---
+title: "Claude Managed Agents — Anthropic がエージェント実行基盤をマネージドサービス化"
+date: "2026-04-10"
+description: "2026年4月8日、Anthropic が Claude Managed Agents をリリース。コンテナ管理・状態管理・権限制御をまとめて引き受けるマネージドランタイムで、エージェント開発が「数ヶ月」から「数週間」へ。"
+tags: ["anthropic", "ai-agents", "claude", "agent-design", "infrastructure"]
+---
+
+## 概要
+
+2026年4月8日、Anthropic が Claude Managed Agents をパブリックベータとして公開した。
+
+AI エージェントを本番環境で動かすには、コンテナのプロビジョニング、状態管理、クレデンシャル保護、権限制御、ループ設計といったインフラ整備が必要になる。これまではそのすべてを開発者が自前で実装していた。Claude Managed Agents はこの「実行基盤」を丸ごとマネージドサービスとして提供し、開発者がロジックだけに集中できる環境を作る。
+
+Notion、Rakuten、Asana、Sentry、Vibecode がすでに本番統合を完了している。
+
+---
+
+## アーキテクチャと主要機能
+
+Claude Managed Agents は composable な API 群として設計されており、必要な機能だけを組み合わせて使える。
+
+| 機能 | 内容 |
+|------|------|
+| **Sandboxed Execution** | エージェントごとに隔離コンテナを自動プロビジョニング。手動スキャフォールディングが不要 |
+| **State Management & Checkpointing** | エージェントの状態をサービス側が管理。割り込み後の再開が可能 |
+| **Credential Management** | API キーや認証情報をセキュアに管理。スコープ付き権限制御で最小権限原則を実施 |
+| **Tool Orchestration** | 定義したツール群から適切なものを自動選択 |
+| **End-to-End Tracing** | ツール呼び出し・判断・失敗モードを Claude Console で全可視化 |
+| **Agent Composition** (research preview) | エージェントが子エージェントをスポーン。複雑なタスクの階層的分解が可能 |
+| **Prompt Refinement** (research preview) | 内部テストで structured file generation の task success が最大 10 ポイント向上 |
+
+ベータ版の利用には `managed-agents-2026-04-01` ベータヘッダーが必要。
+
+---
+
+## 料金体系
+
+| 課金対象 | 単価 |
+|---------|------|
+| モデルトークン | 通常の Claude API 料金と同一 |
+| エージェント実行時間 | **$0.08 / session-hour**（ミリ秒単位で計測） |
+| Web 検索 | **$10 / 1,000 searches** |
+
+エージェントが待機中（思考中・実行中でない）は課金されない設計。長時間タスクでコストが青天井になるリスクは構造的に抑えられている。
+
+---
+
+## Before / After
+
+| 観点 | Before（自前実装） | After（Managed Agents） |
+|------|------------------|------------------------|
+| インフラ準備 | コンテナ・状態DB・権限管理を全自前 | API 呼び出しのみ |
+| 開発期間 | 数ヶ月 | 数週間 |
+| モデルアップグレード | ループ設計を毎回書き直し | Anthropic 側が吸収 |
+| 本番モニタリング | 独自ダッシュボードを構築 | Claude Console に統合 |
+| セキュリティ | クレデンシャル漏洩リスクを自前管理 | スコープ付き権限制御を委任 |
+
+Sentry の VP はこの変化を端的に表現している。
+
+> 「A secure, fully managed agent runtime that allowed us to build the integration in weeks and removed the operational overhead of maintaining agent infrastructure」
+> — Sentry VP
+
+---
+
+## エージェント設計との接続
+
+Agent Composition（research preview）が示す方向性は、Sub-agents の概念をマネージドサービスに乗せることだ。
+
+従来の Agent Teams（Claude Code のローカル実装）は、リーダーエージェントがサブエージェントを制御するモデルだったが、セッション再開不可・ネスト不可という制限があった。Claude Managed Agents の Agent Composition はこの制限を解除し、クラウド側でエージェントの木構造を管理する。
+
+Tool Use の設計観点でも重要な変化がある。Managed Agents では開発者がツールの「定義」と「権限ポリシー」だけを書けばよく、ツール選択ロジックはサービス側が担う。これは MCP（Model Context Protocol）が標準化した「外部ツールの宣言的接続」とも方向性が一致している。
+
+---
+
+## 日本への示唆
+
+日本の SaaS ベンダーや SI 企業にとって、Claude Managed Agents は「AI エージェント機能をプロダクトに埋め込む」コストを大幅に下げる。
+
+| 日本企業のケース | 影響 |
+|----------------|------|
+| SaaS プロダクト（Rakuten 的立場） | エージェント機能をアドオンとして追加しやすくなる |
+| システムインテグレーター | 顧客向けエージェント開発の工数見積もりが変わる |
+| スタートアップ | インフラエンジニア不在でも本番エージェントを出荷できる |
+
+Rakuten がすでに早期採用しているのは象徴的だ。日本の大手 EC が Anthropic のマネージドランタイムを本番採用した事実は、「実験段階から実運用フェーズへ」の移行を裏付けている。
+
+課題は料金体系の透明性だ。$0.08/session-hour は一見安価だが、エージェントが長時間・並列で動くユースケースではトークンコストとの合算で予測が難しい。日本企業が導入する際は、コスト上限設定（ガードレール）の設計が先決になる。
+
+---
+
+## まとめ
+
+- Anthropic が 2026年4月8日にエージェント実行基盤をマネージドサービスとして公開
+- コンテナ管理・状態管理・権限制御・トレーシングをまとめて提供。開発者はロジックに集中できる
+- 料金は $0.08/session-hour。待機中は課金されない設計
+- Agent Composition（research preview）で Sub-agents の階層的管理がクラウド側に移管
+- Rakuten が日本からの早期採用企業として名を連ねており、国内の大規模 EC への波及は現実的なシナリオ
+
+エージェント開発の「重力の中心」が、ローカルのフレームワーク実装からクラウドのマネージドランタイムへと移動し始めている。
+
+---
+
+## 参考リンク
+
+- [Anthropic: Claude Managed Agents overview (API Docs)](https://platform.claude.com/docs/en/managed-agents/overview)
+- [SiliconANGLE: Anthropic launches Claude Managed Agents to speed up AI agent development](https://siliconangle.com/2026/04/08/anthropic-launches-claude-managed-agents-speed-ai-agent-development/)
+- [Help Net Security: Claude Managed Agents bring execution and control to AI agent workflows](https://www.helpnetsecurity.com/2026/04/09/claude-managed-agents-bring-execution-and-control-to-ai-agent-workflows/)
+- [InfoWorld: Anthropic rolls out Claude Managed Agents](https://www.infoworld.com/article/4156852/anthropic-rolls-out-claude-managed-agents.html)
+- [9to5Mac: Anthropic scales up with enterprise features for Claude Cowork and Managed Agents](https://9to5mac.com/2026/04/09/anthropic-scales-up-with-enterprise-features-for-claude-cowork-and-managed-agents/)
