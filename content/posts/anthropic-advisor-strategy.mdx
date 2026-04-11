@@ -1,0 +1,157 @@
+---
+title: "Anthropic Advisor Strategy — Sonnet に Opus の頭脳を借りるエージェント設計"
+date: "2026-04-11"
+description: "2026年4月9日、Anthropic が Messages API にアドバイザーツールを追加。Sonnet が実行を担い、難所だけ Opus に相談する新しいエージェントアーキテクチャで、SWE-bench +2.7pp・コスト -11.9% を同時に実現。"
+tags: ["anthropic", "claude", "ai-agents", "agent-design", "llm-api"]
+---
+
+## 概要
+
+2026年4月9日、Anthropic が Messages API に Advisor Tool（`advisor_20260301`）をベータ公開した。
+
+アーキテクチャは単純だ。Sonnet や Haiku がエージェントタスクを実行し、判断に詰まったタイミングで Opus に相談する。相談は API の内部で完結し、開発者側に余分なラウンドトリップは発生しない。1 回の `/v1/messages` リクエストの中で、executor と advisor の推論が自動的に組み合わされる。
+
+## 仕組み
+
+### executor / advisor の役割分担
+
+| ロール | モデル | 役割 |
+|--------|--------|------|
+| executor | Sonnet 4.6 / Haiku 4.5 | タスク全体を実行。ツール呼び出し・コード生成・反復 |
+| advisor | Opus 4.6 | 難所での戦略立案・コース修正・完了判定 |
+
+executor が advisor を呼ぶ際、full な会話履歴（システムプロンプト・ツール定義・過去のターン全部）が advisor に渡される。advisor はその文脈を読んで 400〜700 トークンの助言を返し、executor は続きを生成する。
+
+advisor の thinking blocks は executor には返ってこない。渡るのはテキストの助言だけだ。
+
+### 有効化
+
+```bash
+curl https://api.anthropic.com/v1/messages \
+  --header "anthropic-beta: advisor-tool-2026-03-01" \
+  --header "content-type: application/json" \
+  --data '{
+    "model": "claude-sonnet-4-6",
+    "max_tokens": 4096,
+    "tools": [
+      {
+        "type": "advisor_20260301",
+        "name": "advisor",
+        "model": "claude-opus-4-6"
+      }
+    ],
+    "messages": [{"role": "user", "content": "Build a concurrent worker pool in Go with graceful shutdown."}]
+  }'
+```
+
+Python / TypeScript / Go SDK はいずれも対応済み。`betas=["advisor-tool-2026-03-01"]` を渡して `tools` に `advisor_20260301` を追加するだけで動く。
+
+### 有効なモデルペア
+
+| executor | advisor |
+|----------|---------|
+| Haiku 4.5 | Opus 4.6 |
+| Sonnet 4.6 | Opus 4.6 |
+| Opus 4.6 | Opus 4.6 |
+
+advisor は executor と同等以上のモデルでなければならない。無効なペアは API が `400 invalid_request_error` を返す。
+
+## ベンチマーク結果
+
+| 設定 | スコア | コスト比較 |
+|------|--------|-----------|
+| Sonnet solo | ベースライン | ベースライン |
+| Sonnet + Opus advisor | SWE-bench Multilingual **+2.7pp** | -11.9% |
+| Haiku solo | BrowseComp **19.7%** | 最小 |
+| Haiku + Opus advisor | BrowseComp **41.2%**（2倍超） | Sonnet solo より **85%安** |
+
+Haiku + Opus advisor の組み合わせは「Sonnet の品質には届かないが、コストは Sonnet の 15%」という位置づけだ。バルク処理・長時間エージェントタスクで費用対効果が出る。
+
+> 「It makes better architectural decisions on complex tasks while adding no overhead on simple ones.」
+> — Eric Simmons, CEO and Founder, Bolt
+
+## コスト構造
+
+advisor トークンは advisor モデルのレートで、executor トークンは executor モデルのレートで別々に課金される。advisor が生成するのは助言テキストのみ（400〜700 tokens、thinking 込みで 1,400〜1,800 tokens）で、最終出力の大部分は executor が低コストで生成する。
+
+```json
+{
+  "usage": {
+    "iterations": [
+      {"type": "message", "input_tokens": 412, "output_tokens": 89},
+      {"type": "advisor_message", "model": "claude-opus-4-6",
+       "input_tokens": 823, "output_tokens": 1612},
+      {"type": "message", "input_tokens": 1348, "output_tokens": 442}
+    ]
+  }
+}
+```
+
+`usage.iterations` で executor / advisor それぞれのトークン消費を分離追跡できる。コスト上限管理は `max_uses` パラメータで制御する。
+
+### advisor-side prompt caching
+
+会話内で advisor 呼び出しが 3 回以上になる場合、`caching: {"type": "ephemeral", "ttl": "5m"}` を有効にすると prefix を再利用できる。2 回以下では write コストが read の節約を上回るため、短いタスクでは off にしておくのが正しい。
+
+## executor モデルへの推奨システムプロンプト
+
+Anthropic が公開した内部評価で最も高い品質を出したシステムプロンプトパターンは「最初の探索後に 1 回、完了前に 1 回 advisor を呼ぶ」タイミング指示だ。
+
+```text
+Call advisor BEFORE substantive work — before writing, before committing
+to an interpretation, before building on an assumption. If the task requires
+orientation first (finding files, fetching a source, seeing what's there),
+do that, then call advisor.
+
+Also call advisor:
+- When you believe the task is complete. BEFORE this call, make your
+  deliverable durable: write the file, save the result, commit the change.
+- When stuck — errors recurring, approach not converging.
+```
+
+advisor の出力長を削りたい場合は、このブロックの前に 1 文追加する。
+
+```text
+The advisor should respond in under 100 words and use enumerated steps, not explanations.
+```
+
+内部テストでアドバイザー出力トークンを 35〜45% 削減できた。
+
+## Before / After
+
+| 観点 | Before（Opus solo） | After（Sonnet + Opus advisor） |
+|------|---------------------|-------------------------------|
+| 実行コスト | 全トークンが Opus レート | 大部分が Sonnet レート |
+| 品質 | Opus の判断力をフル活用 | 難所のみ Opus。単純処理は Sonnet |
+| 実装 | 通常の API 呼び出し | beta ヘッダーと tool 定義を追加 |
+| レイテンシ | Opus の生成速度に依存 | executor は Sonnet 速度。advisor 呼び出し中は一時停止 |
+
+## 日本への示唆
+
+コスト構造の変化が直接響くのは、長時間・高頻度でエージェントを動かす用途だ。
+
+| ユースケース | advisor 適用前 | advisor 適用後 |
+|------------|--------------|--------------|
+| コーディングエージェント（複数タスク並列） | 全タスクを Opus で処理 → 予算上限ですぐ頭打ち | Sonnet が走り切り、難所だけ Opus に相談 |
+| SI 受託のエージェント自動化 | Opus の単価が見積もりを押し上げる | Haiku + advisor で Sonnet 相当の品質をより安く提供可能 |
+| SaaS プロダクトの AI 機能 | シート課金との兼ね合いでモデル選択を妥協 | 品質を下げずにコストを最適化できる |
+
+日本の SI 企業やスタートアップが顧客向けに AI エージェントを構築する際、「Opus の品質が必要だが予算が厳しい」というジレンマは頻繁に発生する。advisor strategy はそのトレードオフに対する構造的な答えだ。
+
+注意点もある。advisor 呼び出し中はストリームが一時停止する。ユーザー向けチャット UI にそのまま使う場合、レスポンス待ち中の UX 設計が必要になる。バックグラウンドの非同期エージェントタスクのほうが相性は良い。
+
+## まとめ
+
+- Anthropic が 2026年4月9日、Messages API に Advisor Tool をベータ公開
+- executor（Sonnet / Haiku）が実行全体を担い、難所でだけ advisor（Opus）に相談する 1 リクエスト完結のアーキテクチャ
+- Sonnet + Opus で SWE-bench +2.7pp・コスト -11.9%。Haiku + Opus で BrowseComp を 19.7% → 41.2% に引き上げつつ Sonnet より 85% 安
+- `max_uses` と advisor-side prompt caching でコスト上限を制御可能
+- 長時間エージェントタスク・バルク処理・SI 受託開発でコスト削減効果が大きい
+
+エージェント設計の原則は変わらない。「いつ何を考えるか」を明示的にデザインする。advisor strategy はその原則を API レベルで実装した。
+
+## 参考リンク
+
+- [Anthropic Blog: The advisor strategy — Give Sonnet an intelligence boost with Opus](https://claude.com/blog/the-advisor-strategy)
+- [Anthropic Docs: Advisor tool](https://platform.claude.com/docs/en/agents-and-tools/tool-use/advisor-tool)
+- [Feature Request: Support Anthropic Advisor Strategy — opencode GitHub](https://github.com/anomalyco/opencode/issues/21789)
