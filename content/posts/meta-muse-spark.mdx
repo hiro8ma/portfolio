@@ -1,0 +1,142 @@
+---
+title: "Meta Muse Spark — $143億の Alexandr Wang 賭けが 9 ヶ月で生んだフロンティアモデル"
+date: "2026-04-12"
+description: "2026年4月8日、Meta が Meta Superintelligence Labs 初のモデル「Muse Spark」を公開。Llama とは別系列のゼロから設計、thought compression で Llama 4 Maverick 比 10 倍のコンピュート効率を達成。医療 AI で競合を上回る一方、コーディング・抽象推論では GPT-5.4 に大差。そして Llama 以来初の closed-source という戦略転換。"
+tags: ["meta", "llm", "model-release", "ai-agents", "benchmark", "open-source"]
+---
+
+## 概要
+
+2026年4月8日、Meta が **Muse Spark**（開発コードネーム "Avocado"）を公開した。
+
+発表主体は Meta 本体ではなく **Meta Superintelligence Labs（MSL）**——2025年6月、Scale AI 共同創業者 Alexandr Wang を初代 Chief AI Officer として招聘し、Scale AI 株の 49% を約 143 億ドルで取得して設立した研究部門だ。Muse Spark はその 9 ヶ月後に出た最初の成果物になる。
+
+Artificial Analysis の総合スコアは 52 で、GPT-5.4 の 57・Gemini 3.1 Pro の 57 に迫る。医療ベンチマークでは競合全社を上回った。コーディングと抽象推論は大きく劣後する。そして Llama シリーズ以来初めての closed-source という戦略転換が、エンジニアにとって最も重い変化だ。
+
+## 立ち上げの文脈
+
+### Scale AI 買収と MSL の設計思想
+
+| 観点 | 内容 |
+|------|------|
+| 時期 | 2025年6月に Wang 参画・MSL 設立 |
+| 取引規模 | Scale AI 株 49%（非議決権）を約 $14.3B で取得 |
+| Wang の役割 | Meta 初代 Chief AI Officer として MSL を主導 |
+| Muse Spark 開発期間 | 参画から 9 ヶ月 |
+
+Zuckerberg は「AI 研究のトップタレントを集める拠点」として MSL を設計した。Wang は「ゼロからモデルを作り直す」という方針を明言しており、Llama のコードベースは引き継がれていない。
+
+## アーキテクチャ
+
+### Llama との断絶
+
+Muse Spark は Llama シリーズとは完全に別の系列だ。アーキテクチャ・インフラ・データパイプラインのすべてを 9 ヶ月で再設計した。
+
+最大の新技術は **thought compression**——複数の思考ステップをより少ないトークンで表現する内部表現の圧縮技術だ。これにより Llama 4 Maverick 比で **10 倍以上少ない計算量**で同等性能を達成した。
+
+| 観点 | Llama 4 Maverick | Muse Spark |
+|------|-----------------|-----------|
+| 系列 | Llama 継続 | ゼロから再設計 |
+| 推論効率 | ベースライン | 10倍以上のコンピュート効率 |
+| ライセンス | Meta Custom（オープンウェイト） | **Closed-source** |
+| 公開形式 | Hugging Face で重み公開 | meta.ai / Meta アプリのみ |
+
+### 推論モードと入出力
+
+モデルはネイティブマルチモーダル（テキスト・画像・音声入力、テキスト出力）で、3 つの推論モードを持つ。
+
+| モード | 用途 | 特徴 |
+|--------|------|------|
+| Fast | 即答が必要なタスク | 最小レイテンシ |
+| Thinking | 推論が必要な問題 | chain-of-thought を内部実行 |
+| Contemplating | 高難度タスク | 複数 AI エージェントが並列推論。HLE で 58% を記録 |
+
+Contemplating モードは Gemini Deep Think・GPT Pro と競合する設計ポジションにある。
+
+## ベンチマーク
+
+### 競合との比較
+
+| ベンチマーク | Muse Spark | GPT-5.4 | Gemini 3.1 Pro | Claude Opus 4.6 |
+|-------------|-----------|---------|--------------|----------------|
+| AI Intelligence Index | **52** | 57 | 57 | 53 |
+| HLE（通常） | 39.9% | 41.6% | **44.7%** | — |
+| HLE（Contemplating） | **58%** | — | — | — |
+| **HealthBench Hard** | **42.8（1位）** | 40.1 | 20.6 | — |
+| GPQA Diamond | 89.5% | 92.8% | **94.3%** | 91.3% |
+| LiveCodeBench Pro | 80.0 | **87.5** | — | — |
+| SWE-Bench Pro | 52.4 | **57.7** | — | — |
+| ARC-AGI-2（抽象推論） | 42.5（**最下位**） | 76.1 | **76.5** | — |
+| Agentic ELO | 1,427–1,444 | 1,672–1,676 | — | 1,606–1,648 |
+
+医療（HealthBench Hard）では GPT-5.4 を 2.7pt 上回り首位。一般・科学推論では拮抗。コーディングと抽象推論、エージェント性能は有意に劣後する。Meta 自身が公式ブログで「current performance gaps」として認めている。
+
+### トークン効率
+
+思考圧縮の効果はトークン消費量にも出る。
+
+| モデル | 平均出力トークン（代表タスク） |
+|--------|--------------------------|
+| Claude Opus 4.6 | 157M |
+| GPT-5.4 | 120M |
+| **Muse Spark** | **58M** |
+
+出力トークンが少ない = API コストが低い。トークン単価が同等なら、Muse Spark は同一タスクで 2〜3 倍のコスト優位を持つ計算になる。
+
+## Closed-source 転換の意味
+
+Llama 2 以降、Meta はオープンウェイト戦略を維持してきた。Llama シリーズは Hugging Face のダウンロード数で首位圏を走り、日本を含む世界の企業がオンプレ展開の基盤として使ってきた。
+
+Muse Spark はその方針を破った最初のモデルだ。Wang は「将来バージョンのオープンソース化を計画している」と発言しているが、現時点では meta.ai と Meta アプリを通じた無料公開に限定されており、プライベート API は一部パートナーのみだ。
+
+| 戦略軸 | Llama 時代 | Muse Spark |
+|--------|-----------|-----------|
+| 重み公開 | Hugging Face で誰でも取得可能 | API/アプリのみ |
+| オンプレ展開 | 可能（4bit 量子化でローカル動作） | 不可 |
+| ファインチューニング | 可能（LoRA/QLoRA） | 不可 |
+| コミュニティ改変 | 可能（Llama.cpp 等の派生多数） | 不可 |
+
+## 日本への示唆
+
+### Llama 依存からの切断
+
+日本の医療・金融・製造の現場では、個人情報保護やデータ主権の観点から「データをクラウドに送れない」制約が根強い。Llama は「ローカルで高性能を出せる唯一の現実解」として採用が広がっていた。
+
+Muse Spark が closed-source になったことで、この用途で Meta に追従することはできない。代替として Gemma 4 (Apache 2.0) や Qwen 3.5 の選択肢が相対的に上昇する。
+
+| 用途 | Llama 時代 | Muse Spark 以降 |
+|------|-----------|----------------|
+| 院内サーバーでの医療 AI | Llama 4 Maverick をオンプレ運用 | Muse Spark は使えない。Gemma 4 31B が代替候補 |
+| 金融機関のオンプレ LLM | LoRA でカスタマイズして自社ファインチューン | 同上。オープンウェイトへ回帰 |
+| API 経由での医療 AI | 感度の高いデータは外部 API に送れない | Muse Spark も同様に不可。オンプレ路線は継続 |
+
+### 医療 AI の可能性
+
+HealthBench Hard で Muse Spark が首位を取ったのは偶然ではない。MSL のデータ戦略は Scale AI の医療・科学データパイプラインを活用している可能性が高い。
+
+日本は高齢化率 30% 超の社会で、医療 AI への需要は大きい。ただし Closed-source の壁があるため、Muse Spark を医療現場に直接持ち込む経路は当面 API 経由のクラウド接続だけだ。規制環境が変わらない限り、国内医療機関が直接採用するシナリオは限定的になる。
+
+### コーディング・エージェント用途では選択肢に入らない
+
+ARC-AGI-2 での 42.5（GPT-5.4 比 -34pt）・エージェント ELO での 228pt 差は、現時点で Muse Spark をコーディングエージェント・自律ワークフローに使う根拠を消している。
+
+Claude Code・Cursor・GitHub Copilot の代替としての検討は早い。「思考するコーディングエージェント」としては GPT-5.4 と Claude Opus 4.6 が引き続き上位に残る。
+
+## まとめ
+
+- 2026年4月8日、Meta Superintelligence Labs が Muse Spark を公開。Alexandr Wang 招聘から 9 ヶ月
+- アーキテクチャは Llama と断絶。thought compression で Llama 4 Maverick 比 10 倍のコンピュート効率
+- 医療ベンチマーク（HealthBench Hard）で GPT-5.4 を上回り首位。コーディング・抽象推論は大幅劣後
+- Llama 以来初の closed-source 転換。オンプレ・ファインチューン依存の用途では使えない
+- トークン効率は競合最高水準（58M vs GPT-5.4 の 120M）。API 利用のコスト優位はある
+
+フロンティアモデルの「医療特化で首位」という結果は示唆的だ。Scale AI のデータパイプラインを持つ MSL の次の一手は、HealthBench の優位を拡張する方向に動く可能性が高い。コーディングとエージェント性能のギャップを埋めるまでの間、エンジニアが Muse Spark を本番ワークフローに組み込む理由は今のところ少ない。
+
+## 参考リンク
+
+- [Introducing Muse Spark: Scaling Towards Personal Superintelligence — Meta AI Blog](https://ai.meta.com/blog/introducing-muse-spark-msl/)
+- [Meta debuts the Muse Spark model in a ground-up overhaul of its AI — TechCrunch](https://techcrunch.com/2026/04/08/meta-debuts-the-muse-spark-model-in-a-ground-up-overhaul-of-its-ai/)
+- [Muse Spark: Meta is back in the AI race — Artificial Analysis](https://artificialanalysis.ai/articles/muse-spark-everything-you-need-to-know)
+- [5 Things Meta's Muse Spark Still Can't Do Better Than ChatGPT and Claude — Techloy](https://www.techloy.com/5-things-metas-muse-spark-ai-model-still-cant-do-better-than-chatgpt-and-claude/)
+- [Meta's new model is Muse Spark — Simon Willison](https://simonwillison.net/2026/Apr/8/muse-spark/)
+- [Meta、視覚で世界を理解する新 AI「Muse Spark」発表 — ITmedia AI+](https://www.itmedia.co.jp/aiplus/articles/2604/09/news059.html)
