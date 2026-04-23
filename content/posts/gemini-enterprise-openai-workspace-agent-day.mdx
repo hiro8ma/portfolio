@@ -1,0 +1,135 @@
+---
+title: "同日発表の企業向けエージェント戦争 — Google Gemini Enterprise と OpenAI Workspace Agents が描く次のレイヤー"
+date: "2026-04-23"
+description: "2026年4月22日、Google Cloud Next 2026 で発表された Gemini Enterprise Agent Platform と、同日 OpenAI がリリースした Workspace Agents in ChatGPT。両社が「チャットボット」から「チーム自動化プラットフォーム」へ同時に舵を切った構造を整理する。"
+tags: ["google-cloud", "openai", "ai-agents", "enterprise", "mcp"]
+---
+
+## 概要
+
+2026年4月22日、Google と OpenAI が **同日に企業向けエージェント基盤** を発表した。
+
+Google Cloud Next 2026（ラスベガス）では Vertex AI の発展形として **Gemini Enterprise Agent Platform** を、OpenAI は ChatGPT に **Workspace Agents**（Codex 駆動）を投入した。両社とも打ち出しは同じ方向——「個人がチャットする時代」から「組織がエージェントを雇う時代」へのシフトだ。
+
+さらに Google は partner エコシステム向けに **$750M** をコミットし、Accenture / Deloitte / McKinsey など主要コンサルを巻き込んだ agent 配布網を構築する。Microsoft Foundry と Amazon Bedrock AgentCore を含めれば、ハイパースケーラー全社が「エージェント OS」の座を奪い合う構図が完成した。
+
+## 同日発表の比較
+
+| 観点 | Google Gemini Enterprise Agent Platform | OpenAI Workspace Agents |
+|------|----------------------------------------|-----------------------|
+| 発表日 | 2026-04-22 | 2026-04-22 |
+| ベース | Vertex AI の発展形 | ChatGPT + Codex |
+| 対象ユーザー | IT / 技術チーム中心 | ビジネスチーム中心 |
+| 提供形態 | 開発者向け Agent Studio / ADK + 業務向け Gemini Enterprise app | ChatGPT 内 + Slack 統合 |
+| 対応モデル | Gemini 3.1・Claude Opus/Sonnet/Haiku・その他 200+ | GPT-5.4 系 + Codex |
+| プロトコル | MCP / A2A / AP2 / WebSocket | MCP |
+| 価格 | 非公開（tier 制と推定） | 2026-05-06 まで無料、以降クレジット課金 |
+| プラン | Google Cloud 全般 | ChatGPT Business / Enterprise / Edu / Teachers |
+
+### Google: IT 主導の「エージェント OS」
+
+Gemini Enterprise Agent Platform は Build / Scale / Govern / Optimize の4層構成だ。
+
+- **Build**: Agent Studio（ロー・コード）、Agent Development Kit（graph ベース multi-agent）、Agent Garden（テンプレート）
+- **Scale**: sub-second cold start、数日間の long-running workflow、Agent Memory Bank
+- **Govern**: Agent Identity、Agent Registry、Model Armor によるプロンプトインジェクション・データ漏洩対策
+- **Optimize**: Agent Simulation（synthetic user での pre-prod テスト）、Agent Evaluator
+
+TechCrunch が指摘する「興味深い選択」は、Google が **ビジネスユーザーではなく IT チームを第一顧客に据えた** 点だ。シンプルなタスク（会議調整・ファイル編集）は別プロダクトの **Gemini Enterprise app** に切り出し、そちらは業務ユーザーが直接 agent を作れる構造にした。
+
+Google 側の含意は明確だ——「現状のエージェントは技術タスクで最も成熟しており、セキュリティも真の懸念。だから IT first で積み上げる」。
+
+### OpenAI: Codex を土台にした「チームの自動化プラットフォーム」
+
+Workspace Agents は custom GPT の後継として位置付けられる。
+
+- ワークフローや手順ファイルをアップロードすると ChatGPT が自動で agent 設定・ツール接続・動作テストまで完了
+- 独自 workspace にファイル・コード・ツール・永続メモリを保持
+- Slack に配置すると到着する依頼を agent が拾って実行
+- 承認ワークフロー、admin コントロール、Compliance API、プロンプトインジェクション対策も同梱
+
+鍵は「Codex が土台」な点だ。開発者用だった Codex の実行基盤が、営業・マーケ・財務向けテンプレートとセットで一般職種に降りてきた。
+
+OpenAI は **Research Preview** として ChatGPT Business / Enterprise / Edu / Teachers に提供し、2026年5月6日までは無料、以降クレジット課金に移行する。
+
+## $750M の partner 経済圏
+
+Google は同日、partner エコシステム（120,000 社）向けに **$750M** を投下すると発表した。
+
+| 項目 | 内容 |
+|------|------|
+| Embedded エンジニアリング | Accenture / Capgemini / Cognizant / Deloitte / HCLTech / PwC / TCS に forward-deployed engineer |
+| Gemini Enterprise Practices | Altimetrik / Artefact / Covasant / Deepsense / Distyl.ai / Northslope / Quantium / Tribe.ai / Tryolabs にサンドボックスクレジット |
+| Early Model Access | Accenture / BCG / Deloitte / McKinsey に Gemini 早期提供 |
+| Ready-made Agents | Adobe / Salesforce / ServiceNow / Oracle / Workday の agent を流通 |
+
+戦略は単純だ——エージェント時代の SI ビジネスを Google 経済圏に取り込み、AWS Bedrock AgentCore と Microsoft Foundry の顧客流出を防ぐ。
+
+採用パートナーが SAP / Oracle / ServiceNow / Workday といった業務システム大手なのも意図的で、既存 ERP 顧客の agent 調達をまとめて受け止める設計になっている。
+
+## MCP が事実上の共通プロトコルに
+
+両社とも **Model Context Protocol（MCP）** を採用した。MCP はもともと Anthropic が提唱した agent ↔ 外部システムの接続規格で、2025年後半から Claude Code / Codex 両方に実装が進んでいた。
+
+| プロダクト | MCP 対応 |
+|-----------|---------|
+| Claude Code | 標準対応（ネイティブ） |
+| Codex CLI | 標準対応 |
+| OpenAI Workspace Agents | 対応（ChatGPT 経由） |
+| Gemini Enterprise Agent Platform | 対応（200+ モデルと相互運用） |
+| Microsoft Foundry | 対応 |
+| Amazon Bedrock AgentCore | 対応予定 |
+
+2026年初頭時点で MCP はエージェント業界の **de facto** になった。ベンダーロックイン回避のためのオプションというより、「MCP 非対応は選択肢に入らない」水準まで普及した。
+
+この標準化によって、企業の調達基準は「どのモデルか」ではなく「どのプラットフォームでガバナンスを敷くか」にシフトしている。
+
+## 日本への示唆
+
+### 調達プロセスが「モデル選定」から「プラットフォーム選定」に
+
+従来の AI 調達は「Gemini か Claude か GPT か」を選ぶ構図だった。エージェント OS の時代は、**ID 管理・監査ログ・threat detection・メモリ永続化・simulation** を含むプラットフォームを選ぶ構図になる。
+
+Gemini Enterprise の **Agent Identity**（暗号学的 ID）や **Model Armor**、OpenAI の **Compliance API** は、情シス・法務・監査部門がそのままレビュー対象にできる層だ。モデル性能の差より、この layer の成熟度で差がつく。
+
+### 日本の SI・SaaS への影響
+
+| 観点 | 米国 | 日本 |
+|------|------|------|
+| Google $750M の直接的恩恵 | Accenture・Deloitte・McKinsey 等が early access | 日系 SIer への直接配分は限定的 |
+| 業務 SaaS 側の agent 対応 | Salesforce・Workday・ServiceNow が Gemini Enterprise 提供 | Japan SaaS（マネフォ・freee・SmartHR）の対応はこれから |
+| admin ガバナンス設計 | Agent Identity / Compliance API が業界標準化 | 社内 IT 部門の負荷増、既存の SSO・DLP 基盤との接続が論点 |
+
+日系 SIer・アクセンチュアジャパンなどは Google 側経由の agent ビジネスに早期参画できるが、純国産 SIer は SAP / Oracle / ServiceNow の agent エコシステム経由で参加する構図になる。独自にプラットフォームを持つ選択肢は実質的にはもう残っていない。
+
+### 「業務ユーザーが agent を作る」現象への備え
+
+OpenAI Workspace Agents と Gemini Enterprise app は共通して「**業務ユーザーが直接 agent を作る**」方向を強く打ち出している。
+
+日本企業はこれまで「IT 主導・承認フローありき」で AI 導入してきた。しかし業務部門が ChatGPT 経由で agent を作り始めると、shadow IT の発生源が「SaaS」から「autonomous agent」に変わる。
+
+対応は3層になる:
+
+1. **検知**: どの部門が・どの agent に・何を実行させているか
+2. **承認**: 会社データへのアクセス・外部 API 呼び出しの事前承認
+3. **棚卸し**: 数百個に増える agent の定期棚卸しと廃止
+
+Google の Agent Registry、OpenAI の admin コントロールはこの3層を最初から前提に設計されている。日本企業の情シスは、MCP ベースで自社データに繋ぎにいく agent を「個人が立てた」段階から見えるようにする仕組みを早めに持つ必要がある。
+
+## まとめ
+
+- 2026年4月22日、Google（Gemini Enterprise Agent Platform）と OpenAI（Workspace Agents）が同日に企業向けエージェント基盤を発表。方向性は「チャットボット→チーム自動化プラットフォーム」で一致
+- Google は IT チーム向け Agent Platform と業務ユーザー向け Gemini Enterprise app の2層構成。$750M を Accenture・Deloitte・McKinsey 等に投下してパートナー経済圏を固める
+- OpenAI は Codex を土台にした Workspace Agents を ChatGPT Business/Enterprise/Edu/Teachers に提供。Slack 統合・承認フロー・Compliance API・2026年5月6日までフリーで投入
+- MCP がハイパースケーラー全社の事実標準に。調達基準はモデル選定からプラットフォーム選定にシフト
+- 日本企業は「業務ユーザーが agent を作る」shadow agent の検知・承認・棚卸し基盤を早期に整備する必要がある
+
+## 参考リンク
+
+- [Introducing Gemini Enterprise Agent Platform — Google Cloud Blog](https://cloud.google.com/blog/products/ai-machine-learning/introducing-gemini-enterprise-agent-platform)
+- [The new Gemini Enterprise: one platform for agent development — Google Cloud Blog](https://cloud.google.com/blog/products/ai-machine-learning/the-new-gemini-enterprise-one-platform-for-agent-development)
+- [Google Cloud Commits $750 Million to Accelerate Partners' Agentic AI Development — Google Cloud Press Corner](https://www.googlecloudpresscorner.com/2026-04-22-Google-Cloud-Commits-750-Million-to-Accelerate-Partners-Agentic-AI-Development)
+- [Introducing workspace agents in ChatGPT — OpenAI](https://openai.com/index/introducing-workspace-agents-in-chatgpt/)
+- [OpenAI launches workspace agents that turn ChatGPT from a chatbot into a team automation platform — The Decoder](https://the-decoder.com/openai-launches-workspace-agents-that-turn-chatgpt-from-a-chatbot-into-a-team-automation-platform/)
+- [Google makes an interesting choice with its new agent-building tool for enterprises — TechCrunch](https://techcrunch.com/2026/04/22/google-makes-an-interesting-choice-with-its-new-agent-building-tool-for-enterprises/)
+- [Google Releases New AI Agents to Challenge OpenAI and Anthropic — Bloomberg](https://www.bloomberg.com/news/articles/2026-04-22/google-releases-new-ai-agents-to-challenge-openai-and-anthropic)
