@@ -1,0 +1,149 @@
+---
+title: "「Prompt caching is everything」— Claude Code チームが SEV 宣言まで行うキャッシュ最適化の全貌"
+date: "2026-05-01"
+description: "2026年4月30日、Anthropic が公式ブログ『Lessons from building Claude Code: Prompt caching is everything』を公開。Claude Code チームのエンジニア Thariq Shihipar が、$20/月の Pro プラン経済性を支える prompt caching のアーキテクチャ判断と、ヒット率が落ちると SEV を宣言する運用文化を明かした。100ターンセッションで $50-100 → $10-19、リアルセッションのヒット率 96% という数字の裏側を整理する。"
+tags: ["anthropic", "claude-code", "prompt-caching", "llm-ops", "cost-optimization"]
+---
+
+## 概要
+
+2026年4月30日、Anthropic 公式ブログに **"Lessons from building Claude Code: Prompt caching is everything"** が公開された。
+
+Claude Code チームのエンジニア Thariq Shihipar が明かしたのは、prompt caching が **Claude Code の存在そのものを支えるアーキテクチャ制約** だという事実だ。チームはキャッシュヒット率が落ちると **SEV（Severity Incident）を宣言** する運用文化を持つ。$20/月の Claude Pro プランが成立する経済性も、この caching の上に乗っている。
+
+100ターンの Opus コーディングセッションは、キャッシュ無しなら **$50-100**、ありなら **$10-19** に収まる。実セッションのキャッシュヒット率は **96%** に達する。LLM プロダクトを運用するすべてのエンジニアにとって、この記事は「Claude API が安く使える理由」と「自分のプロダクトで再現する方法」を同時に示している。
+
+## キャッシュの経済構造
+
+### 価格テーブル（Claude Sonnet 4.6）
+
+| 項目 | 価格（per 1M tokens） | 標準比 |
+|------|---------------------|--------|
+| 標準入力 | $3.00 | 1.0× |
+| **キャッシュ書込** | $3.75 | **1.25×（25% 増）** |
+| **キャッシュ読込** | $0.30 | **0.10×（90% 減）** |
+
+書込時に1回だけ 25% のプレミアムを払い、以降の読込で 90% 減を享受する。同じプレフィックスを **5回以上再利用すれば確実に黒字** になる構造だ。
+
+### 実際のセッションコスト
+
+| シナリオ | キャッシュ無し | キャッシュ有り | 削減率 |
+|---------|-------------|--------------|-------|
+| Opus 100ターン（compaction あり） | $50〜$100 | $10〜$19 | 約 80% |
+| 5,000-token システムプロンプト × 月 100,000 req | — | 月 $1,500 削減 | — |
+| 同上 × 1,000 req/hour | — | 月 $2,000 削減 | — |
+
+実セッションのキャッシュヒット率は基礎実験の 90% を上回り **96%** に達する。マルチターン会話で履歴が伸びても高ヒット率を維持する設計だ。
+
+## Claude Code のアーキテクチャ判断
+
+### 1. プロンプトの並び順
+
+| 位置 | 内容 | 性質 |
+|------|------|------|
+| 先頭 | システムプロンプト・ツール定義・CLAUDE.md | 静的（不変） |
+| 中間 | 過去の会話 | 静的（追記のみ） |
+| 末尾 | 直近のメッセージ | 動的 |
+
+cache breakpoint は静的部分の末尾に置き、動的部分はその後ろに付け足す。これだけで先頭の重い tokens を毎回再利用できる。
+
+### 2. システムプロンプトを編集しない
+
+> 情報が変わる——日付が変わる、ファイルが変更される——ならシステムプロンプトを更新するな。`<system-reminder>` タグとして更新情報を送れ。
+> — Claude Code Engineering, Anthropic
+
+これは Anthropic が公式に推奨する **「メッセージで送る、システムプロンプトを書き換えない」** 原則だ。タイムスタンプを system prompt に入れるだけで、ヒット率が **20+ ポイント** 落ちる。
+
+### 3. 遅延ツール（Deferred Tools）
+
+MCP サーバーが多いと tool 定義だけで数千トークンになる。Claude Code は全 MCP ツールを **数トークンの軽量スタブ** として最初に登録し、実際に呼ぶ時にだけフル schema を取得する。
+
+### 4. Forked 操作
+
+`/compact` などの fork 操作は、親セッションのキャッシュ済みプレフィックス（約 18K tokens）を流用する。新セッションを立ち上げる代わりに、cache を温存して継続する設計だ。
+
+## キャッシュを破壊する操作（5x コストイベント）
+
+| 操作 | 影響 |
+|------|------|
+| システムプロンプトに timestamp を入れる | ヒット率 -20pt |
+| 大文字を2文字変更 | 2,727 tokens のキャッシュ消失 |
+| セッション中にモデル切替（Opus → Haiku） | 全キャッシュ無効化 |
+| MCP サーバー追加/削除 | tools 定義が変わり全キャッシュ無効化 |
+| プロジェクトブリーフを微調整 | プレフィックス変化で下流が全消失 |
+| `extended thinking` 設定変更 | 全キャッシュ無効化 |
+
+**プレフィックスのバイト単位の変更が、下流のすべてを破壊する。** これがキャッシュの本質的制約だ。
+
+## キャッシュの内部構造
+
+| 項目 | 値 |
+|------|----|
+| TTL | 約 5 分（無アクティビティで eviction） |
+| 最小トークン | 1,024（Sonnet/Haiku）/ 4,096（Opus） |
+| 内部実装 | KV キャッシュ（Key/Value 行列） |
+| メモリ | 100K-token プロンプトで 500MB〜1GB / リクエスト |
+
+KV キャッシュは prompt のテキストではなく、attention 計算の Key/Value 行列を保存する。各トークンが数百レイヤー × 数千次元の行列を持つため、メモリコストは大きい。Anthropic はこれを GPU メモリ上に保持して再利用している。
+
+## SEV 宣言という運用文化
+
+注目すべきは Claude Code チームが **「キャッシュヒット率の低下を Severity Incident として宣言する」** 文化を持つ点だ。
+
+通常の SEV は「障害」「データ消失」「セキュリティ事故」に対して宣言される。キャッシュヒット率の低下を SEV 対象にしているチームは、prompt caching を **プロダクトの SLA に含めている** ことを意味する。
+
+これは LLM プロダクト運用の新しいプラクティスだ。コスト・レイテンシ・スループットがキャッシュに直結する以上、ヒット率は単なるメトリクスでなく、プロダクトの可用性そのものになる。
+
+## 日本への示唆
+
+### 自社 LLM プロダクトの設計原則
+
+Claude Code が示した4つの原則は、日本のエンジニアが Anthropic API（または OpenAI / Bedrock）で SaaS / エージェントを構築するときに直接転用できる。
+
+| 原則 | 実装 |
+|------|------|
+| **静的部分を先頭に固める** | system prompt → tools → 過去会話 → 直近 |
+| **システムプロンプトを編集しない** | 動的情報は `<system-reminder>` 等のメッセージで送る |
+| **MCP/tool は遅延ロード** | 軽量スタブ → 必要時にフル取得 |
+| **fork で cache を温存** | 新セッションでなく compact/fork で続ける |
+
+### コスト見積もりの精度向上
+
+日本企業が AI エージェント PoC を行う際、コスト見積もりは **「キャッシュ有り前提」と「キャッシュ無し前提」で5倍以上ぶれる**。
+
+| シナリオ | 月コスト試算 |
+|---------|-----------|
+| キャッシュ無し（5,000-token system prompt × 100,000 req/月） | 約 $1,800 |
+| キャッシュ有り（同上、ヒット率 90%） | 約 $300 |
+
+この差を理解せずに見積もると、本番運用で月コストが想定外に膨らむ・もしくは過剰な予算を確保してしまう。
+
+### LLM Ops の SLA 設計
+
+「キャッシュヒット率を監視メトリクスに入れているか」が LLM プロダクトの成熟度の分水嶺になる。
+
+| 監視項目 | 監視している国内企業の傾向 |
+|---------|------------------------|
+| API レイテンシ | 多い |
+| エラー率 | 多い |
+| トークン使用量 | 一部 |
+| **キャッシュヒット率** | **稀** |
+
+ヒット率が落ちている原因の多くは「設定変更」「コード変更」「依存ツール変更」だ。これらの変更管理を SRE / LLM Ops に組み込めるかが、運用コストを安定させる鍵になる。
+
+## まとめ
+
+- 2026年4月30日、Anthropic が `Lessons from building Claude Code: Prompt caching is everything` を公開。Claude Code チームがキャッシュを **アーキテクチャ制約** として扱い、ヒット率低下を **SEV 宣言対象** にする運用文化を明かした
+- 経済性: 100ターン Opus セッションが $50-100 → $10-19（約 80% 削減）。実セッションのヒット率は 96%。$20/月 Claude Pro はこの上に成立する
+- 4つの設計原則: ①静的を先頭 ②`<system-reminder>` でメッセージ更新 ③MCP/tool の遅延ロード ④fork で cache 温存
+- キャッシュを破壊する操作: timestamp、モデル切替、tool/MCP 増減、プロンプト微調整。**プレフィックスのバイト単位の変化が下流を全消失させる**
+- 日本企業の LLM Ops は、キャッシュヒット率を監視メトリクスに入れることでコスト・レイテンシの両方を安定化できる
+
+## 参考リンク
+
+- [Lessons from building Claude Code: Prompt caching is everything — Anthropic（2026-04-30）](https://www.anthropic.com/news/prompt-caching-is-everything)
+- [How Prompt Caching Actually Works in Claude Code — Claude Code Camp](https://www.claudecodecamp.com/p/how-prompt-caching-actually-works-in-claude-code)
+- [Claude: How prompt caching actually works — mager.co](https://www.mager.co/blog/2026-04-29-claude-prompt-caching/)
+- [Prompt caching — Claude API Docs](https://docs.claude.com/en/docs/build-with-claude/prompt-caching)
+- [Claude Prompt Caching: How to Reduce API Costs by 90% — claudeimplementation.com](https://claudeimplementation.com/blog/claude-prompt-caching)
+- [What Is Anthropic's Prompt Caching and Why Does It Affect Your Claude Subscription Limits? — MindStudio](https://www.mindstudio.ai/blog/anthropic-prompt-caching-claude-subscription-limits)
