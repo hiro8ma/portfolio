@@ -1,0 +1,193 @@
+---
+title: "Claude Computer Use 本番運用ガイド公開 — Opus 4.7 は Sonnet 4.6 max と同等の精度を 1/10 のトークンで達成、Screenshot Pre-downscale が最大のレバー"
+date: "2026-05-14"
+description: "2026年5月13日、Anthropic は Claude の computer / browser use を本番投入する際のベストプラクティスを公開。OSWorld Verified で Opus 4.7 low effort が Sonnet 4.6 max 同等のスコアを約1/10のトークン消費で出す。Screenshot の pre-downscale、Thinking Effort 設定、3層のコンテキスト管理、3層の Prompt Injection 防御まで実装レベルで整理する。"
+tags: ["anthropic", "claude", "computer-use", "browser-use", "agent"]
+---
+
+## 概要
+
+2026年5月13日、Anthropic は Claude の **computer use / browser use** を本番システムに組み込む際のベストプラクティスをまとめたガイドを公開した。著者は Lucas Gonzalez と Luca Weihs（実装も担当）。
+
+| 項目 | 内容 |
+|------|------|
+| 対象 | Claude の computer use / browser use を本番に投入する開発者 |
+| カバー範囲 | Screenshot 最適化・モデル選定・コンテキスト管理・安全性・実験的技法 |
+| 主要ベンチマーク | OSWorld Verified |
+| 最重要レバー | **Screenshot の pre-downscale**（API 側で silent downscale されてクリック座標がずれる問題の解消） |
+
+最大の数字は **Opus 4.7 low effort が Sonnet 4.6 max と同等の精度を、約 1/10 のトークン** で達成したこと。Computer Use のコスト構造が根本的に変わる。
+
+## OSWorld Verified の結果
+
+| モデル / 設定 | 精度 | トークン消費 |
+|--------------|------|------------|
+| Sonnet 4.6 / max effort | 基準 | 基準（=1.0x） |
+| Opus 4.7 / low effort | **Sonnet 4.6 max 同等** | **約 1/10x** |
+| Opus 4.7 / high effort（推奨） | 最大精度に近い | max より約 50% 少ない |
+| Claude 4.6 / medium effort（推奨） | 最大近傍 | high の約半分 |
+
+OSWorld は実機 OS 上で 369 個のタスクをこなすベンチマーク。Computer Use のリアル評価としては事実上の業界標準。Opus 4.7 の "low effort で十分" という結論は、**従来 max effort で組んでいたパイプラインが過剰投資だった可能性を示す。**
+
+## ベスト プラクティス（実装レイヤー別）
+
+### 1. Screenshot の Pre-downscale が最大レバー
+
+> 「screenshot を pre-downscale すること。これが単独で最大の最適化だ」
+> — Anthropic ガイド
+
+| モデル | 最大長辺 | 合計画素数 |
+|--------|---------|-----------|
+| Claude 4.6 系列 | 1568px | 1.15 メガピクセル |
+| Opus 4.7 | 2576px | 3.75 メガピクセル |
+
+これを超える画像は **silent に縮小** され、Claude が見ている画像と座標系がズレて click が外れる。送信前にこちらで明示的に縮小すべき、というのが本筋。
+
+| 推奨解像度 | 用途 |
+|----------|------|
+| 1280×720 | 安全な既定（pixel budget 約 80%） |
+| 1080p | Opus 4.7 の高品質モード |
+| max API fit（アスペクト比保持で最大値まで詰める） | 最大忠実度 |
+
+### 2. メッセージ順序: テキスト先・画像後
+
+`messages` 配列内で **テキスト指示を画像より先に置く**。モデルが指示を理解した上で screenshot を解析するため、クリック精度が上がる。
+
+```python
+messages = [
+    {
+        "role": "user",
+        "content": [
+            {"type": "text", "text": "ログインボタンをクリックして"},
+            {"type": "image", "source": {...}},
+        ],
+    }
+]
+```
+
+### 3. モデル選定
+
+| モデル | 特性 | 主な用途 |
+|--------|------|---------|
+| **Sonnet 4.6** | クリック精度・推論・コストのバランス。downscale 耐性が高い | デフォルト |
+| **Opus 4.7** | 推論強化＋クリック精度が Sonnet 4.6 並み。解像度予算大 | 複雑な workflow、高忠実度が必要 |
+| **Haiku 4.5** | 低レイテンシ | UI の即応性が必要なケース |
+
+### 4. Thinking Effort の使い分け
+
+| モデル | 推奨設定 | 根拠 |
+|--------|---------|------|
+| Opus 4.7 | **high** | max とほぼ同精度で約 50% トークン削減 |
+| Opus 4.7 | low | コスト最小化重視。意外に強い |
+| Claude 4.6 | **medium** | 「accuracy-to-cost ratio が最良」。high の半分のトークンで max 近傍精度 |
+| Claude 4.6 | max | high と精度同等でコストだけ増える。**非推奨** |
+
+「max を最初に試す」は古い直感。Opus 4.7 は high、4.6 は medium がデフォルト。
+
+### 5. コンテキスト管理は 3層
+
+| レイヤー | 目的 | 実装 |
+|---------|------|------|
+| Cache breakpoints | プロンプトキャッシュ活用 | system prompt と末尾の tool results に最大 4 個 |
+| Rolling buffer | 古い画像の整理 | 古い screenshot をバッチで pruning。キャッシュ安定性確保 |
+| Server-side compaction | 長尺セッション維持 | input が 150k token を超えたら自動要約 |
+
+> 「long-running computer use agent の良い既定値は 3 層すべてを使う構成だ」
+> — Anthropic ガイド
+
+### 6. 小さなターゲット対策
+
+| 対策 | 効果 |
+|------|------|
+| `enable_zoom: True` | 密な UI（チェックボックス・トグル・小さなアイコン）で精度向上 |
+| アプリ側のターゲットサイズ拡大 | 制御可能なアプリの場合 |
+| キーボード操作で代替 | クリック不要にする |
+| ソース解像度の確保 | 4K → 720p 圧縮はディテール大量損失 |
+
+## 安全性: 3層の Prompt Injection 防御
+
+| 層 | 内容 | コスト |
+|----|------|-------|
+| Training-time robustness | RL で injection 耐性をモデル内蔵 | — |
+| Real-time classifiers | adversarial command を検出 | **約 0 のレイテンシ・追加コスト** |
+| Continuous red teaming | セキュリティ研究者が継続的に攻撃テスト | — |
+
+公式の `computer_20251124` tool を使うと **classifier が自動適用**される。自前の tool 定義を書くと外れるので注意。
+
+## 実験的機能
+
+### Batch tools
+
+複数の sequential アクションを 1 回の tool call にまとめる。中間のビジュアル feedback に依存しないアクションでのみ使う。
+
+### Advisor tool（beta）
+
+Executor = Sonnet、Advisor = Opus 4.7 のペアで動かす。複雑な workflow で Opus が戦略助言、Sonnet が実行という分業。
+
+| 役割 | モデル | やること |
+|------|-------|---------|
+| Executor | Sonnet | 画面操作の実行 |
+| Advisor | Opus 4.7 | 高次の戦略判断・経路選定 |
+
+### Teach Mode（Demonstration-based workflows）
+
+人間の操作を annotated screenshot 付きで記録 → context として Claude に与えて再生。UI が変わっても適応する。RPA の "録画再生" を Claude が動的に補正するイメージ。
+
+## 日本への示唆
+
+### 国内 RPA / 業務自動化との競合
+
+| プレイヤー | 既存ポジション | Claude Computer Use との関係 |
+|----------|--------------|-----------------------------|
+| UiPath Japan | RPA 国内シェア最大級 | スクリプト固定 vs Claude の動的適応で正面競合 |
+| WinActor（NTT DATA） | 金融・公共系で導入多数 | レガシー UI 自動化は Claude が上書く可能性 |
+| BizRobo!（オープン） | 中堅企業に強い | 同上 |
+| 国内 BPO（コールセンター・データ入力） | 人手依存 | Teach Mode で再現可能領域が広がる |
+
+国内 RPA は「画面要素を XPath / 座標で固定」する設計が主流。**Teach Mode と Opus 4.7 の low effort 経済性** が組み合わさると、固定スクリプト系 RPA の差別化要因が縮小する。
+
+### 「max effort で組む」設計の見直し
+
+| 観点 | Before | After |
+|------|--------|-------|
+| デフォルト Thinking | max | Opus 4.7 = high、4.6 = medium |
+| トークンコスト | 過剰投資 | 約半分〜1/10 |
+| 設計の出発点 | 「精度最大化」 | 「accuracy-to-cost 比最良」 |
+
+日本企業の AI 導入プロジェクトは「とにかく最強モデル + max effort」で見積もりされがちだが、Anthropic 公式が公式に **medium / low を推奨** したことで PoC 予算の積み方が変わる。情シスの **「Opus max を全社展開」決裁** は再考する余地がある。
+
+### セキュリティ調達の前提変化
+
+国内企業が Computer Use をエンタープライズで導入する際の前提:
+
+| 項目 | 従来想定 | Anthropic 公式が提示 |
+|------|---------|--------------------|
+| Prompt injection 対策 | 自前 WAF / プロンプトフィルタ | training-time + real-time classifier が自動適用 |
+| 追加レイテンシ | 数百 ms 〜 | **約 0 ms** |
+| 追加コスト | 別契約・別ベンダー | **0**（公式 tool 使用時） |
+
+NEC × Anthropic 提携（過去記事参照）の文脈で、SOC / BPO 用途の Computer Use 検証はこの BP が出たことで一段進む。
+
+### Claude Code との接続
+
+Claude Code は CLI 上のエージェント、Computer Use は画面操作のエージェント。両方とも **同じ Claude 4.6 / Opus 4.7 のモデル軸** で動く。Anthropic は「同じモデルで CLI と GUI 双方の自動化を統一的に提供する」設計を明示化したことになる。
+
+| 領域 | Anthropic 提供 |
+|------|--------------|
+| ターミナル・コードベース | Claude Code |
+| OS / ブラウザ画面操作 | Computer Use / Browser Use |
+| ハイブリッド業務 | 同一モデル + tool 切替 |
+
+## まとめ
+
+- 2026年5月13日、Anthropic が Claude computer / browser use 本番運用 BP を公開。OSWorld Verified で **Opus 4.7 low effort が Sonnet 4.6 max と同等精度を約 1/10 トークン** で達成
+- 最重要レバーは **Screenshot の pre-downscale**。API 側 silent downscale でクリック座標がずれる問題を解消
+- Thinking Effort は Opus 4.7 = high、4.6 = medium が新標準。max は過剰投資
+- 3層のコンテキスト管理（cache breakpoints / rolling buffer / server-side compaction）と3層の Prompt Injection 防御（training-time / real-time classifier / red teaming）が公式パターン
+- 国内 RPA（UiPath / WinActor / BizRobo!）と国内 BPO は **Teach Mode + Opus 4.7 経済性** の組み合わせで競合構造が変わる。「とにかく max effort」設計の見直しが必要
+
+## 参考リンク
+
+- [Best practices for computer and browser use with Claude — Anthropic Blog（2026-05-13）](https://claude.com/blog/best-practices-for-computer-and-browser-use-with-claude)
+- [OSWorld Verified（ベンチマーク）](https://os-world.github.io/)
+- [Anthropic Computer Use Documentation](https://docs.claude.com/en/docs/agents-and-tools/tool-use/computer-use-tool)
