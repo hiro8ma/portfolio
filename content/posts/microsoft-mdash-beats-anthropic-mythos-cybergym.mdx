@@ -1,0 +1,170 @@
+---
+title: "Microsoft MDASH が CyberGym で Anthropic Mythos を抜いた — 100+ エージェント協調で Windows 16 脆弱性発見、『AI 防衛』は単独モデルから協調群へ"
+date: "2026-05-17"
+description: "2026年5月12日、Microsoft が多モデル協調型のエージェント・セキュリティハーネス MDASH を発表。CyberGym ベンチマークで 88.45% を記録し、Anthropic Mythos Preview の 83.1%・GPT-5.5 の 81.8% を上回り首位に。Windows の tcpip.sys / ikeext.dll / netlogon.dll など 16 件の CVE（うち Critical 4 件）を発見し、5月の Patch Tuesday で配信された。Pentagon が Anthropic を除外した文脈の中で、Microsoft が AI 防衛レースの勝者ポジションを取りに来た。"
+tags: ["microsoft", "anthropic", "security", "agent", "cybergym"]
+---
+
+## 概要
+
+2026年5月12日、Microsoft は多モデル協調型のエージェント・セキュリティハーネス **MDASH（Microsoft Security multi-model agentic scanning harness）** を発表した。CyberGym（UC Berkeley 開発、1,507 タスク / 188 OSS プロジェクト）で **88.45%** を記録、Anthropic Mythos Preview（83.1%）と GPT-5.5（81.8%）を抜いてリーダーボード首位に立った。
+
+| ランク | システム | スコア | アーキテクチャ |
+|-------|---------|-------|---------------|
+| 1 | **Microsoft MDASH** | **88.45%** | 100+ エージェント・ensemble |
+| 2 | Anthropic Mythos Preview | 83.1% | 単一モデル + agent framework |
+| 3 | GPT-5.5 | 81.8% | 単一モデル |
+
+差は 5.35pp。同時に Microsoft は **Windows tcpip.sys / ikeext.dll / netlogon.dll など 16 件の CVE**（Critical 4 件、Important 12 件）を MDASH で発見し、2026年5月の Patch Tuesday で配信した。**「ベンチマーク勝者」を実機の脆弱性発見で裏付けた** 構造だ。
+
+## MDASH のアーキテクチャ
+
+### 100+ エージェントの 5 段パイプライン
+
+| 段階 | 役割 | エージェント種別 |
+|------|------|---------------|
+| Prepare | ソース取り込み、言語別 indexing、attack surface mapping | — |
+| Scan | 候補の脆弱性パターンを列挙 | Auditor |
+| Validate | 悪用可能性を肯定派 / 否定派で議論 | Debater |
+| Dedup | 意味的に等価な検出を統合 | — |
+| Prove | 実際にトリガー入力を構築して悪用を実証 | Prover |
+
+各段階で **役割・プロンプト・利用ツール・停止条件が独立**。100 個以上のエージェントが Auditor / Debater / Prover として配置される。
+
+### モデル構成: アンサンブル
+
+| レイヤー | 内容 |
+|---------|------|
+| 主推論モデル | SOTA frontier モデル |
+| 高速大量パス | distilled モデル（コスト効率） |
+| 反対意見 | 独立した SOTA モデル |
+| 拡張性 | アーキテクチャを変えずモデル差替可能 |
+
+ここが Anthropic Mythos との設計思想の差だ。Mythos は **単独モデル + agent framework**、MDASH は **複数モデルの ensemble + 専門エージェント群**。
+
+> 「MDASH は harness 自体が仕事をする。モデルは1つの入力に過ぎない」
+> — Taesoo Kim, Vice President of Agentic Security, Microsoft（趣旨）
+
+## 発見された 16 件の CVE
+
+### コンポーネント別内訳
+
+| コンポーネント | 件数 | 主なもの |
+|--------------|------|---------|
+| tcpip.sys | 10 | SSRR 経由の Critical RCE、IPv6 拡張ヘッダ NULL deref、IPsec fragment splicing、stack overflow など |
+| ikeext.dll | 2 | IKEv2 double-free → LocalSystem RCE（Critical）、memory leak |
+| netlogon.dll | 1 | CLDAP stack overflow（Critical RCE） |
+| dnsapi.dll | 1 | DNS response heap OOB（Critical RCE） |
+| http.sys | 1 | QUIC control-stream OOB |
+| telnet.exe | 1 | OOB read |
+
+### 重要性
+
+| 観点 | 内容 |
+|------|------|
+| Critical | 4 件（RCE 系） |
+| Important | 12 件 |
+| kernel-mode | 10 件 |
+| user-mode | 6 件 |
+| ネットワーク経由・未認証で到達可能 | 過半数 |
+
+**Windows ネットワークスタックと認証スタックの最深部** にメスを入れた。これは AI が単に既知パターンを検出する段階を越え、未知の脆弱性を産出する段階に入った証拠だ。
+
+## 既存ベンチマークと組み合わせた裏付け
+
+CyberGym はモデル評価のためのベンチマーク。**実環境での再現性** を Microsoft は別途検証している。
+
+| テスト | 結果 |
+|--------|------|
+| 21 件の人工的脆弱性（StorageDrive） | **全件発見、誤検知 0 件**（学習汚染なし、private codebase） |
+| clfs.sys 過去 5 年 MSRC 28 件 | **96% recall** |
+| tcpip.sys 過去 5 年 MSRC 7 件 | **100% recall** |
+
+`clfs.sys` と `tcpip.sys` は Windows カーネルの中核。**過去 5 年間に実際にパッチが出た脆弱性の 96-100% を再発見できる** ということは、防御側が「最先端の AI を本当に持つかどうか」が攻撃側との競争速度を決定する局面に入った。
+
+## 開発体制
+
+| 項目 | 内容 |
+|------|------|
+| 主導 | Microsoft Autonomous Code Security（ACS）team |
+| 協力 | MORSE（Microsoft Offensive Research & Security Engineering）、WARP（Windows Attack Research and Protection） |
+| リード | Taesoo Kim, VP of Agentic Security |
+| ルーツ | **Team Atlanta**（$29.5M DARPA AI Cyber Challenge 優勝チーム）出身者を取り込み |
+| 提供形態 | 限定 private preview（aka.ms/AI-drivenScanningHarness） |
+
+Team Atlanta は DARPA AI Cyber Challenge の優勝チーム。**DARPA で実証済みの自律サイバー推論技術を、Microsoft が買い取って製品化した** 構造。Anthropic Mythos が研究プロダクトに留まる一方、MDASH は **実機での CVE 発見実績 + Patch Tuesday 配信** という事業面の証拠を揃えた。
+
+## Pentagon ブラックリスト後の AI 防衛レース
+
+過去記事で扱った通り、2026年5月1日に Pentagon は AI 8 社を Impact Level 6/7 機密ネットワークに承認し、**Anthropic だけが除外された**。NSA は別途 Anthropic Mythos を密室運用していた。
+
+| 観点 | 5月1日時点 | 5月12日 MDASH 発表後 |
+|------|-----------|--------------------|
+| Pentagon 承認 AI | Microsoft 含む 8 社、Anthropic 除外 | 同上 |
+| AI 防衛技術のリーダー | NSA 密室で Mythos 運用 | **MDASH がベンチマーク首位、Windows 16 CVE 実績** |
+| Anthropic の立場 | 倫理ライン保持で除外、しかし技術的優位 | **技術的優位も失う可能性** |
+| Microsoft の立場 | 承認済みベンダー | **承認 + 技術リーダー** |
+
+Anthropic の防衛市場での立ち位置は二段で崩されている。第一段は政治（Pentagon 除外）、第二段は技術（MDASH がベンチマーク超え）。**NSA が Mythos を密室運用する正当性が、技術的にも薄まった。**
+
+## 日本への示唆
+
+### Microsoft Defender / Sentinel 統合の射程
+
+MDASH は単独製品ではなく、Microsoft の既存セキュリティ製品群に統合される射程にある。
+
+| 製品 | MDASH 統合の想定影響 |
+|------|--------------------|
+| Microsoft Defender for Endpoint | エンドポイント上の未知脆弱性の予防的検出 |
+| Microsoft Sentinel（SIEM） | アラート起因の脆弱性スキャン自動化 |
+| GitHub Advanced Security | リポジトリレベルでの自動脆弱性発見 |
+| Azure DevOps Security | CI/CD パイプライン内での脆弱性検出 |
+
+日本企業の多くは Microsoft 365 / Azure / GitHub Enterprise を中核に据えている。**MDASH が GA になった時点で、追加投資なしに「100+ エージェント協調」の脆弱性検出基盤を手に入れる構造** になる。
+
+### 日本政府・防衛 SOC への影響
+
+| 機関 | 現状の AI 戦略 | MDASH の意味 |
+|------|--------------|------------|
+| 内閣サイバーセキュリティセンター（NISC） | 国産モデル + 海外モデルの混在 | Microsoft 経由で導入する経路が現実的 |
+| 防衛省・防衛装備庁 | Anthropic は Pentagon ブラックリストで採用議論ストップ | Microsoft MDASH が代替の最有力 |
+| 自治体 SOC（東京都・大阪府等） | Defender for Cloud 既導入が多い | アップグレード経路として自然 |
+
+過去記事で書いた通り、Anthropic は日本市場で NEC との SOC 提携を進めていた。**MDASH のベンチマーク優位が確定すると、NEC × Anthropic ラインに加えて、富士通 / NTT Data × Microsoft MDASH の対抗ラインが立つ。**
+
+### 国内 SIer の AI セキュリティ事業への波及
+
+| プレイヤー | 既存ポジション | MDASH 公開後の選択肢 |
+|----------|-------------|--------------------|
+| NEC | Anthropic 連携で SOC 強化 | Mythos の技術優位前提が崩れたら戦略再考 |
+| 富士通 | Microsoft Azure / Defender 統合提案多数 | MDASH を即時組み込み可能 |
+| NTT Data | Microsoft Sentinel 中心の MSS | アップセル材料 |
+| ラック / NRI セキュア | マルチベンダー中立 | Microsoft 推奨度を上げる流れ |
+
+Anthropic CLUE 事例（5/12）が「社内 SOC を 1週間で構築」を示した直後、**Microsoft MDASH が「100+ エージェント協調で benchmarks 首位 + 実 CVE 発見」** を出したのは衝撃的に対照的だ。**社内ドッグフード vs 製品化された解** の対比で、日本企業の調達担当者は後者を選びやすい。
+
+### "単独モデル + agent framework" 設計の見直し
+
+| 観点 | Anthropic Mythos（単独モデル） | Microsoft MDASH（多モデル ensemble） |
+|------|---------------------------|--------------------------------|
+| 設計原則 | 強いモデル 1 つ | 複数モデルの議論で blind spot 解消 |
+| コスト | モデル単価が支配的 | distilled + frontier の混在で最適化 |
+| バージョン耐性 | モデル世代交代で性能変動大 | モデル差替で進化、harness は不変 |
+| 監査可能性 | 単一推論プロセス | Auditor / Debater / Prover の役割分離で監査しやすい |
+
+これは Computer Use BP（5/13）で見た **「max effort 単体」より「適切な effort + 構造」** という流れの一般化だ。**モデルを強くするより、harness を強くする** が業界の合言葉になりつつある。
+
+## まとめ
+
+- 2026年5月12日、Microsoft が MDASH を公開。CyberGym で **88.45%**（Anthropic Mythos Preview 83.1%、GPT-5.5 81.8% を上回り首位）。100+ エージェントの Auditor / Debater / Prover による 5 段パイプライン
+- 実環境裏付け: Windows の tcpip.sys / ikeext.dll / netlogon.dll など **16 件の CVE**（Critical 4 件）を発見、5月 Patch Tuesday で配信。21 件の人工脆弱性で誤検知 0、clfs.sys で 96% recall・tcpip.sys で 100% recall
+- 設計思想の差: Mythos = 単独モデル + agent framework、MDASH = 多モデル ensemble + 専門エージェント群。**harness 自体が仕事をする** スタイル
+- Team Atlanta（$29.5M DARPA AI Cyber Challenge 優勝）出身者を取り込み。Pentagon 承認 8 社の Microsoft が **技術リーダー** ポジションに加わる
+- 日本への示唆: Microsoft Defender / Sentinel / GitHub Advanced Security 統合の射程、防衛省・NISC・自治体 SOC への現実的な調達経路、NEC × Anthropic ラインに富士通 / NTT Data × Microsoft の対抗が形成
+
+## 参考リンク
+
+- [Defense at AI speed: Microsoft's new multi-model agentic security system tops leading industry benchmark — Microsoft Security Blog（2026-05-12）](https://www.microsoft.com/en-us/security/blog/2026/05/12/defense-at-ai-speed-microsofts-new-multi-model-agentic-security-system-tops-leading-industry-benchmark/)
+- [Microsoft's multi-agent AI system tops Anthropic's Mythos on cybersecurity benchmark — GeekWire](https://www.geekwire.com/2026/microsofts-multi-agent-ai-system-tops-anthropics-mythos-on-cybersecurity-benchmark/)
+- [Microsoft's new AI system finds 16 Windows flaws, including four critical RCEs — CSO Online](https://www.csoonline.com/article/4170785/microsofts-new-ai-system-finds-16-windows-flaws-including-four-critical-rces.html)
+- [CyberGym Benchmark — UC Berkeley](https://cybergym.io/)
