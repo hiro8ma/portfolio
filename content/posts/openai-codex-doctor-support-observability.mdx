@@ -1,0 +1,186 @@
+---
+title: "OpenAI codex doctor が出した『サポート可観測性』のテンプレート — Codex 0.131.0、Runtime / Auth / WebSocket / SQLite を一発診断し、JSON で支援者に投げられる構造へ"
+date: "2026-05-20"
+description: "2026年5月19日リリースの Codex CLI 0.131.0 が同梱した codex doctor は、Runtime / Auth / Terminal / Network / Config / SQLite を 5 セクションで一気に診断する。出力は detailed がデフォルト、--summary で要約、--json で構造化（redacted）。feedback upload に自動添付され Sentry タグも自動付与する。Claude Code の /doctor が『triage』なら、codex doctor は『support snapshot』。AI CLI サポートの設計テンプレートが提示された。"
+tags: ["openai", "codex", "cli", "diagnostics", "support"]
+---
+
+## 概要
+
+2026年5月19日にリリースされた Codex CLI **0.131.0** が同梱した `codex doctor` は、Codex の **Runtime / Configuration / Updates / Connectivity / Background Server** を 5 セクションで一気に診断する新コマンドだ（PR #22336、fcoury-oai）。
+
+| 項目 | 内容 |
+|------|------|
+| リリース | Codex CLI 0.131.0（2026-05-19） |
+| コマンド | `codex doctor`（detailed がデフォルト、<code>--summary</code> / <code>--json</code> で切替） |
+| 主要セクション | Environment / Configuration / Updates / Connectivity / Background Server + Notes |
+| 出力モード | 人間向け詳細 / 要約 / redacted JSON |
+| 連携 | feedback upload に自動添付、Sentry tag を派生付与、CLI bug template が `--json` を要求 |
+
+これは単発の診断機能ではなく、**「ユーザーがサポートに投げる時の情報単位」を CLI 側で標準化する** 設計だ。
+
+## codex doctor の中身
+
+### 5 セクション + Notes
+
+| セクション | 主なチェック |
+|-----------|------------|
+| **Notes**（先頭） | アップデート可、rollout dir が肥大、MCP 任意問題、auth 信号の混在を promote |
+| **Environment** | runtime 実体（version / commit / executable path）、install 整合性（npm/bun/PATH）、search backend（`ripgrep`）、terminal/multiplexer（TERM / tmux / zellij / color / TTY）、CODEX_HOME と SQLite 整合性、rollout 統計 |
+| **Configuration** | model / cwd / `config.toml` parse、MCP server 数、feature flag overrides、auth mode 詳細（File 保存 / ChatGPT トークン / API キー env / agent identity）、sandbox 設定 |
+| **Updates** | 利用可能バージョン / 現在バージョン / 既に dismiss したバージョン |
+| **Connectivity** | provider 別の到達性（OpenAI API キー / ChatGPT WebSocket / custom 等）、ChatGPT WS は `HTTP 101 Switching Protocols` まで検証、timeout / DNS / auth の文脈付き |
+| **Background Server** | app-server daemon 状態 |
+
+### Notes ブロックが先頭
+
+通常の診断ツールは check を順に並べるが、`codex doctor` は **異常がある項目だけを Notes として先頭に promote** する。これは Sentry / Datadog の "Issues" タブに近い設計で、サポート担当者が冒頭だけ見れば優先度の高い問題が見える。
+
+```text
+Codex Doctor v0.0.0 · macos-aarch64
+
+Notes
+   ↑ updates      0.130.0 available (current 0.0.0, dismissed 0.128.0)
+   ⚠ rollouts     1,526 active files · 2.53 GB on disk
+   ⚠ mcp          MCP configuration has optional issues
+   ⚠ auth         mixed auth signals: ChatGPT login plus API key env var
+─────────────────────────────────────────────────────────────
+```
+
+### Provider-aware なネットワーク診断
+
+OpenAI 公式 API キー / ChatGPT 認証 / Bedrock / AWS / カスタム HTTP エンドポイントで検証ターゲットを切り替える。
+
+| 認証モード | 検証先 |
+|----------|-------|
+| API key（OpenAI 公式） | OpenAI API エンドポイント |
+| ChatGPT login | ChatGPT WebSocket（HTTP 101 Switching Protocols 検証） |
+| カスタム / AWS / ローカル | 設定済み HTTP エンドポイント |
+
+ChatGPT 認証時の WebSocket ハンドシェイクは独立した check として **timeout / DNS / auth / provider の文脈** を含めて報告される。
+
+### JSON 出力で支援者に投げる前提
+
+`codex doctor --json` は redacted な JSON を出力する。`checks` は check ID で keyed、`details` は key/value object。**Sentry / 内部 issue tracker / Slack に貼り付ける単位** として最適化されている。
+
+```bash
+codex doctor --json > codex-doctor-report.json
+# このファイルが feedback upload で自動添付される
+```
+
+feedback upload 時に **best-effort で `codex-doctor-report.json` が attach され、overall status / failing / warning から Sentry tag が派生** する。CLI バグレポートのテンプレートも `codex doctor --json` 結果の貼り付けを要求するように更新された。
+
+## 対象としている "失敗モード"
+
+PR 本文が想定する failure modes が明示されている。
+
+| 失敗モード | 例 |
+|-----------|---|
+| update-target mismatch | パッケージマネージャ install ターゲットと実行中バイナリがずれる（#21956） |
+| 端末 / multiplexer 起因 | `TERM`、tmux/zellij state、color、TTY metadata |
+| プロバイダ別接続性 | ChatGPT WebSocket handshake、API キー / プロバイダ endpoint reachability |
+| ローカル state SQLite 異常 | state/log SQLite integrity、巨大化した rollout ディレクトリ |
+| feedback report の文脈不足 | 添付された redacted 診断スナップショットがないと再現が困難 |
+
+特に **ChatGPT 認証時の WebSocket** と **SQLite integrity** は、CLI のサポート担当者が「ユーザー環境で何が起きているか」を遠隔で把握するのに最も時間がかかっていた領域だ。
+
+## Claude Code の /doctor との対比
+
+Claude Code には 2.1 系列で `/doctor` がある。観点ごとに比較する。
+
+| 観点 | Claude Code `/doctor` | OpenAI `codex doctor` |
+|------|---------------------|---------------------|
+| 出力単位 | 〜20 個の check を一覧、green / yellow / red | 5 セクション + Notes、detailed / summary / JSON |
+| Connectivity 検査 | API 到達性、MCP server health、hook 構文 | provider-aware reachability + ChatGPT WebSocket 101 検証 |
+| Local state | hook 構文、設定値 | SQLite integrity（state DB / log DB）、rollout 統計 |
+| Terminal | shell integration | terminal / multiplexer / TERM / tmux 詳細 metadata |
+| Update 整合性 | — | install method（npm/bun）、PATH 上の実行可能ファイル、dismiss 済バージョン |
+| JSON 出力 | — | `--json` で redacted JSON、check ID で keyed |
+| サポート連携 | — | feedback upload に自動添付、Sentry tag 派生 |
+| ねらい | 「triage」— 何が壊れているかを表示、修正は人間 | 「support snapshot」— サポートに投げる単位の構造化 |
+
+**Claude Code の `/doctor` は「ユーザーが自力で直す triage」、`codex doctor` は「サポートに投げる snapshot」**。両者は補完関係だが、設計思想の差が CLI ベンダーのカスタマーサクセス戦略に直結する。
+
+## "サポート可観測性" の設計テンプレート
+
+`codex doctor` は単なる便利機能ではなく、**AI CLI のサポートに必要な情報単位を製品化** した。これは観測性（observability）の CLI 版だ。
+
+| 観測性レイヤー | 内容 | codex doctor で提供 |
+|-------------|------|-------------------|
+| インベントリ | 何が、どのバージョンで、どこに | ✅ runtime / install / search / terminal |
+| 設定 | どう動くようにしてあるか | ✅ config.toml / auth / sandbox / MCP / feature flags |
+| 接続性 | 外部 / 内部のどこに繋がっているか | ✅ provider-aware reachability + WebSocket |
+| 状態 | 実体としてのデータがどうなっているか | ✅ SQLite integrity / rollout 統計 |
+| イベント / アラート | 何が異常か | ✅ Notes ブロック + Sentry tag 派生 |
+| 共有 | 支援者にどう投げるか | ✅ JSON 出力 + feedback upload 自動添付 |
+
+これは Datadog / Honeycomb / Grafana が SaaS 観測性で 10 年かけて固めたパターンを、CLI に圧縮した形だ。
+
+## 日本への示唆
+
+### エンタープライズ調達での "サポート品質" 観点
+
+国内エンタープライズが AI CLI を全社展開する際、**サポートのエスカレーション設計**が調達評価項目に入る。
+
+| 評価項目 | これまで | codex doctor 以降 |
+|---------|---------|----------------|
+| サポートチケット起票時の情報 | ユーザーが状況を文章で説明 | `codex doctor --json` 添付を要求 |
+| 1次切り分けの所要時間 | サポート担当者が手探りで再現 | Notes ブロックを冒頭で読めば優先度判定 |
+| 環境差異の特定 | tmux / TERM / shell の聞き取り | terminal/multiplexer metadata で即時把握 |
+| ベンダー側 SRE への引き渡し | フリーテキストの会話 | redacted JSON + Sentry tag で構造化 |
+
+NTT データ・富士通・NRI 等の国内 SIer が AI CLI を顧客に展開する場合、**`codex doctor` のような診断コマンドの有無は、提案書の差別化要因** になる。
+
+### Anthropic / OpenAI の "ロックイン要素" 比較
+
+| 観点 | Claude Code | OpenAI Codex |
+|------|------------|------------|
+| プロダクトコンセプト | 開発者の作業フローを増幅 | 同上 |
+| サポート設計 | `/doctor` で triage、ユーザー自助寄り | `codex doctor` でサポート snapshot、ベンダー支援寄り |
+| エンタープライズ向け差別化 | Founder's Playbook / CLUE 等の戦略コンテンツ | 診断・運用基盤の CLI レベル整備 |
+
+過去記事で扱った **Anthropic 3日連続投下（CLUE / Computer Use BP / Founder's Playbook）** は「戦略・実装・運用の物語」を整える方向。OpenAI Codex は **CLI レベルで運用品質を上げる** 方向。両者の差が日本のエンタープライズ調達担当者にどう映るかで、勝敗が決まる。
+
+### 国内 SIer の CLI ツール提供への波及
+
+| プレイヤー | 既存提供 | codex doctor 後の選択肢 |
+|----------|---------|--------------------|
+| NRI / TIS / SCSK | カスタム CLI ラッパー、社内 wiki | 顧客への `codex doctor` 出力提出を SLA に組込 |
+| NTT データ | エンタープライズ運用基盤 | 「診断 JSON 自動収集 → 自社オブザーバビリティに統合」の SaaS 化 |
+| クラウド MSP（CTC / SCSK ServiceWare 等） | チケットドリブン運用 | 診断 JSON を起点にした runbook 整備 |
+
+### Python SDK との接続
+
+Codex 0.131.0 は同時に **Python SDK を `openai-codex` パッケージに刷新** した。Python SDK + `codex doctor --json` の組み合わせで、**自前の運用ダッシュボードに codex の health を統合する** 経路が現実的になる。
+
+```python
+import subprocess
+import json
+
+result = subprocess.run(
+    ["codex", "doctor", "--json"],
+    capture_output=True, text=True,
+)
+report = json.loads(result.stdout)
+
+for check_id, check in report["checks"].items():
+    if check["status"] in ("warn", "fail"):
+        send_to_observability(check_id, check["details"])
+```
+
+社内に **N 台の開発端末で codex を運用している企業** は、夜間 cron で `codex doctor --json` を回して集約するだけで、**フリート全体の健全性ダッシュボード** が組める構造になった。
+
+## まとめ
+
+- 2026年5月19日リリースの Codex CLI 0.131.0 が `codex doctor` を同梱。Runtime / Auth / Terminal / Network / SQLite を 5 セクションで一気に診断、Notes ブロックで異常を冒頭に promote、`--summary`/`--json` で出力モード切替
+- 出力は **redacted JSON で支援者に投げる単位** に最適化。feedback upload に自動添付、Sentry tag を派生付与、CLI バグテンプレートも `--json` 添付を要求
+- Claude Code `/doctor` は「triage」、`codex doctor` は「support snapshot」。両者の設計思想の差は、ベンダーのカスタマーサクセス戦略の差
+- SaaS 観測性（Datadog/Honeycomb）で固めた "Inventory / Config / Connectivity / State / Events / Sharing" のパターンを CLI に圧縮した。AI CLI の運用品質テンプレートとして他ベンダーが追従する圧力がかかる
+- 日本のエンタープライズ調達で「診断コマンドの有無」が評価項目に。NRI/TIS/SCSK/NTT データなど SIer は、診断 JSON を起点にした runbook 整備や自社オブザーバビリティ統合の SaaS 化が現実的な打ち手
+
+## 参考リンク
+
+- [Codex CLI 0.131.0 Release Notes — GitHub](https://github.com/openai/codex/releases/tag/rust-v0.131.0)
+- [feat(cli): add codex doctor diagnostics — PR #22336](https://github.com/openai/codex/pull/22336)
+- [Command line options — Codex CLI Reference (OpenAI Developers)](https://developers.openai.com/codex/cli/reference)
+- [Claude Code /doctor: Fix Setup Issues in 30 Seconds — Vincent's Blog](https://blog.vincentqiao.com/en/posts/claude-code-doctor/)
