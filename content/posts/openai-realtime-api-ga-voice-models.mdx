@@ -1,0 +1,105 @@
+---
+title: "OpenAI Realtime API が GA — 音声に GPT-5 級の推論を載せた GPT-Realtime-2、70→13 言語の同時通訳、ストリーミング Whisper"
+date: "2026-05-26"
+description: "2026年5月7日、OpenAI は Realtime API を正式版（GA）にし、3 つの音声モデルを投入した。GPT-Realtime-2 は音声に GPT-5 級の推論を載せ、context を 32K→128K に拡張。GPT-Realtime-Translate は 70+ 言語 → 13 言語の同時通訳を $0.034/分で、GPT-Realtime-Whisper は低遅延ストリーミング文字起こしを $0.017/分で提供する。コールセンター・インバウンド観光・アクセシビリティへの影響を日本の文脈で考える。"
+tags: ["openai", "voice", "realtime-api", "ai", "speech"]
+---
+
+## 概要
+
+2026年5月7日、OpenAI は **Realtime API を正式版（GA）** にし、同時に 3 つの音声モデルを投入した。Realtime API は beta を抜け、本番投入できる段階に入った。
+
+| モデル | 役割 | 料金 |
+|--------|------|------|
+| **GPT-Realtime-2** | 推論する音声エージェント | $32 / 1M audio 入力（cached $0.40）、$64 / 1M 出力 |
+| **GPT-Realtime-Translate** | 同時通訳（70+ → 13 言語） | $0.034 / 分 |
+| **GPT-Realtime-Whisper** | 低遅延ストリーミング文字起こし | $0.017 / 分 |
+
+ポイントは **「音声の中で推論する」** こと。これまでは音声をテキスト化 → LLM で処理 → 音声合成、という多段パイプラインが主流だった。GPT-Realtime-2 は音声ループの内側で GPT-5 級の推論を回す。
+
+## GPT-Realtime-2 — 音声に推論を載せる
+
+GPT-Realtime-2 は OpenAI 初の **GPT-5 級 reasoning を持つ音声モデル**だ。
+
+| 能力 | 内容 |
+|------|------|
+| context window | 32K → **128K** に拡張（長い会話・複雑なタスクで文脈を保持） |
+| reasoning level | minimal / low / medium / high / xhigh の 5 段階 |
+| 並列ツール呼び出し | 処理中に「ちょっと確認します」と narration できる |
+| トーン制御 | calm / empathetic / upbeat |
+| 割り込み復帰 | ユーザーの割り込みから自然に復帰、業界用語にも対応 |
+
+処理中に **「let me check that」「one moment while I look into it」** のような preamble を挟める設計が実用的だ。沈黙が続くと電話の相手は不安になる。AI が「考え中」を声で示せることは、コールセンター用途で効く。
+
+### ベンチマーク
+
+reasoning を載せた効果はベンチマークに表れている。
+
+| ベンチマーク | GPT-Realtime-1.5 | GPT-Realtime-2 |
+|------------|-----------------|----------------|
+| Big Bench Audio | 81.4% | **96.6%**（high reasoning） |
+| Audio MultiChallenge | 34.7% | **48.5%**（xhigh） |
+
+Big Bench Audio で 81.4% → 96.6% は大きな跳躍だ。音声での多段推論が、テキスト LLM に近い水準に寄ってきた。
+
+## 通訳と文字起こしを「専用モデル」に分けた
+
+OpenAI は会話・通訳・文字起こしを 1 つのモデルで兼ねず、用途別に分けた。Realtime API には 3 種類の session がある。
+
+| session 種別 | 使うモデル | 用途 |
+|-------------|-----------|------|
+| voice-agent | GPT-Realtime-2 | 対話するアシスタント |
+| translation | GPT-Realtime-Translate | 通訳（応答せず訳す） |
+| transcription | GPT-Realtime-Whisper | 文字起こし（応答しない） |
+
+**GPT-Realtime-Translate** は 70+ 言語の入力を 13 言語へストリーミング翻訳する。会話的な reasoning を持たず、通訳に特化することで $0.034/分という安さを実現した。
+
+**GPT-Realtime-Whisper** は従来 Whisper の streaming 版だ。旧 Whisper は「完結した音声チャンク」向けで事後文字起こし寄りだったが、こちらは話しながら文字が出る。遅延は調整可能（低遅延＝早く出す / 高遅延＝精度優先）。
+
+```json
+// Realtime API のセッション例（transcription）
+{
+  "type": "transcription_session.update",
+  "session": {
+    "input_audio_transcription": { "model": "gpt-realtime-whisper" },
+    "turn_detection": { "type": "server_vad" }
+  }
+}
+```
+
+## 日本への示唆
+
+音声 AI の GA は、日本では「多言語」と「人手不足」の 2 軸で効く。用途別に見る。
+
+| 用途 | 従来 | Realtime API で変わること |
+|------|------|------------------------|
+| コールセンター | 人＋IVR、夜間は停止 | 推論する音声 AI が 24/7 一次対応 |
+| インバウンド観光 | 通訳アプリ（一往復ずつ） | 70+→13 言語の同時通訳で会話が途切れない |
+| 医療・行政の窓口 | 多言語対応は人手頼み | 文字起こし＋通訳で外国人対応を補強 |
+| アクセシビリティ | 事後字幕 | 低遅延ストリーミングで即時字幕 |
+
+### コールセンターの一次対応が現実的に
+
+日本のコールセンターは人手不足と離職率の高さが慢性課題だ。GPT-Realtime-2 の「沈黙を埋める narration」「割り込み復帰」「トーン制御」は、これまで音声 AI が不自然だった部分を埋める。一次対応の自動化が、デモではなく本番に乗る水準に来た。
+
+### インバウンド通訳の単価が崩れる
+
+70+ 言語 → 13 言語の同時通訳が $0.034/分（約 5 円/分）。人間の通訳や従来の通訳サービスの単価とは桁が違う。観光・小売・宿泊の現場で、多言語対応のコスト前提が崩れる。
+
+### 国産音声 AI への圧力
+
+日本語の音声認識・合成は国産勢の強みだった。だが GPT-Realtime-Whisper のストリーミング文字起こしと多言語通訳が API で安価に使えると、差別化は「日本語特化の精度」と「オンプレ・データ主権」に絞られる。汎用音声の領域は価格で押される。
+
+## まとめ
+
+- 2026年5月7日、OpenAI が **Realtime API を GA** にし、用途別の 3 音声モデルを投入
+- **GPT-Realtime-2** は音声に GPT-5 級 reasoning を載せ、context を **128K** に拡張。Big Bench Audio は 81.4%→**96.6%**
+- **Translate**（70+→13 言語、$0.034/分）と **Whisper**（ストリーミング文字起こし、$0.017/分）を専用モデルに分離
+- 日本ではコールセンターの一次対応自動化、インバウンド同時通訳、行政・医療の多言語窓口に直結
+- 国産音声 AI の差別化軸は「日本語精度」と「データ主権」に絞られる
+
+## 参考リンク
+
+- [OpenAI: Advancing voice intelligence with new models in the API](https://openai.com/index/advancing-voice-intelligence-with-new-models-in-the-api/)
+- [MarkTechPost: OpenAI Releases Three Realtime Audio Models](https://www.marktechpost.com/2026/05/08/openai-releases-three-realtime-audio-models-gpt-realtime-2-gpt-realtime-translate-and-gpt-realtime-whisper-in-the-realtime-api/)
+- [9to5Mac: OpenAI has new voice models that reason, translate, and transcribe as you speak](https://9to5mac.com/2026/05/07/openai-has-new-voice-models-that-reason-translate-and-transcribe-as-you-speak/)
