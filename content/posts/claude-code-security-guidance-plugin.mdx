@@ -1,0 +1,175 @@
+---
+title: "Claude Code の security-guidance plugin — Claude が書いたコードを Claude 自身が3層でレビューし、同じセッションで直す"
+date: "2026-05-27"
+description: "Anthropic が Claude Code 向けに security-guidance plugin を公開。Claude が書いたコードを「編集ごと」「ターン終了時」「コミット/プッシュ時」の3層で脆弱性レビューし、見つけた問題を同一セッション内で修正する。レビューは書いた本人とは別の Claude インスタンスが担当。インストール・カスタムルール・他ツールとの位置づけを整理し、SI・受託開発が多い日本のセキュリティ実務への影響を考える。"
+tags: ["claude-code", "anthropic", "security", "appsec", "ai"]
+---
+
+## 概要
+
+Anthropic は Claude Code 向けに **security-guidance plugin** を公開した。**Claude が書いたコードを、Claude 自身が脆弱性レビューし、同じセッション内で直す** プラグインだ。
+
+| 項目 | 内容 |
+|------|------|
+| 何をする | Claude の変更を脆弱性観点でレビューし、同一セッションで修正 |
+| 検出例 | injection、unsafe deserialization、unsafe DOM API |
+| 起動 | インストール後は自動。呼び出すコマンドなし |
+| 前提 | Claude Code CLI 2.1.144 以降、Python 3.8 以降、git リポジトリ |
+| 既定モデル | レビューは Claude Opus 4.7 |
+| 提供 | 全プランで利用可 |
+
+狙いは、**人間のレビュー前に問題を潰す** こと。PR に届く前の editor 段階で拾うため、下流のレビュー負荷が減る。PR 時に走る Code Review の「in-session 版の相棒」と位置づけられている。
+
+### なぜ「自動レビュー」なのか
+
+背景には、AI エージェントの承認が形骸化しているという Anthropic 自身のデータがある。
+
+| 観点 | 数値（Trustworthy Agents in Practice） |
+|------|--------------------------------------|
+| Claude Code auto mode で承認 prompt を無確認で通す割合 | 約 93% |
+| 1 セッションあたりのアクション数 | 数百 |
+
+1 アクションごとの承認は consent fatigue（承認疲れ）を起こし、人間は実質的に確認しなくなる。「実行前にレビューしていない。動かして問題が起きたら介入する。それは oversight ではなく incident response だ」という指摘がある。
+
+per-action の承認が機能しないなら、**自動レビューを多層で挟む** ほうが現実的だ。security-guidance plugin はその実装に当たる。
+
+## 3 層レビューの構造
+
+プラグインは深さの異なる 3 つのタイミングでレビューする。
+
+| 層 | タイミング | 深さ | モデル呼び出し | コスト |
+|----|----------|------|--------------|--------|
+| per-edit | ファイル編集ごと | 既知パターンの文字列マッチ | なし | 無料 |
+| end-of-turn | ターン終了時 | 変更分の diff を別 Claude がレビュー | あり（背景実行） | 課金対象 |
+| commit/push | Claude が commit/push 時 | 周辺コードまで読む agentic レビュー | あり（背景実行） | 課金対象 |
+
+### per-edit — 文字列マッチ（無料）
+
+編集が書き込まれた直後に、危険なパターンを文字列マッチで検出する。モデルを呼ばないのでコストゼロ。
+
+- 動的コード実行: `eval(`, `new Function`, `os.system`, `child_process.exec`
+- unsafe deserialization: `pickle`
+- DOM injection: `dangerouslySetInnerHTML`, `.innerHTML =`, `document.write`
+- workflow ファイル: `.github/workflows/` 配下（リポジトリ権限を付与しうる）
+
+警告は「パターン × ファイル × セッション」ごとに 1 回だけ発火し、会話を埋め尽くさない。
+
+### end-of-turn — diff レビュー（背景実行）
+
+ターン終了時に、その間の作業ツリーの git diff を計算し、**別の Claude** にセキュリティ観点でレビューさせる。背景で走るので応答は遅れない。文字列マッチでは拾えない以下を検出する。
+
+- authorization bypass / IDOR（insecure direct object reference）
+- injection / SSRF（server-side request forgery）
+- weak cryptography
+
+1 ターンで最大 30 ファイル、連続 3 回までで一旦ユーザーに戻す。
+
+### commit/push — agentic レビュー（背景実行）
+
+Claude が Bash tool 経由で `git commit` / `git push` した時に、周辺コード（呼び出し元・sanitizer・関連ファイル）まで読む深いレビューを走らせる。文脈を読むことで、単体では危険に見えるが実際は安全なコードの false positive を抑える。
+
+自分の shell や `!` エスケープで打った commit はレビューされない。上限は 1 時間あたり 20 件。
+
+### レビューの独立性
+
+重要なのは、**書いた本人の Claude に自己採点させない** 設計だ。end-of-turn と commit レビューは fresh context の別 Claude 呼び出しで、diff から出発し、元の実装に思い入れがなく、「問題を見つけろ」とだけ指示される。
+
+ただし 3 層とも書き込みや commit をブロックしない。findings は Claude への指示として返り、Claude が会話内で直す。defense in depth の 1 層であって、完全な解決策ではない。
+
+## 導入とカスタマイズ
+
+### インストール
+
+```text
+/plugin install security-guidance@claude-plugins-official
+/reload-plugins
+```
+
+チームやリポジトリ全体で有効化するには、リポジトリの設定にチェックインする。
+
+```json
+// .claude/settings.json
+{
+  "enabledPlugins": {
+    "security-guidance@claude-plugins-official": true
+  }
+}
+```
+
+### 自社ルールを足す
+
+モデルレビュー向けには、自然言語で threat model を書ける。
+
+```markdown
+# .claude/claude-security-guidance.md
+- INFO 以上で customer_id や account_number をログに出さない
+- /admin 配下の route は DB read 前に require_role("admin") を呼ぶ
+- token 比較は === ではなく crypto.timingSafeEqual を使う
+```
+
+per-edit の文字列マッチには regex/substring ルールを足せる。
+
+```yaml
+# .claude/security-patterns.yaml
+patterns:
+  - rule_name: internal_api_key
+    substrings: ["sk_live_", "AKIA"]
+    reminder: "Hardcoded API key。secret manager から読め"
+  - rule_name: tenant_unfiltered_query
+    regex: "\\.objects\\.all\\(\\)"
+    paths: ["**/src/tenants/**"]
+    reminder: "マルチテナントは org_id で絞れ"
+```
+
+ルールは追加のみ（additive）で、組み込みチェックを無効化したり「この脆弱性は無視せよ」と書いて findings を抑えることはできない。ハードな強制は edit をブロックする hook か CI 側で行う。
+
+## 他のセキュリティツールとの位置づけ
+
+このプラグインは defense in depth の最前段に過ぎない。早い段階で拾うが、後段を置き換えはしない。
+
+| 段階 | ツール | カバー範囲 |
+|------|--------|----------|
+| in-session | security-guidance plugin | Claude が書いたコードの一般的な脆弱性を同一セッションで修正 |
+| on demand | `/security-review` | 現ブランチへの単発セキュリティパス |
+| PR 時 | Code Review（Team/Enterprise） | コードベース全体文脈でのマルチエージェント・レビュー |
+| CI | 既存の静的解析・依存スキャン | 言語別ルール、supply-chain、ポリシー強制 |
+
+プラグインの価値は後段に届く量を減らすことであって、後段を不要にすることではない。
+
+## 日本への示唆
+
+日本は SI・受託開発の比率が高く、セキュリティ人材も慢性的に不足している。このプラグインは、その 2 点に直接効く。
+
+### 1. レビュー負荷の前倒し
+
+| 観点 | Before | After |
+|------|--------|-------|
+| 脆弱性の発見地点 | PR レビュー・CI・最悪は本番 | editor 段階（書いた直後） |
+| レビュアーの負荷 | 全 PR を人手で精査 | プラグインが一次フィルタ |
+| 修正コスト | 後段ほど高い | 同一セッションで完結 |
+
+「セキュリティレビューに回せる人がいない」という現場で、AI エージェントが一次フィルタを担う。人間のレビュアーは、プラグインが減らした残りに集中できる。
+
+### 2. AI 生成コードの脆弱性混入への歯止め
+
+エージェントにコードを書かせる量が増えるほど、脆弱性の混入速度も上がる。`eval` や `innerHTML`、ハードコードされた認証情報は、AI が「動くコード」として平気で書く。書いた直後に同じ場で警告が返る仕組みは、混入を入口で止める。
+
+### 3. ガバナンスは「ハーネス」層の自己責任
+
+Anthropic の shared responsibility model では、Model 層はプロバイダ責任だが、**Harness（指示・ポリシー・ガードレール）と Tools、Environment は導入企業の責任** とされる。クラウドの責任共有モデルと同じ構図だ。
+
+security-guidance plugin は、その Harness 層を企業が固めるための具体的な部品になる。`claude-security-guidance.md` に自社の脅威モデルを書き込めることは、「AI に任せる範囲を自社で定義する」第一歩だ。
+
+## まとめ
+
+- Anthropic が Claude Code 向けに **security-guidance plugin** を公開。Claude が書いたコードを Claude 自身が脆弱性レビューし、同一セッションで修正する
+- レビューは **per-edit（無料の文字列マッチ）/ end-of-turn（diff レビュー）/ commit・push（agentic レビュー）** の 3 層。深さとコストが異なる
+- 書いた本人ではなく **fresh context の別 Claude** がレビューし、自己採点を避ける。ただし書き込みはブロックせず、defense in depth の 1 層
+- `claude-security-guidance.md`（自然言語の脅威モデル）と `security-patterns.yaml`（regex/substring）で自社ルールを追加できる
+- 日本では SI・受託のレビュー負荷の前倒し、AI 生成コードの脆弱性混入への歯止め、Harness 層の自己責任を固める部品として効く
+
+## 参考リンク
+
+- [Claude Code Docs: Catch security issues as Claude writes code（security-guidance plugin）](https://code.claude.com/docs/en/security-guidance)
+- [Anthropic Research: Trustworthy agents in practice](https://www.anthropic.com/research/trustworthy-agents)
+- [Backslash: Anthropic's Shared Responsibility Security Model for AI Agents, Explained](https://www.backslash.security/blog/anthropics-shared-responsibility-security-model-for-ai-agents)
