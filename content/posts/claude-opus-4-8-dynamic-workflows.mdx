@@ -1,0 +1,148 @@
+---
+title: "Opus 4.8 と Dynamic workflows — SWE-bench Pro で GPT-5.5 を 10pt 引き離し、Claude が書く JS スクリプトで最大 1,000 subagent を並列起動"
+date: "2026-05-29"
+description: "2026年5月28日、Anthropic は Opus 4.7 から41日で Opus 4.8 を投入。標準価格は $5/$25 で据え置きのまま、Fast mode を3倍安価に。同時に Claude Code に Dynamic workflows（Claudeがその場で書いたJSが最大1,000 subagentを背景で並列起動）を研究プレビュー公開。Jarred Sumner は Bun を Zig から Rust に75万行・11日で移植した。SWE-bench Pro 69.2%（GPT-5.5: 58.6%）、OSWorld 83.4%（同 78.7%）、GDPval-AA で Elo 1890。Dynamic workflows の仕組み、料金構造、日本のエンジニア・SI への影響を整理する。"
+tags: ["anthropic", "claude-code", "opus", "dynamic-workflows", "agents"]
+---
+
+## 概要
+
+2026年5月28日、Anthropic は **Claude Opus 4.8** を公開した。Opus 4.7 からわずか **41 日** での更新だ。同時に Claude Code 2.1.154 で **Dynamic workflows**（Claude がその場で書く JavaScript で最大 1,000 subagent を並列起動する仕組み）を研究プレビュー公開した。
+
+| 項目 | 内容 |
+|------|------|
+| 公開日 | 2026-05-28（Opus 4.7 から 41 日） |
+| 提供先 | claude.ai / Claude API / Bedrock / Vertex / Foundry |
+| デフォルト context | 1M tokens（API・Bedrock・Vertex） |
+| 最大出力 | 128K tokens |
+| Claude Code 連携 | 2.1.154 以降、Dynamic workflows と同梱 |
+
+「モデルの強化」と「実行基盤の並列化」が同時に出てきた。**Opus 4.8 は単独のモデル更新ではなく、Dynamic workflows と組み合わせて『1セッションで何を変えられるか』を再定義する** のがメッセージだ。
+
+## Opus 4.8 のベンチマーク
+
+agentic coding と computer use のベンチで GPT-5.5 を引き離した。
+
+| ベンチマーク | Opus 4.8 | GPT-5.5 | 差 |
+|------------|---------|---------|-----|
+| SWE-bench Verified | **88.6%** | — | — |
+| SWE-bench Pro | **69.2%** | 58.6% | +10.6pt |
+| OSWorld（computer use） | **83.4%** | 78.7% | +4.7pt |
+| GDPval-AA（Elo） | **1890** | 1769 | +121（約 67% 勝率） |
+
+特に SWE-bench Pro の 10pt 差は大きい。Verified より難度が高く、現実の repo 規模・依存関係に近い設定でこの差が出るのは、agentic coding の実用域で水が空いたことを意味する。
+
+加えて、リモート実行で **未検出のコード欠陥が GPT-5.5 比 4 分の 1** と報告されている。コード生成の正確性と、欠陥の取りこぼしの少なさが揃ったのが今回のリリースの肝だ。
+
+## 料金: 標準据え置き、Fast mode を 3 倍安く
+
+| 区分 | Opus 4.7 | Opus 4.8 | 差 |
+|------|---------|---------|-----|
+| 標準入力（per 1M） | $5 | **$5** | 据え置き |
+| 標準出力（per 1M） | $25 | **$25** | 据え置き |
+| Fast mode 入力 | $30 | **$10** | 3x 安く |
+| Fast mode 出力 | $150 | **$50** | 3x 安く |
+| キャッシュ読み込み | — | 約 $0.50/M | — |
+| Batch API | — | 50% off | — |
+
+ベンチを上げ、フラッグシップ価格を据え置き、しかも Fast mode は 3 倍安く。**「Opus 4.7 を Fast mode で回していたユーザーは、何もしなくても請求が 1/3 になる」** という構造だ。Willison が 5/27 に指摘した「サブスクが API 価格を飲み込む」構造が、価格戦略でも続いている。
+
+## Dynamic workflows — Claude が JS を書いて 1,000 agent を回す
+
+Dynamic workflows は、Claude が **その場で JavaScript スクリプトを書いて subagent を編成する** 仕組みだ。スクリプトはランタイムが背景で実行し、セッションは応答可能なまま維持される。
+
+| 項目 | 内容 |
+|------|------|
+| スクリプト形式 | Claude がタスクに合わせて書く JavaScript |
+| 実行 | ランタイムが背景で実行（セッションを止めない） |
+| subagent 上限 | **1 run あたり 1,000、並列は最大 16** |
+| 提供形態 | 研究プレビュー（Claude Code 2.1.154 以降） |
+| 確認 | 結果をユーザーに返す前に Claude 自身が check |
+| 起動コマンド | <code>/workflows</code> で実行履歴を確認 |
+
+### 想定ユースケース
+
+- **コードベース全体のバグ探し**（thousands of files）
+- profiler を見ながらの最適化監査
+- セキュリティ監査
+- フレームワークの差し替え、API の deprecation 対応
+- 言語ポート（別言語への移植）
+
+「1 ファイル / 1 関数」ではなく、**「1 プロジェクト丸ごと」を 1 セッションで動かす** ことが想定されている。
+
+### Jarred Sumner の Bun 移植の実例
+
+Anthropic がリリースに添えた事例は、`Bun` ランタイムの作者 Jarred Sumner が **Bun を Zig から Rust に移植** したものだ。
+
+| 指標 | 数値 |
+|------|------|
+| 移植元 | Zig |
+| 移植先 | Rust |
+| 生成された Rust コード | 約 **75 万行** |
+| 初コミットから merge まで | **11 日** |
+| 既存テストの通過率 | **99.8%** |
+
+ある workflow は「Zig の各 struct field に対応する Rust lifetime をマップする」専用のものだった。ライフタイム解析のような構造的な前処理を「workflow 1 本」として切り出し、それを 1,000 単位の subagent で回す。1 人の作業を分散ジョブにしてしまう。
+
+ポートが成功した・していないの是非は別にして、**11 日で 75 万行・99.8% 通過** という数字は、agentic coding のスケール感が変わったことを示している。
+
+### スクリプトのイメージ
+
+Dynamic workflows は Claude が書く JS だが、概念としては次のような構造になる。
+
+```js
+// Claude が生成する workflow の概念図
+const tasks = await splitCodebaseByModule(repo)   // 数千ファイルを単位に分割
+const results = await parallel(tasks, 16, async (m) => {
+  return await runSubagent({
+    role: "security-auditor",
+    target: m,
+    rubric: "OWASP Top 10 + project rules",
+  })
+})
+const merged = await mergeFindings(results)
+await checkBeforeReturn(merged)                    // Claude 自身が検証
+return merged
+```
+
+ポイントは「Claude がタスクに応じて毎回別の workflow を書く」ところだ。固定の DAG ではなく、要件から逆算した dispatch を毎回コードで表現する。
+
+## 日本への示唆
+
+Opus 4.8 単独の影響は SI・受託・内製で異なる。Dynamic workflows との合わせ技で見ると論点はより鋭くなる。
+
+### 1. SI の人月単価が SWE-bench Pro 10pt 差で押される
+
+| 観点 | Before | After（Opus 4.8 + Dynamic workflows） |
+|------|--------|----------------------------------|
+| 大規模リファクタ | 人月で見積り、数ヶ月〜年単位 | 1,000 subagent を 1 セッションで動かす |
+| 既存テスト通過率 | 人手で QA | workflow が check 後に返す |
+| 標準価格 | 上昇続き | Opus 4.8 は据え置き、Fast mode 3x 安価 |
+
+SWE-bench Pro の 10pt 差は、現実の repo 規模で「もう人月の見積りに織り込まないと割が合わない」水準に来た。SI が「コードを書く」工程で勝てる領域はさらに狭まる。
+
+### 2. 内製チームの「やれる量」が一段上がる
+
+Dynamic workflows の最大 1,000 subagent / 16 並列は、これまでの「1 人エンジニア + Claude」体制を **「1 人エンジニア + 数百 agent の workflow」** に拡張する。Bun の Zig → Rust 移植が 11 日で出たのは、これが個人プロジェクトに乗ったときの破壊力を示している。
+
+日本の事業会社の内製チームにとって、SI に出していた大規模移植・大規模監査が **「workflow 1 本」で済む可能性** が現実的に見えてきた。
+
+### 3. 価格の据え置きで「逃げ場」が消える
+
+Opus 4.7 の Fast mode（$30/$150）から Opus 4.8 Fast mode（$10/$50）への 3x 削減は、価格を理由に Opus を避けていた組織のロックを外す。標準価格据え置きと合わせて、**「上位モデルを使わない理由」が経済的に説明しにくくなる**。
+
+## まとめ
+
+- 2026年5月28日、Anthropic が **Opus 4.8** を Opus 4.7 から 41 日で投入。同日に Claude Code 2.1.154 で **Dynamic workflows** を研究プレビュー公開
+- ベンチは **SWE-bench Pro 69.2%（GPT-5.5 +10.6pt）/ OSWorld 83.4%（+4.7pt）/ GDPval-AA Elo 1890**。リモート実行で欠陥取りこぼしが GPT-5.5 の **1/4**
+- 価格は **標準据え置き（$5/$25）+ Fast mode 3x 安価（$10/$50）**
+- Dynamic workflows は Claude が JS を書いて **1 run 最大 1,000 subagent / 並列 16** を背景で回す。Bun の Zig → Rust 移植は **75 万行・11 日・テスト 99.8%** で実現
+- 日本では SI の人月単価への圧力、内製チームのスケール、上位モデル回避のしづらさという 3 軸で影響が出る
+
+## 参考リンク
+
+- [Anthropic: Claude Opus 4.8](https://www.anthropic.com/claude/opus)
+- [Anthropic Blog: Introducing dynamic workflows in Claude Code](https://claude.com/blog/introducing-dynamic-workflows-in-claude-code)
+- [Claude Code Docs: Orchestrate subagents at scale with dynamic workflows](https://code.claude.com/docs/en/workflows)
+- [MarkTechPost: Anthropic Ships Claude Opus 4.8 Alongside Dynamic Workflows and Cheaper Fast Mode](https://www.marktechpost.com/2026/05/28/anthropic-ships-claude-opus-4-8-alongside-dynamic-workflows-and-cheaper-fast-mode-with-workflows-capped-at-1000-subagents/)
+- [The New Stack: Claude Opus 4.8 is here — effort controls, dynamic workflows, cheaper fast mode](https://thenewstack.io/claude-opus-48-release/)
