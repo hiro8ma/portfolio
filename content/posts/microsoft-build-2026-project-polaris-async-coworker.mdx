@@ -1,0 +1,108 @@
+---
+title: "Microsoft Build 2026 — 自前コーディングモデル Project Polaris が GitHub Copilot の GPT-4 を置き換え、Foundry は Claude も載せる『脱 OpenAI 依存』へ"
+date: "2026-06-03"
+description: "2026年6月2日の Microsoft Build 2026 で、Microsoft は自社コーディングモデル Project Polaris を発表。2026年8月から GitHub Copilot の既定モデルを GPT-4 Turbo から置き換え、自社 Maia 200 アクセラレータで動かす。Azure AI Foundry は Claude / DeepSeek / Llama 4 / Mistral を first-class 対応し、OpenAI 一辺倒から多モデルへ。Nadella は『同期型アシスタントから、長時間タスクをこなす async coworker へ』と宣言。Office 365 Copilot の Agent Mode 既定化など、日本企業への影響を整理する。"
+tags: ["microsoft", "github-copilot", "openai", "agents", "ai"]
+---
+
+## 概要
+
+2026年6月2日、Microsoft Build 2026 で Microsoft は自社のコーディングモデル **Project Polaris** を発表した。最大の意味は、**GitHub Copilot の既定モデルを GPT-4 Turbo から自社モデルに置き換える** ことだ。
+
+| 項目 | 内容 |
+|------|------|
+| イベント | Microsoft Build 2026（2026-06-02〜） |
+| 目玉 | Project Polaris（自社コーディングモデル） |
+| Copilot 置き換え | 2026年8月から既定モデルに（11月まで fallback 可） |
+| 実行基盤 | 自社 Maia 200 アクセラレータ（Azure 内） |
+| 位置づけ | "peer programmer, not a pair programmer" |
+
+加えて Azure AI Foundry が **Claude / DeepSeek / Llama 4 / Mistral を first-class 対応**。Microsoft は OpenAI 一辺倒から、自社モデル + 多社モデルの併存へと舵を切った。
+
+> 「AI は同期型のアシスタントから、主要領域で長時間タスクをこなす async coworker へ進化した」
+> — Satya Nadella, CEO, Microsoft（Build 2026 基調講演）
+
+## Project Polaris — 「ペアプロ」から「ピアプロ」へ
+
+Polaris は GitHub Copilot のコア体験を Microsoft 自身が握り直す動きだ。
+
+| 観点 | 従来（GPT-4 Turbo） | Project Polaris |
+|------|-------------------|----------------|
+| モデル所有 | OpenAI | **Microsoft 自社** |
+| 実行基盤 | OpenAI ルーティング | **Maia 200**（自社アクセラレータ） |
+| 位置づけ | pair programmer（補助） | **peer programmer（自走）** |
+| 想定タスク | 補完・提案 | bug / feature / 保守を独立して完了 |
+
+能力はコード生成・複数ファイルの refactoring・テスト記述・コードレビュー・ドキュメント生成・依存解析に及ぶ。**「割り当てられたバグや機能を自分で完了する peer」** という位置づけが、Nadella の「async coworker」宣言と一致する。
+
+自社 Maia 200 で動かすことで、OpenAI 経由のルーティングより推論レイテンシとコストを下げる狙いがある。**モデルとシリコンの両方を内製化** して、Copilot の単価構造を Microsoft が支配する設計だ。
+
+### 移行スケジュール
+
+| 時期 | 状態 |
+|------|------|
+| 2026年8月 | GitHub Copilot 既定が Polaris に自動移行 |
+| 〜2026年11月 | 任意で GPT-4 Turbo に fallback 可（3ヶ月） |
+
+## 脱 OpenAI 依存 — Foundry の多モデル化
+
+Build 2026 のもう一つの軸は、Azure AI Foundry の **多モデル対応** だ。
+
+| カテゴリ | 内容 |
+|---------|------|
+| first-class 対応モデル | Claude / DeepSeek / Llama 4 / Mistral（+ Microsoft / OpenAI） |
+| 共通基盤 | 同一 SLA / Entra ID 統合 / Purview ガバナンス / 統一請求 |
+| 自社モデル群 | MAI-Transcribe-1、MAI-Voice-1、MAI-Image-2-Efficient を商用提供 |
+
+**Claude が Azure の first-class モデルになった** 点は象徴的だ。Microsoft は OpenAI の最大の出資者でありながら、競合の Anthropic モデルを自社プラットフォームの一等地に置く。
+
+MAI-Voice-1 は **1 分の音声を 1 秒未満で生成** する TTS。音声・文字起こし・画像でも自社モデルを揃え、用途ごとに OpenAI 以外の選択肢を持つ。
+
+## エージェント基盤を一気に揃えた
+
+Build 2026 は「async coworker」を支える基盤を一括で出した。
+
+| 発表 | 内容 |
+|------|------|
+| Windows Agent Framework 1.0 | **MIT ライセンスでオープンソース化**。ローカル Windows / Cloud PC / Azure Arc edge をまたいで agent を動かす。特権操作は human approval queue 経由 |
+| Azure Agent Mesh | 複数クラウド（**AWS Bedrock / Google Cloud も統合**）・オンプレ・edge をまたぐ agent オーケストレーション。Entra ID / Purview で監査 |
+| Copilot Workspace GA | GitHub Enterprise 向けに GA。複数リポ理解、本番監視の自律 SRE agent |
+| Office 365 Copilot Agent Mode | Word / Excel / PowerPoint で **既定化**。バックグラウンドで文書更新・異常検知・資料下書き |
+| Foundry Local GA | Windows / macOS / Linux でのオンデバイス推論（DirectML 2.0） |
+
+Windows Agent Framework の MIT 公開と Agent Mesh の他社クラウド統合は、**「Windows と Office を agent の実行基盤にする」** という宣言だ。
+
+## 日本への示唆
+
+日本企業は Microsoft 365 と GitHub のインストールベースが厚い。Build 2026 の影響は「自動的に降ってくる」点が特徴だ。
+
+### 1. GitHub Copilot 利用企業は8月に自動でモデルが変わる
+
+| 観点 | 影響 |
+|------|------|
+| 既定モデル | 8月に GPT-4 Turbo → Polaris へ自動移行 |
+| 検証負荷 | コード生成の挙動が変わる前提で回帰確認が要る |
+| fallback | 11月まで GPT-4 Turbo に戻せる（猶予は3ヶ月） |
+
+日本の開発現場で Copilot を標準採用している組織は、**8月の自動移行を「与件」として** 検証計画を組む必要がある。挙動差を放置すると、生成コードの品質前提が静かにずれる。
+
+### 2. Office の Agent Mode 既定化で「裏で動く AI」が標準に
+
+Word / Excel / PowerPoint の Agent Mode が既定になると、**多くの日本のホワイトカラーが、意識せず async coworker を使う** 状態になる。文書監視・異常検知・資料下書きが裏で走る。情報システム部門は、ガバナンス（誰が何を自動実行したか）を Entra ID / Purview で追える設計を先に固める必要がある。
+
+### 3. マルチモデルは調達の自由度を上げる
+
+Foundry が Claude / Llama / Mistral を同一 SLA で扱えることは、日本企業の **ベンダーロックイン回避** に効く。「Azure を使う = OpenAI に縛られる」ではなくなった。用途ごとに最適モデルを選び、請求とガバナンスは Azure に集約できる。
+
+## まとめ
+
+- 2026年6月2日の Microsoft Build 2026 で、自社コーディングモデル **Project Polaris** を発表。**8月に GitHub Copilot の既定を GPT-4 Turbo から置き換え**、自社 Maia 200 で動かす
+- Azure AI Foundry が **Claude / DeepSeek / Llama 4 / Mistral を first-class 対応**。Microsoft は OpenAI 一辺倒から多モデル併存へ
+- Nadella は「同期型アシスタントから async coworker へ」と宣言。Windows Agent Framework 1.0（MIT 公開）、Azure Agent Mesh、Office Agent Mode 既定化で基盤を一括投入
+- 日本では、GitHub Copilot の8月自動移行への検証、Office Agent Mode 既定化のガバナンス、マルチモデルによるロックイン回避が論点
+
+## 参考リンク
+
+- [BuildFastWithAI: AI News Today — June 2, 2026（Microsoft Build）](https://www.buildfastwithai.com/blogs/ai-news-today-june-2-2026)
+- [CIO: OpenAI, Anthropic expand services push, signaling new phase in enterprise AI race](https://www.cio.com/article/4167787/openai-anthropic-expand-services-push-signaling-new-phase-in-enterprise-ai-race.html)
+- [LLM Stats: AI Updates Today（June 2026）](https://llm-stats.com/llm-updates)
