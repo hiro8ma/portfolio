@@ -1,0 +1,123 @@
+---
+title: "Claude Fable 5 のトークン経済 — フロンティアAIが「メーター付き蛇口」になった日"
+date: "2026-06-10"
+description: "2026年6月9日、Anthropic が Mythos級モデル Claude Fable 5 を一般提供。$10/$50 のトークン単価、常時ON の thinking、定額プランからの締め出しが示す、フロンティアAIの従量課金化を読み解く。"
+tags: ["anthropic", "claude", "llm-pricing", "token-economics", "ai-agents"]
+---
+
+## 概要
+
+2026年6月9日、Anthropic は Claude Fable 5 を一般提供した。これまで Project Glasswing の限定パートナーにしか開かれていなかった「Mythos級」の能力が、初めて誰でも API から使える形になった。
+
+価格は input $10 / output $50（per million tokens）。context window は 1M tokens、1リクエストあたり最大 128k output tokens。
+
+注目すべきは性能ではなく課金構造だ。Fable 5 は定額サブスクリプションの外に置かれ、6月23日以降は usage credits を消費しないと使えなくなる。フロンティアAIが「使い放題」から「メーター付き蛇口」へ移行した瞬間だ。
+
+## 詳細
+
+### Fable 5 と Mythos 5 の関係
+
+同じ中身のモデルが、安全装置の有無で2つの名前を持つ。
+
+| モデル | API model ID | 安全分類器 | 提供範囲 |
+|--------|-------------|-----------|---------|
+| Claude Fable 5 | `claude-fable-5` | あり | 一般提供（API/Bedrock/Vertex/Foundry） |
+| Claude Mythos 5 | `claude-mythos-5` | なし | Project Glasswing 限定 |
+
+Fable 5 は cybersecurity、biology/chemistry、model distillation に関わる要求を自動検知し、Claude Opus 4.8 にルーティングする。この fallback が発動するのは全セッションの5%未満。拒否された要求は出力生成前なら課金されず、別モデルへの retry 時は prompt-cache のコストが fallback credit で返金される。
+
+### トークン単価の位置づけ
+
+$10/$50 という単価は、Opus 4.8 を基準にすると意味が見えてくる。
+
+| モデル | input ($/M) | output ($/M) | 位置づけ |
+|--------|------------|-------------|---------|
+| Opus 4.8（標準） | $5 | $25 | 従来のフラッグシップ |
+| Opus 4.8（fast mode） | $10 | $50 | 高速版 |
+| **Fable 5** | **$10** | **$50** | Opus 4.8 fast mode と同額 |
+| Mythos Preview | $20+ | $100+ | Fable 5 の2倍超 |
+
+Fable 5 は Opus 4.8 標準の2倍、fast mode とちょうど同額に着地した。Mythos Preview と比べれば半額以下だ。フロンティアの能力が値下げされた一方、Opus より確実に高い。
+
+### output が5倍高い、という設計
+
+トークン経済を語るうえで最重要なのは、output が input の5倍（$50 vs $10）だという点だ。
+
+long-horizon な agentic タスクは大量の output を生む。コードを書き、ツールを呼び、結果を解釈し、また書く。この往復で膨らむのは output 側だ。つまり Fable 5 のコストは「何を読ませるか」より「どれだけ書かせるか」で決まる。
+
+簡単な試算を置く。1リクエストで context を50万トークン読み、思考込みで10万トークン出力した場合:
+
+| 項目 | トークン量 | 単価 | コスト |
+|------|-----------|------|--------|
+| input（context） | 500k | $10/M | $5.00 |
+| output（thinking 含む） | 100k | $50/M | $5.00 |
+| **合計** | — | — | **$10.00** |
+
+input が output の5倍あっても、コストは拮抗する。output が増えれば一気に output 側へ傾く。
+
+### thinking が常時ONで、止められない
+
+Fable 5 の課金を読みにくくしているのが adaptive thinking だ。
+
+このモデルでは adaptive thinking が唯一の思考モードで、`thinking: {"type": "disabled"}` はサポートされない。思考を完全に切ることはできず、深さは `effort` パラメータで制御するしかない。
+
+```python
+# thinking は無効化できない。effort で深さ＝コストを調整する
+response = client.messages.create(
+    model="claude-fable-5",
+    effort="low",   # low / medium / high で思考トークン量が変わる
+    max_tokens=4096,
+    messages=[...]
+)
+```
+
+思考トークンは output として課金される。raw chain of thought は返らない（`thinking.display` は既定で `omitted`）が、生成された思考トークンの料金は発生する。effort を上げるほど精度と引き換えに output コストが膨らむ。コスト管理の主戦場は `effort` の設定になる。
+
+### 「メーター付き蛇口」への移行
+
+最大の変化は課金モデルそのものだ。
+
+| 期間 | Pro / Max / Team / Enterprise プラン |
+|------|-------------------------------------|
+| 6月9日〜6月22日 | Fable 5 を追加費用なしで利用可 |
+| 6月23日以降 | Fable 5 は usage credits 消費が必須 |
+
+$20〜$200/月の定額プランがカバーするのは標準モデルまで。フロンティアモデルは従量課金へ切り出された。「使い放題のフロンティアAI」期は終わり、使った分だけ払う resource になった。
+
+Mythos級は Covered Model に指定され、30日のデータ保持が義務づけられる。zero data retention は使えない。能力と引き換えに、コストとデータ統制の両方で制約が増えた。
+
+## 日本への示唆
+
+日本のエンジニアと企業にとって、これは2つの意味で重い。
+
+第一に、為替だ。トークン単価はドル建て。output $50/M は、agentic な使い方では1タスク数ドルが当たり前になる水準だ。円安局面では実効コストがそのまま膨らむ。「とりあえず最強モデルを回す」運用は、日本円の請求書で跳ね返る。
+
+第二に、見積もりモデルの崩壊だ。SI やSaaS の多くは「席数 × 月額」で価格を組んできた。フロンティアモデルが従量課金へ移ると、この前提が崩れる。
+
+| 観点 | 定額前提（Before） | 従量前提（After） |
+|------|------------------|------------------|
+| コスト予測 | 席数で固定 | タスク量・effort で変動 |
+| 最適化対象 | ライセンス数 | output トークン・thinking 深さ |
+| 見積もり | 月初に確定 | 実行後に判明 |
+
+日本企業が Fable 5 を本番に組み込むなら、コスト最適化が設計要件になる。prompt cache で input を圧縮し、`effort` で thinking を絞り、context editing で不要な tool result を削る。これらは「あれば良い」ではなく、請求額を左右する必須技術だ。
+
+Opus 4.8 で足りるタスクに Fable 5 を使うのは過剰投資になる。モデル選択そのものがコスト管理になる。
+
+## まとめ
+
+- 2026年6月9日、Anthropic が Mythos級の Claude Fable 5 を一般提供。$10/$50、1M context、128k output
+- output が input の5倍高い。コストは「読ませる量」より「書かせる量」で決まる
+- adaptive thinking は常時ONで無効化不可。`effort` が唯一のコスト制御レバー
+- 6月23日以降、定額プランから締め出され usage credits 必須。フロンティアAIの従量課金化
+- 日本では円安でドル建て課金が重く、席数ベースの見積もりモデルが崩れる。コスト最適化が設計要件になる
+
+フロンティアの能力は安くなった。だが「蛇口にメーターが付いた」という事実の方が、運用には効いてくる。
+
+## 参考リンク
+
+- [Anthropic: Claude Fable 5 and Claude Mythos 5](https://www.anthropic.com/news/claude-fable-5-mythos-5)
+- [Claude API Docs: Introducing Claude Fable 5 and Claude Mythos 5](https://platform.claude.com/docs/en/about-claude/models/introducing-claude-fable-5-and-claude-mythos-5)
+- [VentureBeat: Anthropic brings Mythos to the masses with Claude Fable 5](https://venturebeat.com/technology/anthropic-brings-mythos-to-the-masses-with-claude-fable-5-its-most-powerful-generally-available-model-ever)
+- [Unite.AI: Claude Fable 5 Makes Frontier AI a Metered Utility](https://www.unite.ai/claude-fable-5-makes-frontier-ai-a-metered-utility/)
+- [TechCrunch: Anthropic's Claude Fable 5 is a version of Mythos the public can access today](https://techcrunch.com/2026/06/09/anthropic-released-claude-fable-5-its-most-powerful-model-publicly-days-after-warning-ai-is-getting-too-dangerous/)
