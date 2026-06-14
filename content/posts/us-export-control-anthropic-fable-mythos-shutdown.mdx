@@ -1,0 +1,109 @@
+---
+title: "米政府が Claude Fable 5 を3日で止めた — 輸出規制がAIの「kill switch」になった日"
+date: "2026-06-14"
+description: "2026年6月12日、米政府が export control directive で Anthropic に Fable 5 / Mythos 5 の全面停止を命じた。発売3日後の異例の措置は、フロンティアAIが国家の停止命令で消える時代を示す。"
+tags: ["anthropic", "claude", "export-control", "ai-regulation", "ai-governance"]
+---
+
+## 概要
+
+2026年6月12日、米政府は Anthropic に対し、Claude Fable 5 と Claude Mythos 5 への全アクセスを停止するよう命じた。根拠は national security を理由にした emergency export control directive だ。
+
+Fable 5 が一般提供されたのは6月9日。発売からわずか3日後の停止命令だった。
+
+Anthropic は命令に従い、両モデルを全ユーザーから即時に切り離した。数億人規模に提供していた商用モデルが、政府の一片の指示で消えた。これはフロンティアAIの歴史で前例のない recall だ。
+
+## 詳細
+
+### 何が起きたか
+
+時系列で見ると、措置の異例さがはっきりする。
+
+| 日付 | 出来事 |
+|------|--------|
+| 6月9日 | Claude Fable 5 / Mythos 5 を一般提供開始 |
+| 6月12日 | 米政府が export control directive を発出、全面停止を命令 |
+| 同日 | Anthropic が両モデルを全ユーザーから即時遮断 |
+| 以降 | 他の Anthropic モデル（Opus / Sonnet / Haiku）は影響なし |
+
+引き金は jailbreak だ。政府は「highly credible, trusted partner」から、Fable 5 のガードレールを回避する手法のデモを受けたという。手法は「特定の codebase を読ませ、ソフトウェアの欠陥を見つけ・修正させる」というもの。
+
+### 政府の主張と Anthropic の反論
+
+両者の認識は真っ向から食い違う。
+
+| 論点 | 米政府 | Anthropic |
+|------|--------|-----------|
+| 深刻度 | national security リスク | narrow かつ non-universal な脆弱性 |
+| 緊急性 | 即時 recall が必要 | 数億人向け商用モデルを止める理由にならない |
+| 再現性 | Fable 5 固有の危険 | GPT-5.5 等の公開モデルでも同等に再現可能 |
+| 手続き | 輸出規制権限で執行 | 透明性と技術的根拠を欠く |
+
+Anthropic は、脆弱性は「比較的単純」で、競合の公開モデルでも既に同じことができると主張した。つまり Fable 5 を止めても危険は消えないという論理だ。
+
+> 「もしこの基準が業界全体に適用されれば、新しいモデルのデプロイはすべて事実上停止する」
+> — Anthropic 公式声明
+
+CAST co-chair の David Sacks は「ボールは Anthropic 側にある」と述べ、復旧の責任を Anthropic に投げた。
+
+### 誰が締め出されたか
+
+export control という建て付けが、影響範囲を独特なものにした。
+
+| 対象 | 影響 |
+|------|------|
+| 全 API / プラン利用者 | Fable 5 / Mythos 5 へのアクセスを即時喪失 |
+| foreign nationals | Anthropic 社員を含め両モデルから遮断 |
+| 他モデル利用者 | Opus / Sonnet / Haiku は影響なし |
+
+輸出規制は「外国人への技術移転」を制限する枠組みだ。そのため Anthropic 社内の foreign nationals すら Fable 5 を触れなくなり、結果として全社的に無効化せざるを得なかった。復旧時期は明示されていない。
+
+## 日本への示唆
+
+この事件は、日本のエンジニアと企業に3つの現実を突きつける。
+
+第一に、日本のユーザーは「外国人」として真っ先に切られる側にいる。export control は foreign nationals への移転を止める仕組みだ。米政府が同様の措置を取れば、日本企業は通告なしにフロンティアモデルを失う。Fable 5 を本番に組み込んでいた日本の開発者は、6月12日に実際にアクセスを失った。
+
+第二に、モデルは3日で消える。SLA でも障害でもなく、国家の停止命令で消える。これは従来の可用性設計の外側にあるリスクだ。
+
+| 観点 | 従来の前提 | Fable 5 が示した現実 |
+|------|-----------|---------------------|
+| 停止要因 | 障害・メンテ・課金停止 | 政府の export control directive |
+| 予告 | SLA・事前通知あり | 即時・通告なし |
+| 復旧 | 数時間〜数日 | 時期未定 |
+| 回避策 | リトライ・冗長化 | 他プロバイダへの切り替えのみ |
+
+第三に、対策は「単一フロンティアモデルに賭けない」ことに尽きる。皮肉にも Anthropic 自身が Fable 5 の安全装置として Opus 4.8 への fallback を組み込んでいた。だが今回はモデル系統ごと止まった。本当の冗長化は、Anthropic / OpenAI / Google をまたぐ provider 分散だ。
+
+```python
+# 単一モデル依存は規制リスクをそのまま被る
+# provider をまたぐ抽象化で kill switch に備える
+PROVIDERS = ["anthropic", "openai", "google"]
+def call_with_failover(prompt, providers=PROVIDERS):
+    for p in providers:
+        try:
+            return invoke(p, prompt)
+        except ProviderUnavailable:   # 規制・障害・課金停止を一律で吸収
+            continue
+    raise AllProvidersDown()
+```
+
+日本の AI 事業者ガイドラインには、こうした国家による即時停止メカニズムは想定されていない。米国モデルに依存する以上、日本企業は米国の規制権限を自社の BCP に織り込む必要がある。
+
+## まとめ
+
+- 2026年6月12日、米政府が export control directive で Fable 5 / Mythos 5 の全面停止を命令。発売3日後の異例の recall
+- 引き金は「codebase を読ませて欠陥を探させる」narrow な jailbreak。Anthropic は GPT-5.5 でも再現可能と反論
+- export control ゆえ foreign nationals（日本ユーザー含む）が真っ先に遮断対象に
+- フロンティアモデルは障害でなく国家命令で消える。可用性設計の外側のリスク
+- 対策は provider 分散。単一フロンティアモデルへの依存は規制リスクを丸ごと被る
+
+国家は AI への関与を、出資（equity stake）から運用停止（kill switch）へと広げた。能力が上がるほど、その上に何を載せるかは政治の領域に入る。
+
+## 参考リンク
+
+- [Anthropic: Statement on the US government directive to suspend access to Fable 5 and Mythos 5](https://www.anthropic.com/news/fable-mythos-access)
+- [Decrypt: US Government Orders Anthropic to Pull Claude Fable, Mythos AI Models](https://decrypt.co/371027/us-government-orders-anthropic-pull-claude-fable-mythos-ai-models)
+- [TechRadar: Anthropic is shutting off access to its Mythos 5 and Fable 5 models under national security orders](https://www.techradar.com/ai-platforms-assistants/claude/after-a-potential-jailbreak-anthropic-is-shutting-off-access-to-its-mythos-5-and-fable-5-models-under-national-security-orders-from-the-us-government)
+- [The Next Web: US orders Anthropic to shut down Fable 5 and Mythos 5](https://thenextweb.com/news/anthropic-fable-mythos-us-government-suspension)
+- [American Banker: Anthropic shuts down Mythos 5, Fable 5 due to government order](https://www.americanbanker.com/news/anthropic-shuts-down-mythos-5-fable-5-due-to-government-order)
