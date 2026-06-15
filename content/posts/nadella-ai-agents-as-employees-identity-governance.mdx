@@ -1,0 +1,108 @@
+---
+title: "Nadella「AI agent を従業員のように扱え」 — 100体を動かす時代のID・ガバナンス論"
+date: "2026-06-16"
+description: "2026年6月5日、Satya Nadella が Possible Podcast で「AI agent には identity・sandbox・policy を与えよ」と語った。100体の coding agent を動かす時代、ボトルネックは能力ではなく統制になる。"
+tags: ["microsoft", "nadella", "ai-agents", "identity-governance", "security"]
+---
+
+## 概要
+
+2026年6月5日、Microsoft CEO の Satya Nadella が Reid Hoffman の Possible Podcast で、AI agent を従業員のように扱うべきだと語った。
+
+> 「agent には identity を与え、sandbox を与え、それらを govern する policy を設定する必要がある」
+> — Satya Nadella, Microsoft CEO
+
+理由は彼自身の実体験だ。Nadella は同時に100体の coding agent を動かしているという。そして率直にこう漏らした。
+
+> 「これを管理する私の cognitive load は、あまりに高い」
+> — Satya Nadella
+
+agent の能力はもう十分に上がった。次のボトルネックは「増えすぎた agent をどう統制するか」だ。
+
+## 詳細
+
+### なぜ「従業員」扱いなのか
+
+agent を1体使うのは chat で済む。だが100体になると、chat interface で1つずつ導く方式は破綻する。これは人間の組織が「個人商店」から「企業」になるときに直面した問題と同じだ。
+
+人間の従業員は、入社時に ID を与えられ、職務に応じた権限を持ち、行動が監査される。Nadella の主張は、agent にも同じ枠組みを適用せよということだ。
+
+| 観点 | 人間の従業員 | AI agent |
+|------|------------|----------|
+| 識別 | 社員ID・アカウント | agent identity |
+| 権限 | 職務ベースの access 権 | scoped permission |
+| 隔離 | 業務範囲・職場 | sandbox |
+| 統制 | 就業規則・コンプラ | policy |
+| 追跡 | 勤怠・操作ログ | audit log |
+
+### 統制に必要な4要素
+
+Nadella は、agent への信頼は4つの性質から生まれると整理した。
+
+> 「security、containment、manageability、observability。これが agent に confidence を持つための道だ」
+> — Satya Nadella
+
+| 要素 | 意味 | 欠けると起きること |
+|------|------|------------------|
+| security | 認証・権限境界 | agent が過剰な権限で動く |
+| containment | sandbox による隔離 | 1体の暴走が全体に波及 |
+| manageability | 一元的な管理 | 100体を chat で個別対応＝破綻 |
+| observability | 行動の可視化・監査 | 誰が何をしたか追えない |
+
+能力（どれだけ賢いか）ではなく、運用（どれだけ安全に多数を回せるか）が論点になっている。
+
+### Microsoft の答え: Agent 365
+
+Microsoft はこの統制を製品化した。人間向けの ID・データ統制基盤を、そのまま agent に向ける構成だ。
+
+| 製品 | 人間向けの役割 | agent への適用 |
+|------|--------------|---------------|
+| Agent 365 | （新規）agent 管理スイート | identity・権限・監査を一元管理 |
+| Entra | digital identity / access 管理 | agent に identity と access 境界を付与 |
+| Purview | データガバナンス | agent が生成・参照するデータを labeling |
+
+人間の identity 基盤（Entra）と data governance（Purview）を agent に拡張する。つまり「非人間の従業員」を既存の IT 統制の中に組み込む発想だ。
+
+```text
+# 従来: 人間のみが identity を持つ
+[Human] --(Entra ID)--> [Resources]
+
+# これから: agent も identity を持つ統制対象
+[Human] --(Entra ID)------> [Resources]
+[Agent] --(Agent identity)-> [Resources]  # 権限・監査・sandbox 付き
+```
+
+## 日本への示唆
+
+これは日本の情シス・セキュリティ部門に、新しい統制対象を突きつける。
+
+これまで identity 管理（IdP、RBAC、監査ログ）の対象は人間だった。agent が業務に入ると、ID を持つ「非人間アカウント」が爆発的に増える。100体の agent は、100人分の権限・監査・ライフサイクル管理を必要とする。
+
+| 観点 | Before（人間中心） | After（agent 混在） |
+|------|------------------|-------------------|
+| 管理対象 | 社員アカウント | 社員 + agent identity |
+| 権限設計 | 職務ベース | 職務 + agent のタスク境界 |
+| 監査 | 人の操作ログ | 人 + agent の行動ログ |
+| 退職処理 | アカウント停止 | agent の廃棄・権限失効 |
+
+日本企業は J-SOX（内部統制報告制度）で、システムアクセスの統制と監査証跡を求められる。agent が業務システムを操作するなら、その agent の権限と行動も内部統制の範囲に入る。「誰が承認したか」が「どの agent が、誰の権限で実行したか」に変わる。
+
+ゼロトラストを進める日本企業にとっては、むしろ追い風だ。non-human identity の管理は、ゼロトラストの権限最小化・常時検証の延長線上にある。agent を例外扱いせず、人間と同じ統制基盤に載せることが要件になる。
+
+逆に、agent を「便利なツール」として無統制に増やせば、権限の棚卸しも監査も効かない影の従業員群を抱えることになる。
+
+## まとめ
+
+- 2026年6月5日、Nadella が「AI agent を従業員のように扱い、identity・sandbox・policy を与えよ」と発言
+- 背景は実体験。100体の coding agent を動かすと、chat での個別管理は cognitive load で破綻する
+- agent への信頼は security・containment・manageability・observability の4要素から生まれる
+- Microsoft の答えは Agent 365。人間向けの Entra（ID）と Purview（データ統制）を agent に拡張
+- 日本への示唆: agent は新たな identity 統制対象。J-SOX・ゼロトラストの枠組みに「非人間の従業員」を組み込む設計が要る
+
+agent の競争は「賢さ」から「何体を安全に回せるか」へ移った。能力ではなく、統制が次の差別化要因になる。
+
+## 参考リンク
+
+- [AOL: Satya Nadella says AI agents should be treated like employees with identities, permissions, and audits](https://www.aol.com/articles/satya-nadella-says-ai-agents-180016000.html)
+- [Windows Central: Satya Nadella says AI agents deserve real "identities"](https://www.windowscentral.com/artificial-intelligence/satya-nadella-ai-agents-deserve-real-identities)
+- [Yahoo News: Satya Nadella says AI agents should be treated like employees](https://sg.news.yahoo.com/satya-nadella-says-ai-agents-180016296.html)
