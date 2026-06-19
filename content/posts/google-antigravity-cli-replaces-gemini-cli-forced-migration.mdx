@@ -1,0 +1,113 @@
+---
+title: "Gemini CLI 終了 — Antigravity CLI への強制移行が CI/CD を壊す日"
+date: "2026-06-19"
+description: "2026年6月18日、Google が Gemini CLI の consumer 向け提供を停止し、Go 製の Antigravity CLI へ移行した。1:1 の機能パリティはなく、CLI を組み込んだ CI/CD が壊れる。ベンダー CLI への依存リスクを考える。"
+tags: ["google", "gemini", "cli", "devtools", "ci-cd"]
+---
+
+## 概要
+
+2026年6月18日、Google が Gemini CLI の consumer 向け提供を停止した。後継は Go 製の **Antigravity CLI** だ。デスクトップ版 Antigravity 2.0 と同じ agent harness を共有する、別バイナリとして提供される。
+
+問題は移行の強制力にある。Google は「launch 時点で 1:1 の feature parity はない」と明言した。Gemini CLI を組み込んだスクリプトや CI/CD パイプラインは、6月18日を境に動かなくなる。
+
+これは単なるツール更新ではない。**ベンダーの CLI に依存した自動化が、ベンダーの都合で一斉に壊れた**事例だ。
+
+## 詳細
+
+### 誰が止まり、誰が残るか
+
+停止対象は consumer 層に限られる。enterprise は猶予される。
+
+| 区分 | 対象 | 6月18日以降 |
+|------|------|------------|
+| consumer | Google AI Pro / Ultra subscriber | Gemini CLI 停止 |
+| consumer | Gemini Code Assist for individuals（無料枠） | 停止 |
+| consumer | Code Assist for GitHub | 新規インストール不可 |
+| enterprise | Code Assist Standard / Enterprise | 継続利用可 |
+| enterprise | 有償 Gemini API キー経由 | 継続利用可 |
+
+個人開発者と小規模チームが最も影響を受ける。enterprise 契約があれば当面は逃げ切れるが、移行の先送りに過ぎない。
+
+### Gemini CLI と Antigravity CLI の違い
+
+新 CLI は刷新されており、互換ではない。
+
+| 観点 | Gemini CLI | Antigravity CLI |
+|------|-----------|-----------------|
+| 実装言語 | Node.js 系 | Go（単一バイナリ） |
+| 実行モデル | 同期中心 | 非同期 multi-agent |
+| アーキテクチャ | 単独ツール | Antigravity 2.0 とharness共有 |
+| 機能パリティ | — | launch 時点で非対応あり |
+| 拡張 | Extensions | plugins（名称・仕組みが変更） |
+
+Agent Skills・Hooks・Subagents・Extensions は plugins として引き継がれる。だが「引き継がれる」ことと「同じコマンド・同じ引数で動く」ことは別だ。スクリプトレベルでは破壊的変更になる。
+
+### なぜ CI/CD が壊れるのか
+
+CLI をパイプラインに組み込んでいる場合、バイナリ名・サブコマンド・認証フローの変更が直撃する。
+
+```yaml
+# Before: Gemini CLI を前提にした CI ステップ
+- name: AI code review
+  run: |
+    gemini auth login --key "$GEMINI_API_KEY"
+    gemini review --diff origin/main --format json > review.json
+```
+
+```yaml
+# After: Antigravity CLI へ。コマンド体系が変わり、そのままでは動かない
+- name: AI code review
+  run: |
+    antigravity auth --api-key "$GEMINI_API_KEY"   # 認証フローが変更
+    antigravity agent run review --base origin/main # サブコマンド再設計
+```
+
+パイプラインを止めないには、6月18日より前に CLI 参照を全て洗い出し、新コマンドへ書き換え、staging で検証する必要があった。準備ができていないチームは、ビルドが赤くなって初めて気づく。
+
+### 背景: コーディングツールの寡占化
+
+この強制移行は、単独の出来事ではない。AI コーディングツールが巨大プラットフォームへ吸収される流れの一部だ。
+
+| 出来事 | 時期 | 内容 |
+|--------|------|------|
+| Gemini CLI → Antigravity CLI | 6月18日 | Google が自社 agent 基盤へ統合 |
+| SpaceX が Cursor を買収 | 6月16日 | $60B の全株式取引 |
+| 独立系ツールの後退 | 2026年 | 主要コーディングツールが軒並み大手傘下に |
+
+独立したコーディングツールが大手の agent エコシステムへ統合されるほど、開発者は「ツールの仕様変更を自分で制御できない」状況に置かれる。Antigravity CLI への移行は、その構造を体感させる最初の請求書だ。
+
+## 日本への示唆
+
+日本企業にとって、これは2つの教訓を突きつける。
+
+第一に、ベンダー CLI への直接依存はリスクだ。AI コーディングツールを業務フローや CI/CD に組み込む企業が増えた。だが CLI のコマンド体系はベンダーの裁量で変わる。今回のように猶予が短いと、移行が技術的負債ではなく即時の障害になる。
+
+第二に、抽象化レイヤの欠如が露呈する。CLI を直接叩くのではなく、社内ラッパーや adapter 層を挟んでいれば、影響範囲を1か所に閉じ込められた。日本の多くの現場は「動いているから」と直接呼び出しを放置しがちだ。
+
+| 観点 | 直接依存型 | 抽象化レイヤ型 |
+|------|-----------|--------------|
+| 移行時の修正箇所 | パイプライン全箇所 | adapter 1か所 |
+| ベンダー変更への耐性 | 低い | 高い |
+| 初期コスト | 低い | 中程度 |
+| 障害発生時の影響 | 全 CI が停止 | 局所化できる |
+
+対策は明快だ。AI CLI を業務に組み込むなら、コマンドを直接書かず、薄い wrapper を1枚挟む。ベンダーの仕様変更を、その1枚で吸収する設計にする。これは「最強モデルを選ぶ」議論より、はるかに地味で、はるかに効く。
+
+## まとめ
+
+- 2026年6月18日、Google が Gemini CLI の consumer 向け提供を停止し、Go 製 Antigravity CLI へ移行
+- enterprise（Code Assist Standard/Enterprise・有償 API キー）は継続利用可。個人・小規模が直撃
+- 新 CLI は非同期 multi-agent で刷新。launch 時点で 1:1 の機能パリティはなく、コマンド体系が破壊的に変わる
+- CLI を組み込んだ CI/CD は、バイナリ名・サブコマンド・認証フローの変更で停止する
+- 背景はコーディングツールの寡占化（SpaceX の Cursor 買収など）。仕様変更を開発者が制御できない構造が進む
+- 日本への教訓: ベンダー CLI を直接叩かず、adapter 層を1枚挟んで仕様変更を局所化する
+
+便利な CLI ほど、深く業務に食い込む。そして食い込んだ分だけ、ベンダーの都合で壊れたときの被害は大きい。
+
+## 参考リンク
+
+- [Google Developers Blog: An important update — Transitioning Gemini CLI to Antigravity CLI](https://developers.googleblog.com/an-important-update-transitioning-gemini-cli-to-antigravity-cli/)
+- [OSTechNix: Google is Replacing Gemini CLI with Its New Antigravity Platform](https://ostechnix.com/google-is-replacing-gemini-cli-with-google-antigravity/)
+- [Tech Times: Gemini CLI Shutdown Takes Effect — CI/CD Pipelines Break as Go-Based Antigravity CLI Arrives](https://www.techtimes.com/articles/318660/20260618/gemini-cli-shutdown-takes-effect-ci-cd-pipelines-break-go-based-antigravity-cli-arrives.htm)
+- [BuildFastWithAI: AI News Today - June 17, 2026](https://www.buildfastwithai.com/blogs/ai-news-today-june-17-2026)
