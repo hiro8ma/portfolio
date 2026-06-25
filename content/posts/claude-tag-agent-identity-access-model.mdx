@@ -1,0 +1,149 @@
+---
+title: "Claude Tag — AIエージェントが「ユーザーの代理」をやめ、自分の身分を持つ日"
+date: "2026-06-25"
+description: "Anthropic が Claude Tag を発表した。エージェントがユーザーの代理ではなく、それ自身の identity と権限を持つアクセスモデルだ。channel 単位の権限分離と監査の仕組み、そして自分でエージェントを設計するときの教訓を整理する。"
+tags: ["anthropic", "claude", "ai-agents", "identity-governance", "security"]
+---
+
+## 概要
+
+Anthropic は2026年6月24日、Claude Tag を発表した。
+
+Claude Tag は Slack の中で働く AI のチームメイトである。
+同時に、その土台として「agent identity」という新しいアクセスモデルを導入した。
+
+このモデルの核心は一点に集約される。
+エージェントが特定ユーザーの代理として動くのをやめ、Claude 自身の identity と権限で動くようにしたことだ。
+
+背景には、私が以前の記事で扱った Satya Nadella の主張がある。
+Nadella は「AI agent に identity と sandbox と policy を与え、従業員のように統制せよ」と説いた。
+Claude Tag は、その概念をそのまま製品へ落とし込んだ実装にあたる。
+
+## 詳細
+
+### 従来の「代理」モデルが壊れる理由
+
+これまでのエージェントは、依頼したユーザーの権限を借りて動いた。
+この「on-behalf-of（代理）」モデルが、2つの変化で成立しなくなった。
+
+第一の変化は自律性である。
+エージェントは自分でタスクを後刻にスケジュールし、依頼者がログオフした後もイベントに反応して動く。
+依頼者がその場にいないのだから、依頼者の権限を借りる前提が崩れる。
+
+第二の変化は multiplayer である。
+複数人が参加する共有チャンネルでは、複数の人間が同時にエージェントを動かす。
+誰の権限を適用すべきかが決まらない。
+一人のユーザーの認証情報では、共有空間の動作を表現できない。
+
+### Claude Tag の答え — エージェントが自分自身として振る舞う
+
+Claude Tag は、Claude を「それ自身」として動かすことでこの矛盾を解いた。
+
+Claude は固有のアカウントを持って各システムに現れる。
+Slack には Claude アプリとして投稿し、GitHub には Claude GitHub App として pull request を開き、データウェアハウスには管理者が用意した service account で接続する。
+
+この設計は、共有チャンネルが個人の private 文書への抜け道になる事態を防ぐ。
+Claude は個人の認証情報に依存しないので、アクセスは従業員の個人アカウントから切り離される。
+
+| 観点 | 従来の代理モデル | Claude Tag（agent identity） |
+|------|----------------|----------------------------|
+| 動作主体 | 依頼ユーザーの代理 | Claude 自身 |
+| 認証情報 | ユーザー個人の権限 | admin が付与した固有の権限 |
+| 依頼者ログオフ後 | 権限の根拠が消える | identity が残り動作を継続 |
+| 複数人の共有 | 誰の権限か不定 | チャンネルの identity に固定 |
+
+### channel 単位で権限を分ける
+
+権限の付与は、管理者が workspace と channel の2層で設定する。
+
+public channel は workspace 共通の identity を共有する。
+private channel は、それぞれ固有の identity を持つ。
+legal チャンネルの identity は、許可されていない engineering のコードに到達できない。
+engineering チャンネルの identity は、許可されていない legal 文書を読めない。
+
+管理者が channel ごとに割り当てる対象は、リポジトリ権限、API connector、skill とプラグイン、固有の standing instruction である。
+
+```yaml
+# channel 単位の identity 設定（概念図）
+workspace_default:
+  tools: [search, calendar]
+
+channels:
+  engineering:
+    repos: [backend, infra]      # GitHub App 権限
+    connectors: [data_warehouse] # service account 経由
+  legal:
+    connectors: [contract_db]    # engineering の repos には到達不可
+```
+
+### 統制を支える3つの仕組み
+
+agent identity は、監査とメモリ境界とアクセス制御で統制を担保する。
+
+監査はすべての行動を記録する。
+あらゆる routine、memory への書き込み、ネットワーク呼び出しが、agent の認証情報とともに記録される。
+これらは接続先システム自身のログにも残る。
+
+メモリは境界を尊重する。
+Claude が private チャンネルで学んだ内容は、より広い workspace には現れない。
+
+アクセスは admin が絞る。
+Enterprise プランでは、どのメンバーがどのチャンネルで Claude を起動できるかを RBAC（Role-Based Access Control、役割に基づくアクセス制御）で制限する。
+承認されていないホストへの外向き通信は遮断する。
+
+なお DM（ダイレクトメッセージ）は例外として扱う。
+DM はユーザー個人の claude.ai アカウントと個人の認証情報で動く。
+個人用のツールとタスクのための領域だからだ。
+
+| scope | identity | 主な用途 |
+|-------|----------|---------|
+| workspace / public channel | workspace 共通 | 全社で共有してよい作業 |
+| private channel | チャンネル固有 | 部門限定の情報と権限 |
+| DM | ユーザー個人 | 個人のツールとタスク |
+
+Anthropic は今後の拡張として、単発の機微な操作に限って権限を渡す just-in-time credential、およびチャンネルの profile とユーザー権限を組み合わせる identity-aware overlay を挙げている。
+
+## 日本への示唆
+
+この発表は、日本の情報システム部門とエージェントを自作する開発者の双方に効く。
+
+第一に、統制対象としての non-human identity が現実の製品になった。
+これまで identity 管理（IdP、RBAC、監査ログ）の対象は人間だった。
+Claude Tag のようなエージェントが業務に入ると、固有の identity を持つ非人間アカウントが統制対象に加わる。
+日本企業は J-SOX（内部統制報告制度）で、システムアクセスの統制と監査証跡を求められる。
+エージェントが業務システムを操作するなら、その identity の権限と行動も内部統制の範囲に入る。
+
+第二に、ゼロトラストの権限最小化と同じ原理が、エージェントにそのまま適用できる。
+channel 単位の権限分離は、人間に対する最小権限付与の延長線上にある。
+エージェントを例外扱いせず、人間と同じ統制基盤へ載せる設計が要件になる。
+
+第三に、自分でエージェントを設計するときの教訓がある。
+個人でエージェントを実装する場合も、「誰の権限で動くのか」を曖昧にしたまま作ると、自律化と共有の段階で破綻する。
+Claude Tag の設計から学べる原則は3つに整理できる。
+
+| 原則 | 内容 | 自作時の具体策 |
+|------|------|--------------|
+| 主体の明確化 | エージェント自身に固有の身分を与える | 個人トークンの使い回しをやめ、専用の service account を切る |
+| 権限の分離 | 文脈（channel）ごとに到達範囲を限定する | 用途別にスコープを分け、横断アクセスを既定で禁止する |
+| 行動の可観測性 | すべての行動を後から追えるようにする | routine、memory 書き込み、外部呼び出しを残す監査ログを設計する |
+
+エージェントの能力ではなく、誰の権限でどこまで動けるかという統制が、運用の分岐点になる。
+
+## まとめ
+
+- Anthropic は2026年6月24日に Claude Tag を発表した。Slack で働くチームメイトと、その土台の agent identity アクセスモデルを導入した
+- 従来の代理モデルは、自律化（依頼者不在でも動く）と multiplayer（複数人が動かす）で成立しなくなった
+- Claude Tag は Claude を「それ自身」として動かす。Slack アプリ、GitHub App、service account として固有のアカウントを持つ
+- 権限は workspace と channel の2層で分離する。private channel は固有 identity を持ち、部門間の越境を防ぐ
+- 統制は監査ログ、メモリ境界、RBAC で担保する。承認外ホストへの通信は遮断する
+- 日本への示唆は、non-human identity の内部統制、ゼロトラストとの接続、自作エージェントへの設計教訓の3点にある
+
+エージェントが従業員のように働くなら、従業員と同じ身分管理が要る。
+次の競争軸は、賢さではなく統制に移った。
+
+## 参考リンク
+
+- [Anthropic: Agent identity — a new access model for autonomous, team-wide AI](https://claude.com/blog/agent-identity-access-model)
+- [SiliconANGLE: Anthropic debuts Claude Tag, a more capable AI teammate that lives within Slack](https://siliconangle.com/2026/06/23/anthropic-debuts-claude-tag-capable-ai-teammate-lives-within-slack/)
+- [Help Net Security: Anthropic's Claude Tag gives AI agents independent identities](https://www.helpnetsecurity.com/2026/06/24/anthropic-claude-tag-agent-identity-model/)
+- [Fortune: Anthropic launches Claude Tag, a tool that works like a virtual employee within Slack](https://fortune.com/2026/06/23/anthropic-claude-tag-virtual-employee-tool-slack/)
