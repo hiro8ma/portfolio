@@ -1,0 +1,132 @@
+---
+title: "OpenAI 自社チップ Jalapeño — 推論コスト半減が狙う『NVIDIA依存』からの脱却"
+date: "2026-06-27"
+description: "OpenAI と Broadcom が初の自社設計チップ Jalapeño を発表した。LLM 推論に特化し、NVIDIA GPU 比で推論コストを約50%下げる。なぜ AI ラボが自らシリコンを設計するのか、その機構と日本の半導体への波及を整理する。"
+tags: ["openai", "broadcom", "ai-chips", "semiconductor", "inference"]
+---
+
+## 概要
+
+OpenAI と Broadcom は2026年6月24日、OpenAI 初の自社設計チップ Jalapeño を発表した。
+
+Jalapeño は LLM の推論（inference）に特化した ASIC である。
+学習用ではなく、学習済みモデルを実際に動かす工程に最適化した。
+
+最大の数字は推論コストにある。
+初期テストでは、現行の NVIDIA GPU と比べてトークンあたりの推論コストが約50%低い。
+性能は NVIDIA Blackwell や Google TPU に並ぶ水準を示した。
+
+この発表が重要な理由は一点に尽きる。
+推論コストの削減が、AI 事業の赤字を黒字へ変える最大のレバーだからだ。
+
+## 詳細
+
+### 何を作ったのか
+
+Jalapeño は、OpenAI が設計し、複数の専業企業が量産化を担う分業で生まれた。
+
+OpenAI は LLM の挙動に関する知見からアーキテクチャを定めた。
+Broadcom がシリコン実装と Tomahawk ネットワーキングを担い、TSMC が製造し、Celestica が基板とラック統合を受け持つ。
+
+設計の速さも際立つ。
+構想から製造の tape-out まで9か月で到達した。
+これは高性能半導体として過去最速の ASIC 開発サイクルとされる。
+OpenAI 自身のモデルが設計の最適化を支援した。
+
+| 項目 | 内容 |
+|------|------|
+| 種別 | LLM 推論特化の ASIC（OpenAI 初の自社設計） |
+| 設計 | OpenAI（アーキテクチャ）、Broadcom（シリコン実装） |
+| 製造 | TSMC |
+| 統合 | Celestica（基板、ラック、システム） |
+| 性能 | NVIDIA Blackwell・Google TPU に並ぶ。電力あたり性能は現行 SOTA を大きく上回る |
+| コスト | トークンあたり推論コストが NVIDIA GPU 比で約50%低い |
+| 展開 | 2026年末に小規模、2027年に量産、2028年上期に本格展開 |
+
+### なぜ自社チップなのか
+
+OpenAI が自らシリコンを設計する理由は、推論コストの構造にある。
+
+OpenAI は2025年に ChatGPT を提供するため、third-party の GPU に約$14B（140億ドル）を費やした。
+推論は、ユーザーがモデルを使うたびに発生する変動費である。
+利用が伸びるほど、この費用は線形に積み上がる。
+
+ここでコストの50%削減が効く。
+推論コストを半分にすれば、同じ売上でも残る利益が増える。
+OpenAI が2026年に$14Bの赤字を見込む一方、Anthropic が同時期に約$559Mの営業黒字へ向かう局面では、推論単価の差が損益を直接左右する。
+
+自社チップは、利用量が増えるほど効く複利のコスト圧縮装置として機能する。
+
+### 自社シリコンへ向かうのは OpenAI だけではない
+
+Jalapeño は、AI の主要プレイヤーが進める垂直統合の最新例である。
+
+クラウドと AI ラボは、汎用 GPU への依存を減らすため、自社用途に最適化したチップを設計してきた。
+推論という反復負荷は、専用設計の効果が出やすい領域である。
+
+| 事業者 | 自社チップ | 主な用途 |
+|--------|-----------|---------|
+| Google | TPU | 学習と推論 |
+| Amazon | Trainium / Inferentia | 学習と推論 |
+| Microsoft | Maia | 学習と推論 |
+| OpenAI | Jalapeño | 推論特化 |
+
+各社が向かう先は共通する。
+モデルの価値を、交換可能な汎用ハードウェアの上ではなく、自社最適化したスタックの上で出す方向だ。
+
+### NVIDIA への打撃は限定的
+
+この発表は、NVIDIA の支配を即座に崩すものではない。
+
+OpenAI は、学習（training）では NVIDIA が引き続き主要パートナーだと明言した。
+Jalapeño が狙うのは推論であり、学習用 GPU の市場とは分かれている。
+発表当日の NVIDIA 株の下落は0.26%にとどまった。
+
+市場は、これを推論セグメントに限定された競争として受け止めた。
+学習用 GPU の需要は、当面 NVIDIA に残る。
+
+## 日本への示唆
+
+この動きは、日本の半導体産業に直接届く。
+
+第一に、設計者が誰であっても製造と素材の需要は残る。
+Jalapeño は OpenAI が設計し、TSMC が製造する。
+AI ラボが自社設計へ進むほど、先端ロジックの製造能力と、それを支える日本製の材料と装置への需要が増える。
+東京エレクトロンの製造装置、信越化学のシリコンウエハ、各種フォトレジストは、設計者が誰でも必要になる。
+
+第二に、advanced packaging（先端実装）の比重が増す。
+大型 ASIC は、複数のチップを高密度で接続する先端パッケージングを要する。
+ここでも日本の材料と後工程の技術が供給側に立つ。
+
+第三に、Rapidus の 2nm 量産（2027年予定）の意味が変わる。
+カスタム AI ASIC は、最先端ノードを必要とする代表的な需要である。
+国内に先端ロジックの製造拠点を持つことは、この需要を取り込む前提になる。
+
+| 経路 | 日本側の主体 | 波及する論点 |
+|------|------------|------------|
+| 製造装置と材料 | 東京エレクトロン、信越化学、JSR | 設計者が誰でも需要が残る picks and shovels |
+| 先端実装 | 後工程の材料・装置メーカー | 大型 ASIC が advanced packaging 需要を押し上げる |
+| 先端ロジック製造 | Rapidus | カスタム AI ASIC が 2nm 需要の受け皿になる |
+
+日本のエンジニアと事業者が読み取るべき点は、推論コストの低下が AI 導入の前提を変えることである。
+推論単価が下がれば、これまで採算が合わなかった業務へも AI を載せられる。
+モデルの賢さではなく、推論をいくらで回せるかが、導入範囲を決める変数になる。
+
+## まとめ
+
+- OpenAI と Broadcom は2026年6月24日、推論特化の自社設計 ASIC Jalapeño を発表した。トークンあたり推論コストが NVIDIA GPU 比で約50%低い
+- 構想から tape-out まで9か月の最速サイクルで開発し、OpenAI 自身のモデルが設計を支援した。製造は TSMC、統合は Celestica が担う
+- 自社チップの狙いは推論コストの構造的削減にある。OpenAI は2025年に GPU へ約$14Bを費やしており、50%削減は利益へ直結する
+- 垂直統合は OpenAI だけではない。Google TPU、Amazon Trainium、Microsoft Maia と並ぶ流れにある
+- NVIDIA への打撃は限定的である。学習用 GPU は当面 NVIDIA に残り、発表時の株価下落は0.26%にとどまった
+- 日本への波及は、製造装置と材料、先端実装、Rapidus の 2nm 需要の3経路に及ぶ
+
+AI 競争の主戦場は、モデルの賢さから推論を回すコストへ移った。
+そのコストを握るのは、チップを設計できる者になる。
+
+## 参考リンク
+
+- [OpenAI: OpenAI and Broadcom unveil LLM-optimized inference chip](https://openai.com/index/openai-broadcom-jalapeno-inference-chip/)
+- [TechCrunch: OpenAI unveils its first custom chip, built by Broadcom](https://techcrunch.com/2026/06/24/openai-unveils-its-first-custom-chip-built-by-broadcom/)
+- [Tom's Hardware: Broadcom and OpenAI unveil custom-built Jalapeño inference processor](https://www.tomshardware.com/tech-industry/artificial-intelligence/broadcom-and-openai-unveil-custom-built-jalapeno-inference-processor-openais-first-chip-is-a-massive-reticle-sized-asic-built-in-an-ultra-fast-nine-month-development-cycle)
+- [CNBC: OpenAI and Broadcom reveal Jalapeno, first AI chip in partnership](https://www.cnbc.com/2026/06/24/openai-and-broadcom-reveal-jalapeno-first-ai-chip-in-partnership.html)
