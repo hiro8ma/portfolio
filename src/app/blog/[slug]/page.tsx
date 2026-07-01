@@ -4,7 +4,7 @@ import { notFound } from "next/navigation";
 import { getAllPostSlugs, getPostBySlug, getAdjacentPosts, calculateReadingTime } from "@/lib/posts";
 import { MDXRemote } from "next-mdx-remote/rsc";
 import { Metadata } from "next";
-import { useMDXComponents } from "../../../../mdx-components";
+import { useMDXComponents as getMDXComponents } from "../../../../mdx-components";
 import remarkGfm from "remark-gfm";
 
 const siteUrl = "https://hiro8ma.github.io/portfolio";
@@ -104,7 +104,7 @@ export default async function PostPage({ params }: PageProps) {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
-      <article className="mx-auto max-w-3xl px-6 py-12 md:px-12 md:py-20">
+      <article className="mx-auto max-w-4xl px-6 py-12 md:px-12 md:py-20">
         <div className="flex items-center gap-4 mb-8">
           <Link
             href="/"
@@ -147,7 +147,7 @@ export default async function PostPage({ params }: PageProps) {
         <div className="prose prose-invert prose-violet max-w-none">
           <MDXRemote
             source={post.content}
-            components={useMDXComponents({})}
+            components={getMDXComponents({})}
             options={{ mdxOptions: { remarkPlugins: [remarkGfm] } }}
           />
         </div>
