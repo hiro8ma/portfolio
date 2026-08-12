@@ -1,0 +1,216 @@
+---
+title: "24GB に収まった 30B エージェント — Meta Muse Glimmer と「閉じたフロンティア、開いたローカル」"
+date: "2026-08-12"
+description: "2026年8月10日、Meta が 30B の agentic モデル Muse Glimmer を Apache 2.0 で公開した。4月に Muse Spark を closed で出した方針を4ヶ月で転換した形になる。ベンチマークの勝敗が道具使用と端末操作で割れる理由と、24GB のローカル実行が日本企業に何を許すかを整理する。"
+tags: ["meta", "open-source", "ai-agents", "on-device-ai", "llm"]
+---
+
+## 概要
+
+2026年8月10日、Meta Superintelligence Labs（MSL）が **Muse Glimmer** を公開した。
+
+パラメータ数 30B、ライセンスは Apache 2.0、重みは Hugging Face から誰でも取得できる。
+4bit 量子化で 20GB を切るため、24GB のコンシューマ GPU や統合メモリの Mac で動く。
+
+同じ MSL が 4 月に出した Muse Spark は closed だった。
+このブログでも当時、Llama 以来初の closed-source 転換として扱っている。
+その 4 ヶ月後に、Meta は open weights へ戻った。
+
+ただし戻り方が変わった。
+フロンティアモデルは有料 API のまま置き、そこから蒸留した小型モデルだけを開ける。
+Muse Glimmer は、この二層構造の下側にあたる最初の製品になる。
+
+## 何を公開したのか
+
+### モデルの構成
+
+Muse Glimmer は dense transformer で、画像を扱う知覚エンコーダを前段に持つ。
+
+| 項目 | 内容 |
+|------|------|
+| パラメータ数 | 30B（2B の知覚エンコーダ + 28B のテキストデコーダ） |
+| 構造 | dense transformer、テキストと画像の交互入力に対応 |
+| context 長 | 最大 131K トークン |
+| ライセンス | Apache 2.0 |
+| 対応言語 | 100 言語以上 |
+| 配布 | Hugging Face |
+
+学習は 3 段階に分かれる。
+事前学習では Muse Spark を教師とした logit 蒸留を行い、中間学習で長い context と agent 中心のデータに推論トレースを付けて流し込む。
+事後学習は SFT に on-policy 蒸留と強化学習を組み合わせ、汎用、推論、コーディング、agent の各領域を対象にした。
+
+つまり Muse Glimmer は、閉じたフロンティアモデルの出力を圧縮した製品である。
+Meta が上位モデルを閉じたまま置く理由も、ここに含まれている。
+
+### 動作環境
+
+量子化の刻み方が実運用を決める。
+
+| 精度 | 必要メモリ | 想定ハードウェア |
+|------|-----------|----------------|
+| full precision | 55GB 超 | データセンター GPU |
+| K-Quant 4bit | 20GB 未満 | 24GB / 32GB のコンシューマ機 |
+| K-Quant 17GB 版 | 17GB | 24GB 機で context に余裕を残す構成 |
+
+推論ランタイムは公開時点で llama.cpp、MLX、ExecuTorch、vLLM、SGLang が対応し、Ollama は 0.32.7 で取り込んだ。
+LM Studio と Unsloth もパートナーとして名前が挙がっている。
+
+生成速度は DFlash という投機的デコーディングの drafter で伸びる。
+drafter がトークンの塊を提案し、本体が並列に検証する方式なので、出力は非投機実行と一致する。
+
+| ハードウェア | DFlash による decode 高速化 |
+|-------------|--------------------------|
+| RTX 5090 | 3.1 倍 |
+| MacBook M5 Max | 1.8 倍 |
+| MacBook M4 Max | 1.5 倍 |
+
+AMD 7900XT での実測は、prompt 処理が約 700 tok/s、生成が約 36 tok/s、DFlash 併用で約 60 tok/s に達している。
+対話とエージェントの反復に耐える水準に入った。
+
+## ベンチマークが割れている
+
+### 道具使用では明確に勝つ
+
+Meta は Gemma4-31B と Qwen3.6-27B を比較対象に置いた。
+
+| ベンチマーク | 測る能力 | Muse Glimmer | Gemma4-31B | Qwen3.6-27B |
+|-------------|---------|-------------|-----------|------------|
+| MCP Atlas | MCP 経由の道具使用 | **75.5** | 54.2 | 62.5 |
+| DeepSearch QA | 多段の情報探索 | **74.6** | 61.7 | 71.1 |
+| WildClawBench | 実環境の agent 課題 | **47.6** | 37.6 | 43.2 |
+| GAIA2 | 汎用 agent タスク | **43.3** | 36.4 | 40.0 |
+| τ³-Banking | 金融ドメインの対話 agent | **23.5** | 15.1 | 16.7 |
+| SWE-Bench Pro | 難易度の高いコード修正 | **51.2** | 36.9 | 50.2 |
+
+MCP Atlas の 75.5 対 62.5 は、同じサイズ帯の中では大きな差になる。
+MCP（Model Context Protocol）は agent が外部システムと通信するための標準規格で、このスコアは道具を正しく選び、引数を組み立て、失敗から復帰できるかを測る。
+
+### 端末操作では逆転する
+
+一方、汎用推論では 3 モデルがほぼ並ぶ。
+
+| ベンチマーク | Muse Glimmer | Gemma4-31B | Qwen3.6-27B |
+|-------------|-------------|-----------|------------|
+| AIME 2026 | 94.7 | 89.2 | 94.1 |
+| Charxiv Reasoning | 78.8 | 77.7 | 78.4 |
+
+そして端末とコンピュータ操作を伴う課題では、Qwen3.6-27B が前に出る。
+
+| ベンチマーク | Muse Glimmer | Qwen3.6-27B | 差 |
+|-------------|-------------|------------|-----|
+| TerminalBench 2.1 | 51.7 | **60.7** | -9.0 |
+| OSWorld-Verified | 65.9 | **75.6** | -9.7 |
+| SWE-Bench Verified | 76.0 | **77.2** | -1.2 |
+
+この非対称は、学習設計から説明がつく。
+Muse Glimmer は中間学習で agent 中心のデータを大量に通しており、そこで扱われるのは構造化された関数呼び出しが中心になる。
+対して TerminalBench と OSWorld が要求するのは、シェルの状態や GUI の描画結果という非構造の環境を長時間追い続ける能力で、必要な訓練分布が異なる。
+
+選定の指針も、そこから決まる。
+API と MCP サーバを叩くエージェントなら Muse Glimmer、シェルを長く回すエージェントなら Qwen3.6-27B が現時点の合理解になる。
+
+## なぜ 4 ヶ月で方針が変わったのか
+
+### 決定の時系列
+
+Meta の判断は 6 ヶ月で 2 回向きを変えている。
+
+| 時期 | 決定 |
+|------|------|
+| 2026年4月8日 | Muse Spark を closed で公開。Llama 以来の open weights を打ち切る |
+| 2026年8月上旬 | Muse Spark 1.2 と Muse Code を投入。重みの配布はなし |
+| 2026年8月5日 | Muse Spark 1.2 も closed のまま続けると説明 |
+| 2026年8月10日 | Muse Glimmer を Apache 2.0 で公開。Muse Spark 1.2 の open weights も予告 |
+
+Chief AI Officer の Alexandr Wang は X で公開を告知した。
+
+> excited to be releasing open weights for muse glimmer today, a 30b model that runs on a single consumer gpu, with open weights for a version of muse spark 1.2 coming soon.
+> — Alexandr Wang, Meta Chief AI Officer（X, 2026年8月10日）
+
+同日、Mark Zuckerberg は 6,500 語のエッセイを出し、米国の open source モデルが世界最良であるべきだと主張した。
+論の中心は蒸留の擁護にある。
+
+> Some have tried to frame distillation as harmful, but I think it is important to protect the principle that you can learn from anything you can observe.
+> — Mark Zuckerberg（2026年8月10日のエッセイ）
+
+観察できるものからは学んでよい、という原則を守るべきだという立場である。
+Zuckerberg はそのうえで、蒸留と学習データに関する米国の政策を見直すよう求めた。
+
+### 分析側の読み
+
+Futurum Group の Nick Patience は、この転換を収益の放棄ではなく流通の確保と見ている。
+Meta が支配していないハードウェア、つまり他社の PC とワークステーションへ到達する手段として open weights を使う、という読みになる。
+30B という容量帯で Meta が現実に取れた売上はほとんどなく、開けても失うものが小さい。
+
+背景には Hugging Face のダウンロード構成の変化がある。
+DeepSeek、Alibaba、Zhipu の中国系 open-weight モデル群が取り分を伸ばす一方、Llama の生態系は伸びが止まっていた。
+Muse Glimmer は、この失地への回答にあたる。
+
+同時に、調達側には別の論点が残る。
+Patience が指摘するとおり、供給者が 6 ヶ月でライセンス方針を 2 回変えた事実は消えない。
+モデルを製品に組み込む側は、次の版でも同じ条件が続く保証を持たないまま設計することになる。
+
+## 日本への示唆
+
+### 外に出せないデータを持つ現場で使える
+
+日本の金融、医療、製造では、顧客データや設計データをクラウド API へ送れない案件が常に残る。
+これまでの選択肢は、性能を大きく落とした小型モデルを使うか、agent 化を諦めるかの二択だった。
+
+Muse Glimmer は、この制約の位置を動かす。
+MCP Atlas 75.5 という水準の道具使用が、ネットワークを一切使わずに手元で回る。
+
+| 制約 | 従来の対応 | Muse Glimmer 以後 |
+|------|-----------|------------------|
+| データを外部送信できない | 小型モデルで妥協、または非採用 | 端末内で 30B 級の agent を実行 |
+| 従量課金が読めない | 利用量に上限を設けて運用 | ハードウェア費用に固定化 |
+| ライセンス条件の交渉 | 提供元との個別契約 | Apache 2.0 で商用利用が明示 |
+
+社内の稟議で最も通りにくいのは、外部送信の可否と費用の予測不能性である。
+ローカル実行は、その両方を同時に外す。
+
+### 24GB という線引きが調達に直結する
+
+必要メモリが 20GB 未満という数字は、日本の開発現場では機材選定の基準に変わる。
+
+| 機材 | メモリ | Muse Glimmer 4bit |
+|------|-------|------------------|
+| MacBook Pro 16GB | 16GB | 不可 |
+| MacBook Pro 24GB | 24GB | 実行可（17GB 版で context に余裕） |
+| MacBook Pro 48GB 以上 | 48GB+ | 余裕を持って実行可 |
+| RTX 4090 / 5090 | 24GB / 32GB | 実行可 |
+
+MLX に対応済みである点が、Mac 中心の日本の開発チームには効く。
+M4 Max で 1.5 倍、M5 Max で 1.8 倍という DFlash の高速化も、Apple Silicon が最初から検証対象に入っていることを示している。
+
+支給端末を 16GB で揃えている組織は、ここで線を引かれる。
+ローカル agent を検討するなら、次の更新は 24GB 以上が実質的な下限になる。
+
+### 供給者の方針変更をどう織り込むか
+
+Meta が 6 ヶ月で 2 回方針を変えた事実は、日本企業の調達では特に重く効く。
+複数年の保守契約を前提に稟議を組む慣行と、ライセンス方針が四半期単位で動く現実が噛み合わない。
+
+現実的な備えは、モデルを差し替え可能な部品として扱うことに尽きる。
+agent の足回りを MCP のような標準インタフェースで組んでおけば、Muse Glimmer から Qwen3.6 へ、あるいはその逆へ移す費用が抑えられる。
+Apache 2.0 で取得済みの重みは後から取り上げられないため、一度落として社内に保管する運用も有効になる。
+
+## まとめ
+
+- Meta が 2026年8月10日に Muse Glimmer（30B、Apache 2.0）を公開し、4 月の closed 方針を転換した
+- フロンティアは有料 API、蒸留した小型モデルは open weights という二層構造を採る
+- MCP Atlas 75.5、DeepSearch QA 74.6 と道具使用で同サイズ帯を明確に上回る
+- TerminalBench 2.1 と OSWorld では Qwen3.6-27B に 9 ポイント前後の差で負ける。構造化された関数呼び出しに寄せた学習設計の裏返しになる
+- 4bit で 20GB 未満に収まり、24GB のコンシューマ機で動く。外部送信できないデータを扱う日本の現場では、agent 適用の前提条件が変わる
+- 供給者が 6 ヶ月でライセンス方針を 2 回変えた点は残る。モデルを差し替え可能に設計しておく必要がある
+
+## 参考リンク
+
+- [Meta AI Research: Introducing Muse Glimmer](https://research.meta.ai/blog/introducing-muse-glimmer-open-agentic-model)
+- [Meta Developer: Muse Glimmer](https://developer.meta.com/ai/models/muse-glimmer/)
+- [Phoronix: Meta Publishes Muse Glimmer As 30B Open Agentic Model](https://www.phoronix.com/news/Meta-Muse-Glimmer)
+- [CNBC: Meta to open source its most powerful AI model as it takes swipe at OpenAI, Anthropic](https://www.cnbc.com/2026/08/10/meta-muse-glimmer-open-weight-ai.html)
+- [Futurum: Meta Reopens Its Models. Is This a PC Play or a Policy Play?](https://futurumgroup.com/insights/meta-reopens-its-models-is-this-a-pc-play-or-a-policy-play/)
+- [Constellation Research: Meta releases open weight Muse Glimmer model with open Muse Spark 1.2 on tap](https://www.constellationr.com/insights/news/meta-releases-open-weight-muse-glimmer-model-open-muse-spark-12-tap)
+- [Trending Topics: Zuckerberg Defends AI Distillation, Criticises Closed Labs](https://www.trendingtopics.eu/zuckerberg-atacks-closed-models/)
+- [artificialintelligence-news: Meta Muse Glimmer brings local AI agents to consumer GPUs](https://www.artificialintelligence-news.com/news/meta-muse-glimmer-local-ai-agents-consumer-gpus/)
