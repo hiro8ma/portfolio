@@ -58,9 +58,10 @@ const skills = [
   "NestJS", "GraphQL", "RabbitMQ", "Firebase",
   "AWS", "GCP", "Docker", "Kubernetes", "Grafana",
   "Terraform", "Istio", "Prometheus", "Argo Rollouts",
-  "Vertex AI", "Gemini", "Claude", "Claude Code", "LiteLLM", "LangChain", "Langfuse",
+  "Gemini Enterprise Agent Platform", "Gemini", "Claude", "Claude Code", "LiteLLM", "LangChain", "Langfuse",
   "RAG", "MCP", "FastMCP", "Genkit", "Ollama", "Pydantic",
   "LoRA", "MLX", "TensorFlow", "BigQuery ML",
+  "AI Engineering", "Recommender Systems", "Personalization",
   "Engineering Management", "Product Management", "Agile/Scrum",
 ];
 
@@ -88,7 +89,7 @@ export default function Home() {
                 Forward Deployed Engineer & Engineering Manager
               </h2>
               <p className="mt-4 max-w-xs leading-normal text-slate-400">
-                10+ years building scalable systems. Now delivering AI products into enterprise production, and building the engineering org that does it.
+                10+ years building scalable systems. Now delivering AI personalization and recommendation systems into enterprise production, and building the engineering org that does it.
               </p>
 
               {/* Navigation */}
@@ -222,7 +223,9 @@ export default function Home() {
                 <p>
                   Forward Deployed Engineer and Engineering Manager with 10+ years of{" "}
                   <span className="text-slate-200">backend and infrastructure</span>{" "}
-                  experience. I sit between customers and the product —{" "}
+                  experience, now working in{" "}
+                  <span className="text-slate-200">AI engineering, recommender systems, and personalization</span>.
+                  I sit between customers and the product —{" "}
                   <span className="text-slate-200">leading delivery on the client side while feeding what I learn back into the platform</span>,
                   and building the FDE organization that scales it.
                   Previously owned product-wide engineering accountability as a Product Lead Engineer: technical
@@ -235,7 +238,8 @@ export default function Home() {
                   and running local fine-tuning experiments with{" "}
                   <span className="text-slate-200">LoRA + MLX</span> on Apple Silicon.
                   Integrating LLMs into production via{" "}
-                  <span className="text-slate-200">Vertex AI, Claude, and Gemini</span>.
+                  <span className="text-slate-200">Gemini Enterprise Agent Platform</span> (formerly Vertex AI),{" "}
+                  <span className="text-slate-200">Claude, and Gemini</span>.
                 </p>
                 <p>
                   Depending on the requirements, I work with{" "}
@@ -262,7 +266,7 @@ export default function Home() {
                 <p>
                   On <span className="text-slate-200">Google Cloud / AWS</span>, I have hands-on experience with a wide range of services including{" "}
                   <span className="text-slate-200">
-                    GKE, Anthos, Cloud Run, Pub/Sub, AlloyDB, Spanner, BigQuery, Vertex AI
+                    GKE, Anthos, Cloud Run, Pub/Sub, AlloyDB, Spanner, BigQuery, Gemini Enterprise Agent Platform
                   </span>.
                 </p>
               </div>
@@ -451,7 +455,8 @@ export default function Home() {
                           </div>
                         </h3>
                         <p className="mt-2 text-sm leading-normal">
-                          Delivering an AI-driven CX platform for enterprise fashion e-commerce.
+                          Delivering AI personalization and recommendation systems into enterprise production.
+                          Retail and commerce first, expanding into adjacent verticals.
                           Working directly with clients while building the engineering organization behind the delivery.
                         </p>
                         <ul className="mt-3 space-y-1 text-sm text-slate-400">
@@ -465,11 +470,11 @@ export default function Home() {
                           </li>
                           <li className="flex items-start gap-2">
                             <span className="text-violet-400">▹</span>
-                            LLM-backed recommendation and merchandising pipelines on GCP
+                            Recommendation and personalization pipelines: LLM-backed retrieval, ranking, and merchandising
                           </li>
                         </ul>
                         <ul className="mt-3 flex flex-wrap gap-2" aria-label="Technologies used">
-                          {["Go", "Python", "TypeScript", "GCP", "BigQuery", "Vertex AI", "dbt"].map((tech) => (
+                          {["AI Engineering", "Recommender Systems", "Personalization", "Go", "Python", "TypeScript", "GCP", "BigQuery", "Gemini Enterprise Agent Platform", "dbt"].map((tech) => (
                             <li key={tech}>
                               <span className="flex items-center rounded-full bg-violet-400/10 px-3 py-1 text-xs font-medium leading-5 text-violet-300">
                                 {tech}
@@ -511,7 +516,7 @@ export default function Home() {
                           </li>
                         </ul>
                         <ul className="mt-3 flex flex-wrap gap-2" aria-label="Technologies used">
-                          {["Go", "Kubernetes", "GCP", "Vertex AI", "Team Building"].map((tech) => (
+                          {["Go", "Kubernetes", "GCP", "Gemini Enterprise Agent Platform", "Team Building"].map((tech) => (
                             <li key={tech}>
                               <span className="flex items-center rounded-full bg-violet-400/10 px-3 py-1 text-xs font-medium leading-5 text-violet-300">
                                 {tech}
