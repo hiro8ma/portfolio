@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { Github, Linkedin, Mail, ExternalLink, Briefcase, Instagram, BookOpen, Youtube, FileText, Mic, Award, ArrowRight } from "lucide-react";
+import { Github, Linkedin, Mail, ExternalLink, Briefcase, Instagram, BookOpen, FileText, Mic, Award, ArrowRight } from "lucide-react";
 import { SiX, SiZenn } from "react-icons/si";
 import {
   SiGo,
@@ -81,7 +81,7 @@ export default function Home() {
           <header className="lg:sticky lg:top-0 lg:flex lg:max-h-screen lg:w-1/2 lg:flex-col lg:justify-between lg:py-24">
             <div>
               <h1 className="text-4xl font-bold tracking-tight text-slate-200 sm:text-5xl">
-                <a href="/">Hiroyuki Masuda</a>
+                <Link href="/">Hiroyuki Masuda</Link>
               </h1>
               <p className="mt-1 text-sm text-slate-400">hiro8ma / 増田 浩之</p>
               <h2 className="mt-3 text-lg font-medium tracking-tight text-slate-200 sm:text-xl">

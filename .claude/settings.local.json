@@ -11,7 +11,10 @@
       "WebFetch",
       "mcp__playwright__browser_evaluate",
       "mcp__Claude_Preview__preview_start",
-      "mcp__playwright__browser_navigate"
+      "mcp__playwright__browser_navigate",
+      "mcp__github__list_releases",
+      "mcp__github__search_pull_requests",
+      "mcp__759e806d-bbb8-4cc5-9fd0-956a95987020__slack_search_public_and_private"
     ]
   }
 }
