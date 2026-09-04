@@ -85,10 +85,10 @@ export default function Home() {
               </h1>
               <p className="mt-1 text-sm text-slate-400">hiro8ma / 増田 浩之</p>
               <h2 className="mt-3 text-lg font-medium tracking-tight text-slate-200 sm:text-xl">
-                Engineering Manager & Architect
+                Forward Deployed Engineer & Engineering Manager
               </h2>
               <p className="mt-4 max-w-xs leading-normal text-slate-400">
-                10+ years building scalable systems. Leading teams, architecting microservices, and driving AI transformation at scale.
+                10+ years building scalable systems. Now delivering AI products into enterprise production, and building the engineering org that does it.
               </p>
 
               {/* Navigation */}
@@ -220,12 +220,13 @@ export default function Home() {
               </div>
               <div className="space-y-4">
                 <p>
-                  Product Lead Engineer with 10+ years of{" "}
+                  Forward Deployed Engineer and Engineering Manager with 10+ years of{" "}
                   <span className="text-slate-200">backend and infrastructure</span>{" "}
-                  experience. Owning product-wide engineering accountability —{" "}
-                  <span className="text-slate-200">technical strategy, team growth, and cross-functional decision-making</span>.
-                  Recently building AI systems that automate complex workflows — from natural language
-                  understanding to API orchestration, knowledge retrieval, and operational decision support.
+                  experience. I sit between customers and the product —{" "}
+                  <span className="text-slate-200">leading delivery on the client side while feeding what I learn back into the platform</span>,
+                  and building the FDE organization that scales it.
+                  Previously owned product-wide engineering accountability as a Product Lead Engineer: technical
+                  strategy, team growth, hiring, and cross-functional decision-making.
                 </p>
                 <p>
                   Building and operating{" "}
@@ -441,7 +442,49 @@ export default function Home() {
                     <div className="group relative grid pb-1 transition-all sm:grid-cols-8 sm:gap-8 md:gap-4 lg:hover:!opacity-100 lg:group-hover/list:opacity-50">
                       <div className="absolute -inset-x-4 -inset-y-4 z-0 hidden rounded-md transition motion-reduce:transition-none lg:-inset-x-6 lg:block lg:group-hover:bg-slate-800/50 lg:group-hover:shadow-[inset_0_1px_0_0_rgba(148,163,184,0.1)] lg:group-hover:drop-shadow-lg"></div>
                       <header className="z-10 mb-2 mt-1 text-xs font-semibold uppercase tracking-wide text-slate-500 sm:col-span-2">
-                        2023 — Present
+                        2026 — Present
+                      </header>
+                      <div className="z-10 sm:col-span-6">
+                        <h3 className="font-medium leading-snug text-slate-200">
+                          <div className="inline-flex items-baseline font-medium leading-tight text-slate-200 group-hover:text-violet-300 focus-visible:text-violet-300">
+                            Forward Deployed Engineer &amp; Engineering Manager · InsightX
+                          </div>
+                        </h3>
+                        <p className="mt-2 text-sm leading-normal">
+                          Delivering an AI-driven CX platform for enterprise fashion e-commerce.
+                          Working directly with clients while building the engineering organization behind the delivery.
+                        </p>
+                        <ul className="mt-3 space-y-1 text-sm text-slate-400">
+                          <li className="flex items-start gap-2">
+                            <span className="text-violet-400">▹</span>
+                            Client-facing delivery lead, paired with data scientists per account
+                          </li>
+                          <li className="flex items-start gap-2">
+                            <span className="text-violet-400">▹</span>
+                            Building the FDE org: hiring, onboarding, and evaluation design
+                          </li>
+                          <li className="flex items-start gap-2">
+                            <span className="text-violet-400">▹</span>
+                            LLM-backed recommendation and merchandising pipelines on GCP
+                          </li>
+                        </ul>
+                        <ul className="mt-3 flex flex-wrap gap-2" aria-label="Technologies used">
+                          {["Go", "Python", "TypeScript", "GCP", "BigQuery", "Vertex AI", "dbt"].map((tech) => (
+                            <li key={tech}>
+                              <span className="flex items-center rounded-full bg-violet-400/10 px-3 py-1 text-xs font-medium leading-5 text-violet-300">
+                                {tech}
+                              </span>
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    </div>
+                  </li>
+                  <li className="mb-12">
+                    <div className="group relative grid pb-1 transition-all sm:grid-cols-8 sm:gap-8 md:gap-4 lg:hover:!opacity-100 lg:group-hover/list:opacity-50">
+                      <div className="absolute -inset-x-4 -inset-y-4 z-0 hidden rounded-md transition motion-reduce:transition-none lg:-inset-x-6 lg:block lg:group-hover:bg-slate-800/50 lg:group-hover:shadow-[inset_0_1px_0_0_rgba(148,163,184,0.1)] lg:group-hover:drop-shadow-lg"></div>
+                      <header className="z-10 mb-2 mt-1 text-xs font-semibold uppercase tracking-wide text-slate-500 sm:col-span-2">
+                        2023 — 2026
                       </header>
                       <div className="z-10 sm:col-span-6">
                         <h3 className="font-medium leading-snug text-slate-200">
