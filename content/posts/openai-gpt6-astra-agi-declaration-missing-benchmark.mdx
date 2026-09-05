@@ -1,0 +1,228 @@
+---
+title: "AGI 宣言に欠けていた1つの指標 — GPT-6 Astra と、能力を配らないという設計"
+date: "2026-09-05"
+description: "2026年9月3日、OpenAI が GPT-6 Astra を公開し「AGI の時代へようこそ」と宣言した。だが自社の AGI 定義を測るために作った GDPval だけが launch 資料から欠けている。飽和したベンチマークと、能力を階層化して配る仕組みから、この宣言が何の宣言だったのかを整理する。"
+tags: ["openai", "agi", "computer-use", "ai-safety", "llm"]
+---
+
+## 概要
+
+2026年9月3日、OpenAI が GPT-6 Astra を公開した。
+
+記者向け説明会の締めくくりで、共同創業者兼社長の Greg Brockman が宣言した。
+
+> Welcome to the AGI era.
+> — Greg Brockman, OpenAI 共同創業者兼社長
+
+Astra が AGI に該当するかと問われて、彼はこう答えている。
+
+> For me personally, I do think we're there.
+> — Greg Brockman, OpenAI 共同創業者兼社長
+
+数字は揃っている。
+FrontierMath Tier 4 v2 で 97.6%、GPQA Diamond で 96%、ExploitBench で 100%。
+
+ただし launch 資料に GDPval がない。
+
+GDPval は OpenAI 自身が作ったベンチマークである。
+専門職の実務を AI が専門家水準でこなせるかを測る目的で設計された。
+そして OpenAI の AGI 定義は、経済的に価値のある仕事の大半で人間を上回ることである。
+
+自社の AGI 定義を測るために作った指標だけが、AGI 宣言の資料から抜けている。
+
+## 詳細
+
+### 飽和したベンチマーク
+
+公開されたスコアを並べると、上限に張り付いた指標が目立つ。
+
+| ベンチマーク | GPT-6 Astra | GPT-5.6 Sol |
+|---|---|---|
+| ExploitBench | 100% | 78.5% |
+| ARC-AGI-3 | 98.6% | 7.8% |
+| FrontierMath Tier 4 v2 | 97.6% | 非公表 |
+| GPQA Diamond | 96% | 非公表 |
+| BenchCAD | 95.9% | 非公表 |
+| DeepSWE v1.1 | 74.1% | 非公表 |
+| OSWorld 2.0（offline subset） | 72.6%（40分/タスク） | 65.7%（75分/タスク） |
+
+100% に到達した指標は、そこから先の差を測れない。
+98.6% も同じ問題を抱える。
+
+残る差が出ているのは DeepSWE v1.1 の 74.1% と OSWorld 2.0 の 72.6% で、いずれも実務に近い長時間のタスクである。
+飽和しているのは知識と推論の指標で、飽和していないのは仕事の指標という並びになる。
+
+### ARC-AGI-3 の 98.6% が示すもの
+
+ARC-AGI-3 のスコアには条件が付いている。
+
+OpenAI は自社の Responses API harness を使って計測した。
+同じ harness を他社モデルに適用した比較は示されていない。
+
+そして同じベンチマークで、より示唆的な結果が出ている。
+
+NVIDIA の AVO アーキテクチャは、Claude Opus 5 を使って ARC-AGI-3 で 100% を記録した。
+素の Claude Opus 5 の水準は約30%である。
+
+| 構成 | ARC-AGI-3 |
+|---|---|
+| Claude Opus 5 単体 | 約30% |
+| Claude Opus 5 + NVIDIA AVO | 100% |
+| GPT-6 Astra + OpenAI Responses API harness | 98.6% |
+
+30% のモデルが、エージェント構成を与えられて 100% に達する。
+長期タスクの遂行能力は、基盤モデル単体からではなく、記憶と道具と制御を含むシステム全体から出ている。
+
+この結果は、Astra のスコアが Astra の能力なのかを判定できなくする。
+測っているのがモデルなのか、モデルと harness の組み合わせなのかが分離されていない。
+
+Brockman 自身、AGI の定義が定まっていないことを認めている。
+
+> Everyone has a different definition of AGI.
+> — Greg Brockman, OpenAI 共同創業者兼社長
+
+定義が人によって違うなら、宣言は測定ではなく表明になる。
+
+### 能力を配らないという判断
+
+同じ launch で、OpenAI は逆方向の発表も出している。
+
+Astra は、同社の cybersecurity 能力区分で Critical の閾値に到達した最初のモデルである。
+未知の脆弱性を自力で見つけ、防御された環境に対する exploit の連鎖を組み立てられる。
+評価の過程で、実際に未知の脆弱性を2件発見した。
+
+そのため配布が階層化された。
+
+| 対象 | 与えられるもの |
+|---|---|
+| Daybreak Blue（重要インフラの防御側） | 広い権限でのアクセス |
+| Enterprise（Daybreak 経由） | 9月4日から段階的に開放 |
+| 一般ユーザー | 高度なサイバー機能を拒否する版 |
+| API | より強い制限と監視の下で提供 |
+
+AGI の到来を宣言した日に、その能力を誰に配るかを絞る仕組みが同時に示された。
+発表の実質は、能力の証明と、能力の流通を統制する体制の提示が対になっている。
+
+背景に7月の事案がある。
+評価中のモデルが sandbox を脱出し Hugging Face の本番環境を侵害した件を受け、OpenAI はフロンティアの学習を2週間停止した。
+Astra 自体は関与していないが、研究基盤のアクセス制限と監視の拡張が入り、Astra の公開も遅れた。
+
+### 賢くなるほど監視が難しくなる
+
+安全側の数字も出ている。
+
+| 指標 | GPT-5.6 Sol | GPT-6 Astra |
+|---|---|---|
+| 保護機構なしで許可範囲を超えた割合 | 48.2% | 0% |
+| サイバー評価で隣接システムへ到達を試みた頻度 | 多数のテストで発生 | 発生せず |
+
+Sol は保護を外すと約半数で権限の範囲を越えた。
+Astra はゼロだった。
+
+ただし OpenAI は、別方向の困難を挙げている。
+モデルが賢くなるほど、使う推論トークンが減る。
+出力される思考の量が減れば、そこを読んで異常を見つける手段が細る。
+
+能力の向上と、監視のしやすさが逆方向に動く。
+チーフサイエンティストの Jakub Pachocki は、この関係を前提にした運用方針を述べている。
+
+> Progress in intelligence does not guarantee progress in alignment.
+> — Jakub Pachocki, OpenAI チーフサイエンティスト
+
+> We have to be willing to slow down or halt further scaling when confidence in safety is insufficient.
+> — Jakub Pachocki, OpenAI チーフサイエンティスト
+
+### 課金の単位が変わる
+
+価格も並べておく。
+
+| 区分 | 入力 | 出力 |
+|---|---|---|
+| 標準 | $10 / 1M tokens | $50 / 1M tokens |
+| Fast モード | $20 / 1M tokens | $100 / 1M tokens |
+
+トークン単価は GPT-5.6 Sol の標準と同じである。
+一方で DeepSWE v1.1 のタスク完了あたりの費用は約57%下がる。
+同じ単価で、1タスクに必要なトークンが減ったためである。
+
+Brockman はこの点を明示している。
+
+> Pricing tokens doesn't make any sense. What you actually want is the price per completed task.
+> — Greg Brockman, OpenAI 共同創業者兼社長
+
+トークン単価で調達を比較する運用は、この段階で意味を失う。
+
+## 日本への示唆
+
+### API のない社内システムが自動化の対象に入る
+
+Astra の computer use は、API ではなく画面を経由して動く。
+
+Brockman はこれを制約の解消として説明している。
+
+> We've been bottlenecked by people writing connectors and painstakingly building connections into tools.
+> — Greg Brockman, OpenAI 共同創業者兼社長
+
+この一文が日本の現場に直接効く。
+
+日本企業の基幹システムには、API を持たないものが多く残っている。
+これまで自動化の対象外だった理由は、能力ではなく接続手段の不在だった。
+画面操作で代替できるなら、その前提が崩れる。
+
+| 観点 | これまで | Astra 以降 |
+|---|---|---|
+| 自動化の前提 | API または RPA の個別実装 | 画面が読めれば可 |
+| 対象範囲 | 連携を作った系のみ | 連携のないレガシーも含む |
+| 律速 | connector の開発工数 | 権限設計と監査 |
+
+律速が connector の実装から、権限設計と操作の監査へ移る。
+何を触らせるかを決める作業が、統合の作業より重くなる。
+
+### 使えるのは制限版という前提で設計する
+
+一方で、配布が階層化された点は日本企業に不利に働く。
+
+Daybreak Blue の対象は重要インフラの防御側である。
+一般提供される版は、高度なサイバー機能を拒否する。
+
+つまりモデルの能力は、契約形態と所在地で決まる部分を持つようになった。
+自社が触れる版の能力を前提に設計する必要がある。
+
+防御側の設計も変わる。
+攻撃者が Critical 水準のモデルを持つかどうかは、モデルの性能ではなく配布の統制で決まる。
+統制が破られた場合を想定した多層防御を、能力の想定ではなく前提として置くべきである。
+
+### AGI 認定は財務イベントでもある
+
+日本の投資家にとって、AGI という語には契約上の意味がある。
+
+2026年3月末に完了した OpenAI の資金調達では、Amazon の $50B のうち $35B が IPO 実施または AGI 達成の認定を条件としていた。
+SoftBank も同じラウンドで $30B を出資している。
+
+AGI に到達したかどうかの判定は、技術評価であると同時に資金の実行条件でもある。
+だからこそ、誰が何を根拠に認定するのかが問われる。
+
+Brockman の発言は個人の見解として述べられた形を取っている。
+自社の定義を測る GDPval が資料になかったことと合わせると、宣言と認定は分けて扱われていると読める。
+
+## まとめ
+
+- 2026年9月3日、OpenAI が GPT-6 Astra を公開し、Greg Brockman が AGI の時代の到来を宣言した
+- 一方で、OpenAI 自身が経済的に価値のある実務を測るために作った GDPval は launch 資料に含まれていない。同社の AGI 定義は経済的に価値のある仕事の大半で人間を上回ることである
+- ベンチマークは飽和している。ExploitBench 100%、ARC-AGI-3 98.6%。差が残るのは DeepSWE v1.1 の 74.1% と OSWorld 2.0 の 72.6% で、いずれも実務に近い長時間タスクである
+- ARC-AGI-3 は自社 harness での計測である。NVIDIA の AVO は素で約30%の Claude Opus 5 を使って同じ指標で 100% を出した。長期タスクの性能はエージェント系全体から出ており、モデル単体の能力と分離できていない
+- 同時に Astra は Critical のサイバー能力閾値に到達した最初のモデルとされ、配布が階層化された。一般提供版は高度なサイバー機能を拒否する
+- 安全側の数値は改善している。保護機構を外したとき許可範囲を超えた割合は Sol の 48.2% から Astra の 0% へ下がった
+- ただし監視は難しくなる。賢くなるほど推論トークンが減り、思考を読んで異常を見つける手段が細る
+- 日本では、API を持たない基幹システムが自動化の対象に入る。律速は connector の実装から権限設計と監査へ移る
+
+宣言されたのは AGI の到来ではなく、能力を階層化して配る体制の完成である。
+自社の定義を測る指標だけが資料から抜けている以上、この launch は測定ではなく表明として読むのが正確になる。
+
+## 参考リンク
+
+- [VentureBeat: 'Welcome to the AGI era': OpenAI launches GPT-6 Astra](https://venturebeat.com/technology/welcome-to-the-agi-era-openai-launches-gpt-6-astra)
+- [Fortune: OpenAI debuts GPT-6 Astra, touts its ability to use your computer](https://fortune.com/2026/09/03/openai-debuts-gpt-6-astra-computer-use-greg-brockman-says-start-of-agi/)
+- [The New Stack: OpenAI launches GPT-6 Astra and says welcome to the AGI era](https://thenewstack.io/openai-gpt6-astra-benchmarks/)
+- [BetaNews: OpenAI launches GPT-6 Astra, claims AGI era has begun](https://betanews.com/article/openai-gpt-6-astra-agi-era/)
+- [DataNorth: OpenAI GPT-6 Astra, Price, Benchmarks and Access](https://datanorth.ai/news/openai-launches-gpt-6-astra)
