@@ -1,9 +1,9 @@
 ---
 name: knowledge-to-blog
-description: ai リポジトリの knowledge/ に溜めた測定済みのナレッジを、portfolio の技術ブログ記事（content/posts/*.mdx）へ変換する。記事を書く前に公開可否を判定し、顧客名 / 社名 / 業務の詳細 / private リポジトリへの参照を落としてから書く。「ナレッジをブログにして」「この測定を記事化して」「knowledge から記事を作って」「学んだことを公開したい」「実測をブログに」のような依頼では、ファイル名だけを渡された場合でも必ずこのスキルを使う。外部ニュースを題材に書く場合は write-blog を使う。
+description: ai リポジトリの knowledge/ に溜めた測定済みのナレッジを、公開する記事に変換する。AI / Go / Agent の技術記事と AI 時代の組織論は Zenn の下書き（private の連携リポジトリ、published false）として、業界ニュースの論評は portfolio（content/posts/*.mdx）として書く。記事を書く前に公開可否を判定し、顧客名 / 社名 / 業務の詳細 / private リポジトリへの参照を落としてから書く。「ナレッジをブログにして」「この測定を記事化して」「Zenn に書いて」「Zenn の下書きにして」「knowledge から記事を作って」「学んだことを公開したい」「実測をブログに」のような依頼では、ファイル名だけを渡された場合でも必ずこのスキルを使う。外部ニュースを題材に書く場合は write-blog を使う。
 ---
 
-# ナレッジからブログ記事への変換
+# ナレッジから記事への変換
 
 `write-blog` は外部のニュースを入力にする。
 このスキルは private リポジトリに溜めた測定ノートを入力にする。
@@ -15,11 +15,19 @@ description: ai リポジトリの knowledge/ に溜めた測定済みのナレ�
 
 ## 手順
 
-### 1. 読む
+### 1. 読んで、出し先を決める
 
 - 対象のナレッジを読む。本文の `[[...]]` が論の前提になっていれば、その先も読む
-- `.claude/BLOG_WRITING_GUIDE.md` と、`content/posts/` の新しい記事を 2〜3 本読む。文体と構成はそちらに合わせる
-- `content/posts/` を題材の語で grep し、同じ話を既に書いていないか確かめる
+- 題材から出し先を決める。ユーザーが出し先を指定したらそれに従う
+
+| 題材 | 出し先 | 形式 |
+| --- | --- | --- |
+| AI / Go / Agent の実測や実装 | Zenn | `../zenn/articles/<slug>.md`、`type: tech` |
+| AI 時代の組織論、チームの作り方 | Zenn | `../zenn/articles/<slug>.md`、`type: idea` |
+| 業界ニュースの論評 | portfolio | `content/posts/<slug>.mdx` |
+
+- 出し先の既存記事を題材の語で grep し、同じ話を既に書いていないか確かめる
+- 文体と構成は、Zenn なら `references/zenn.md`、portfolio なら `.claude/BLOG_WRITING_GUIDE.md` と新しい記事 2〜3 本に合わせる
 
 ### 2. 公開できる核を決める
 
@@ -29,7 +37,7 @@ description: ai リポジトリの knowledge/ に溜めた測定済みのナレ�
 | --- | --- | --- |
 | 載せてよい | OSS や公開 SDK の挙動、public リポジトリでの実測、公開資料の検証 | そのまま使う |
 | 抽象化すれば使える | 業務で得た知見、業務のコードで踏んだ落とし穴 | 顧客名 / 社名 / 固有の数値を外し、一般的な状況として書く |
-| 載せない | 顧客名、社名、private リポジトリの PR や Issue、社内の数値、GCP のプロジェク ID、未公開の設計 | 書かない |
+| 載せない | 顧客名、社名、private リポジトリの PR や Issue、社内の数値、GCP のプロジェクト ID、未公開の設計 | 書かない |
 
 この表はユーザーへの報告にもそのまま使う。
 
@@ -53,6 +61,9 @@ description: ai リポジトリの knowledge/ に溜めた測定済みのナレ�
 業種そのものを伏せる必要はない。
 業種と固有の構成と時期が同時にそろうと特定されるので、固有の構成と時期の側を外す。
 
+組織論は特に注意する。
+社名は禁止語で拾えるが、担当社数の目標やコスト率や人数のような社内の数値は、文字列の検査では拾えない。
+
 ### 3. 構成を決める
 
 測定ノートは「問い → 実物の挙動 → 食い違い → 判断」の順に溜まっている。
@@ -61,21 +72,23 @@ description: ai リポジトリの knowledge/ に溜めた測定済みのナレ�
 
 ### 4. 書く
 
-`BLOG_WRITING_GUIDE.md` に従う。測定記事で変わるのは次の点だけ。
-
-- 「日本への示唆」の代わりに「実務での判断」を置く。ニュースの翻訳ではないので、示唆を作ると論が浮く
 - 実測値は表にする。再現の手順はコードにする。実際の出力はそのまま貼る
 - 推測と実測を分ける。確かめていないことは「確かめていない」と書く
 - 教材の主張を否定するときは、教材の記述と実物の挙動を並べて見せる。どちらが正しいかは読み手が判断できる形にする
+- 「日本への示唆」の代わりに「実務での判断」を置く。ニュースの翻訳ではないので、示唆を作ると論が浮く
 - 参考リンクは公開された一次ソースと、public リポジトリだけにする
+
+Zenn に書くときは `references/zenn.md` の frontmatter と記法に従い、`published: false` で置く。
 
 ### 5. 公開判定を機械で確かめる
 
 ```bash
-python .claude/skills/knowledge-to-blog/scripts/disclosure_check.py content/posts/<slug>.mdx
+S=.claude/skills/knowledge-to-blog/scripts
+python $S/disclosure_check.py <記事のパス>
+python $S/zenn_check.py --repo ../zenn ../zenn/articles/<slug>.md   # Zenn のとき
 ```
 
-スクリプトは文字列で判定できるものだけを拾う。
+`disclosure_check.py` は文字列で判定できるものだけを拾う。
 
 - 禁止語ファイルの語（既定は `~/.config/knowledge-to-blog/denylist.txt`、環境変数 `KNOWLEDGE_TO_BLOG_DENYLIST` で変更できる）
 - private リポジトリへの参照（`../ai/` や `knowledge/` の相対パス、`github.com/hiro8ma/ai`）
@@ -84,46 +97,33 @@ python .claude/skills/knowledge-to-blog/scripts/disclosure_check.py content/post
 
 禁止語はこのリポジトリに置かない。portfolio は public なので、ここに書いた語はそのまま公開される。
 
-終了コードが 0 でなければ直して再実行する。
+`zenn_check.py` は、連携リポジトリが private かと、frontmatter が Zenn の条件を満たすかを見る。
+Zenn は連携リポジトリと同期するので、`published: false` は Zenn 上で隠れるだけで、リポジトリが public なら GitHub で誰でも読める。
+
+どちらも終了コードが 0 でなければ直して再実行する。
 スクリプトが通っても「抽象化しても特定できる」の判断は残るので、手順 2 の表と一緒にユーザーへ渡す。
 
 ### 6. 渡す
 
-- `content/posts/{slug}.mdx` に保存する
 - **コミットも push もしない**。`write-blog` と違い入力が private なので、公開の判断はユーザーが持つ
 - 次の 3 つを報告して承認を待つ
   - 保存先のパス
   - 手順 2 の仕分け表（何を載せ、何を抽象化し、何を落としたか）
-  - `disclosure_check.py` の結果
+  - 手順 5 のスクリプトの結果
 
-承認されたら、`git add` / `git commit` / `git push origin main` を行う。
+承認されたら、出し先のリポジトリで `git add` / `git commit` / `git push origin main` を行う。
+Zenn は push しても `published: false` のままで、公開はユーザーが Zenn の画面で判断する。
 コミットメッセージに `Co-Authored-By` とツール名のフッターは付けない。
 
-### 7. Zenn の下書きを作る（任意）
+## portfolio の既存記事を Zenn に移す
 
-portfolio の記事が承認されたあと、ユーザーが Zenn にも出したいと言った場合に行う。
+既に portfolio に出した記事を Zenn にも置く場合は `to_zenn.py` で変換する。
 
 ```bash
 python .claude/skills/knowledge-to-blog/scripts/to_zenn.py content/posts/<slug>.mdx \
   --zenn-repo ../zenn --emoji 📝 --type tech
-python .claude/skills/knowledge-to-blog/scripts/disclosure_check.py ../zenn/articles/<slug>.md
 ```
 
-`to_zenn.py` は常に `published: false` の下書きとして書き出す。
-Zenn は連携した GitHub リポジトリと同期するので、`published: false` は Zenn 上で隠れるだけで、GitHub では誰でも読める。
-そのため出力先のリポジトリが public なら、書き込まずに止まる。
-公開範囲を確かめられない場合（`gh` の未認証、origin が無い）も止まる。
-
-変換で変わるのは frontmatter だけになる。
-
-| portfolio | Zenn | 扱い |
-| --- | --- | --- |
-| `title` | `title` | そのまま |
-| `tags` | `topics` | 英数字だけにし、先頭から 5 個 |
-| `description` / `date` | なし | 落とす。`published_at` は一度入れると変えられないので付けない |
-| なし | `emoji` / `type` | 引数で渡す。既定は `📝` / `tech` |
-
-本文に MDX 固有の記法（`import` や JSX のコンポーネント）があると止まる。Zenn では表示できない。
-
-Zenn へのコミットと push も、ユーザーの承認を待ってから行う。
-公開（`published: true`）はユーザーが Zenn の画面で判断する。
+変わるのは frontmatter だけで、`tags` は英数字だけの `topics`（先頭から 5 個）に、`description` と `date` は落とす。
+本文に MDX 固有の記法（`import` や JSX のコンポーネント）があると止まる。
+出力先が public、または公開範囲を確かめられない場合も書き込まずに止まる。

@@ -18,11 +18,13 @@ published: false は Zenn 上の下書きであって、GitHub 上では誰で�
 from __future__ import annotations
 
 import argparse
-import json
 import re
-import subprocess
 import sys
 from pathlib import Path
+
+# 公開範囲の判定は、Zenn へ直接書く経路と同じものを使う。
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from zenn_check import repo_visibility  # noqa: E402
 
 SLUG = re.compile(r"^[a-z0-9_-]{12,50}$")
 MAX_TOPICS = 5
@@ -86,28 +88,6 @@ def mdx_only_constructs(body: str) -> list[str]:
         if re.search(r"<[A-Z][A-Za-z0-9]*[\s/>]", line):
             found.append(f"{lineno}: JSX のコンポーネント")
     return found
-
-
-def repo_visibility(repo: Path) -> str | None:
-    """origin のリポジトリの公開範囲を返す。取れなければ None。"""
-    try:
-        url = subprocess.run(
-            ["git", "-C", str(repo), "remote", "get-url", "origin"],
-            capture_output=True, text=True, check=True,
-        ).stdout.strip()
-    except (subprocess.CalledProcessError, FileNotFoundError):
-        return None
-    m = re.search(r"github\.com[:/]([^/]+/[^/.]+)", url)
-    if not m:
-        return None
-    try:
-        out = subprocess.run(
-            ["gh", "repo", "view", m.group(1), "--json", "visibility"],
-            capture_output=True, text=True, check=True,
-        ).stdout
-    except (subprocess.CalledProcessError, FileNotFoundError):
-        return None
-    return json.loads(out).get("visibility")
 
 
 def build(meta: dict[str, str], body: str, emoji: str, kind: str) -> str:
